@@ -204,23 +204,32 @@ def score_local_intent(signals):
 def compute_final_score(signals):
     """
     Combine four pillars into a final 0-100 integer score.
+    All pillar functions are guaranteed to return floats via their
+    normalizers, but we wrap in float() as a safety net.
     """
-    p1 = score_ticket_demand(signals)
-    p2 = score_historical_sales(signals)
-    p3 = score_sentiment(signals)
-    p4 = score_local_intent(signals)
+    try:
+        p1 = float(score_ticket_demand(signals)  or 0)
+        p2 = float(score_historical_sales(signals) or 0)
+        p3 = float(score_sentiment(signals)      or 0)
+        p4 = float(score_local_intent(signals)   or 0)
 
-    raw = (
-        W_TICKET_DEMAND * p1 +
-        W_HISTORICAL    * p2 +
-        W_SENTIMENT     * p3 +
-        W_LOCAL_INTENT  * p4
-    )
-    return round(raw * 100), {
-        "ticket_demand": round(p1 * 100),
+        raw = (
+            W_TICKET_DEMAND * p1 +
+            W_HISTORICAL    * p2 +
+            W_SENTIMENT     * p3 +
+            W_LOCAL_INTENT  * p4
+        )
+        final = max(0, min(100, round(raw * 100)))
+    except Exception as e:
+        print(f"  [WARN] Score computation failed, defaulting to 0: {e}")
+        final = 0
+        p1 = p2 = p3 = p4 = 0.0
+
+    return final, {
+        "ticket_demand":    round(p1 * 100),
         "historical_sales": round(p2 * 100),
-        "sentiment": round(p3 * 100),
-        "local_intent": round(p4 * 100),
+        "sentiment":        round(p3 * 100),
+        "local_intent":     round(p4 * 100),
     }
 
 
