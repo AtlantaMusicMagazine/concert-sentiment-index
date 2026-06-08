@@ -1,0 +1,99 @@
+name: Nightly Dashboard Refresh
+
+on:
+  # Runs every night at 11:00 PM Eastern Time (03:00 UTC).
+  # GitHub Actions runs on UTC, so 11 PM ET = 03:00 UTC (04:00 UTC during EDT).
+  # We use 03:00 UTC to cover both EST and EDT safely.
+  schedule:
+    - cron: "0 3 * * *"
+
+  # Also allows manual trigger from the GitHub Actions UI (Actions tab → Run workflow)
+  workflow_dispatch:
+
+jobs:
+  refresh:
+    name: Collect → Score → Build → Upload
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      # 1. Check out the repository so the scripts are available
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Set up Python
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # 3. Install dependencies
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+
+      # 4. Run the full pipeline
+      #    All API keys and WordPress credentials are stored as GitHub Secrets
+      #    (Repository Settings → Secrets and variables → Actions → New repository secret)
+      - name: Run nightly pipeline
+        env:
+          # ── Ticket demand sources ──────────────────────────────────────
+          TICKETMASTER_KEY:    ${{ secrets.TICKETMASTER_KEY }}
+          SEATGEEK_CLIENT_ID:  ${{ secrets.SEATGEEK_CLIENT_ID }}
+          SEATGEEK_SECRET:     ${{ secrets.SEATGEEK_SECRET }}
+          STUBHUB_TOKEN:       ${{ secrets.STUBHUB_TOKEN }}
+
+          # ── Sentiment / streaming sources ──────────────────────────────
+          SPOTIFY_CLIENT_ID:   ${{ secrets.SPOTIFY_CLIENT_ID }}
+          SPOTIFY_SECRET:      ${{ secrets.SPOTIFY_SECRET }}
+          CHARTMETRIC_TOKEN:   ${{ secrets.CHARTMETRIC_TOKEN }}
+
+          # ── Local intent sources ───────────────────────────────────────
+          SERPAPI_KEY:         ${{ secrets.SERPAPI_KEY }}
+          BANDSINTOWN_KEY:     ${{ secrets.BANDSINTOWN_KEY }}
+
+          # ── Wikipedia (no key needed, just a user-agent string) ────────
+          WIKIPEDIA_USER:      "atlanta-music-magazine/1.0 (contact@atlantamusicmagazine.com)"
+
+          # ── WordPress upload ───────────────────────────────────────────
+          WP_SITE_URL:         ${{ secrets.WP_SITE_URL }}
+          WP_USERNAME:         ${{ secrets.WP_USERNAME }}
+          WP_APP_PASSWORD:     ${{ secrets.WP_APP_PASSWORD }}
+          WP_PAGE_ID:          ${{ secrets.WP_PAGE_ID }}
+          WP_UPLOAD_MODE:      "page"
+
+        run: python pipeline.py
+
+      # 5. Upload the built HTML as a GitHub Actions artifact
+      #    This means you can download the file directly from GitHub
+      #    even if the WordPress upload fails, and inspect it for debugging.
+      - name: Upload dashboard artifact
+        if: always()   # run even if a previous step failed
+        uses: actions/upload-artifact@v4
+        with:
+          name: dashboard-${{ github.run_id }}
+          path: output/artist_card_module.html
+          retention-days: 7
+
+      # 6. Upload raw signals and scores for debugging
+      - name: Upload data artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pipeline-data-${{ github.run_id }}
+          path: data/
+          retention-days: 3
+
+      # 7. Notify on failure via GitHub's built-in issue creation
+      #    (Optional — remove this step if you don't want automatic issue creation)
+      - name: Create issue on failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `Pipeline failed — ${new Date().toISOString().split('T')[0]}`,
+              body: `The nightly dashboard refresh failed on run [${context.runId}](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}).\n\nCheck the logs for details.`,
+              labels: ['pipeline-failure']
+            })
