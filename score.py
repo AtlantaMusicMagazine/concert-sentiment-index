@@ -253,11 +253,24 @@ def score_all():
     scored = []
     for event_id, signals in raw["events"].items():
         meta = signals.get("event_meta", {})
-        final_score, pillar_scores = compute_final_score(signals)
+        try:
+            final_score, pillar_scores = compute_final_score(signals)
+        except Exception as e:
+            print(f"  [WARN] Scoring failed for {event_id}: {e} — defaulting to 0")
+            final_score = 0
+            pillar_scores = {
+                "ticket_demand": 0,
+                "historical_sales": 0,
+                "sentiment": 0,
+                "local_intent": 0,
+            }
+
+        # Guarantee score is always a plain int, never None or float
+        final_score = int(final_score) if final_score is not None else 0
 
         scored.append({
             "id":           event_id,
-            "name":         meta.get("name", ""),
+            "name":         meta.get("name", event_id),
             "artist":       meta.get("artist", ""),
             "venue":        meta.get("venue", ""),
             "date":         meta.get("date", ""),
@@ -271,24 +284,24 @@ def score_all():
                 "local_intent":     determine_signal_level(pillar_scores["local_intent"]),
             },
             "raw_signals": {
-                "seatgeek_deal_score":    signals.get("seatgeek_deal_score"),
-                "seatgeek_floor":         signals.get("seatgeek_floor"),
-                "seatgeek_avg_price":     signals.get("seatgeek_avg_price"),
-                "seatgeek_listing_count": signals.get("seatgeek_listing_count"),
-                "tm_floor_price":         signals.get("tm_floor_price"),
-                "tm_status":              signals.get("tm_status"),
-                "spotify_popularity":     signals.get("spotify_popularity"),
-                "spotify_followers":      signals.get("spotify_followers"),
+                "seatgeek_deal_score":     signals.get("seatgeek_deal_score"),
+                "seatgeek_floor":          signals.get("seatgeek_floor"),
+                "seatgeek_avg_price":      signals.get("seatgeek_avg_price"),
+                "seatgeek_listing_count":  signals.get("seatgeek_listing_count"),
+                "tm_floor_price":          signals.get("tm_floor_price"),
+                "tm_status":               signals.get("tm_status"),
+                "spotify_popularity":      signals.get("spotify_popularity"),
+                "spotify_followers":       signals.get("spotify_followers"),
                 "cm_spotify_stream_trend": signals.get("cm_spotify_stream_trend"),
-                "google_trends_atl":      signals.get("google_trends_atl"),
-                "bandsintown_rsvps":      signals.get("bandsintown_rsvps"),
-                "wikipedia_30d_views":    signals.get("wikipedia_30d_views"),
-                "wikipedia_7d_trend_pct": signals.get("wikipedia_7d_trend_pct"),
+                "google_trends_atl":       signals.get("google_trends_atl"),
+                "bandsintown_rsvps":       signals.get("bandsintown_rsvps"),
+                "wikipedia_30d_views":     signals.get("wikipedia_30d_views"),
+                "wikipedia_7d_trend_pct":  signals.get("wikipedia_7d_trend_pct"),
             },
         })
         print(f"  {meta.get('name', event_id)[:50]:50s}  score={final_score:3d}")
 
-    # Sort by score descending for convenience
+    # Sort by score descending — all scores are guaranteed ints at this point
     scored.sort(key=lambda e: e["score"], reverse=True)
 
     output = {
