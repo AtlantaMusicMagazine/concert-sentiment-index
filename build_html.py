@@ -221,30 +221,59 @@ def build():
     bottom_events = sorted(events, key=lambda e: int(e["score"]))[:BOTTOM_N]
 
     # Build card blocks
-    top_html    = "\n".join(build_card(ev, i+1, False) for i, ev in enumerate(top_events))
-    bottom_html = "\n".join(build_card(ev, i+1, True)  for i, ev in enumerate(bottom_events))
+    top_html_parts = []
+    for i, ev in enumerate(top_events):
+        try:
+            top_html_parts.append(build_card(ev, i+1, False))
+        except Exception as e:
+            print(f"  [WARN] top card {i+1} failed ({ev.get('id','?')}): {e}")
+            top_html_parts.append(f"  <!-- card {i+1} failed: {e} -->")
+
+    bottom_html_parts = []
+    for i, ev in enumerate(bottom_events):
+        try:
+            bottom_html_parts.append(build_card(ev, i+1, True))
+        except Exception as e:
+            print(f"  [WARN] bottom card {i+1} failed ({ev.get('id','?')}): {e}")
+            bottom_html_parts.append(f"  <!-- card {i+1} failed: {e} -->")
+
+    top_html    = "\n".join(top_html_parts)
+    bottom_html = "\n".join(bottom_html_parts)
 
     # Load template
+    print(f"[build] Loading template from {TEMPLATE_PATH}")
     with open(TEMPLATE_PATH) as f:
         html = f.read()
+    print(f"[build] Template loaded — {len(html):,} bytes")
+    print(f"[build] TOP_CARDS_START present: {'<!-- TOP_CARDS_START -->' in html}")
+    print(f"[build] BOTTOM_CARDS_START present: {'<!-- BOTTOM_CARDS_START -->' in html}")
 
     # Inject top cards
-    html = re.sub(
-        r"<!-- TOP_CARDS_START -->.*?<!-- TOP_CARDS_END -->",
-        f"<!-- TOP_CARDS_START -->\n{top_html}\n<!-- TOP_CARDS_END -->",
-        html,
-        flags=re.DOTALL,
-    )
+    if "<!-- TOP_CARDS_START -->" in html:
+        html = re.sub(
+            r"<!-- TOP_CARDS_START -->.*?<!-- TOP_CARDS_END -->",
+            f"<!-- TOP_CARDS_START -->\n{top_html}\n<!-- TOP_CARDS_END -->",
+            html,
+            flags=re.DOTALL,
+        )
+        print("[build] Injected top cards")
+    else:
+        print("[build] WARNING: TOP_CARDS_START sentinel not found in template")
 
     # Inject bottom cards
-    html = re.sub(
-        r"<!-- BOTTOM_CARDS_START -->.*?<!-- BOTTOM_CARDS_END -->",
-        f"<!-- BOTTOM_CARDS_START -->\n{bottom_html}\n<!-- BOTTOM_CARDS_END -->",
-        html,
-        flags=re.DOTALL,
-    )
+    if "<!-- BOTTOM_CARDS_START -->" in html:
+        html = re.sub(
+            r"<!-- BOTTOM_CARDS_START -->.*?<!-- BOTTOM_CARDS_END -->",
+            f"<!-- BOTTOM_CARDS_START -->\n{bottom_html}\n<!-- BOTTOM_CARDS_END -->",
+            html,
+            flags=re.DOTALL,
+        )
+        print("[build] Injected bottom cards")
+    else:
+        print("[build] WARNING: BOTTOM_CARDS_START sentinel not found in template")
 
     # Update last-updated date in footer
+    print("[build] Updating footer date")
     today = datetime.date.today().isoformat()
     html = re.sub(
         r'<time datetime="[\d-]+">[^<]+</time>(?=\s*</p>)',
@@ -252,6 +281,7 @@ def build():
         html,
     )
 
+    print(f"[build] Writing output to {OUTPUT_PATH}")
     with open(OUTPUT_PATH, "w") as f:
         f.write(html)
 
