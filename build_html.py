@@ -213,18 +213,12 @@ def build():
 
     events = data["events"]   # already sorted by score descending
 
-    # Debug: print all scores before sorting
-    print("[build] Event scores before sort:")
+    # Guarantee all scores are ints before any sorting
     for ev in events:
-        print(f"  {ev.get('id','?'):40s}  score={ev.get('score')!r}")
-
-    # Coerce any None scores to 0 before sorting to avoid comparison errors
-    for ev in events:
-        if ev.get("score") is None:
-            ev["score"] = 0
+        ev["score"] = int(ev.get("score") or 0)
 
     top_events    = events[:TOP_N]
-    bottom_events = sorted(events, key=lambda e: e["score"])[:BOTTOM_N]
+    bottom_events = sorted(events, key=lambda e: int(e["score"]))[:BOTTOM_N]
 
     # Build card blocks
     top_html    = "\n".join(build_card(ev, i+1, False) for i, ev in enumerate(top_events))
