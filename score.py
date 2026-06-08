@@ -1,0 +1,297 @@
+"""
+score.py
+Atlanta Music Magazine — Nightly Scoring Engine
+Reads raw_signals.json, applies the four-pillar weighted model,
+outputs data/scored_events.json with final 0-100 scores.
+
+Weight distribution:
+  30% — Current Ticket Demand
+  25% — Historical Sales
+  25% — Public Sentiment
+  20% — Local Intent Signals
+"""
+
+import json
+import math
+import datetime
+from pathlib import Path
+
+Path("data").mkdir(exist_ok=True)
+
+# ── Weight constants ───────────────────────────────────────────────────────
+W_TICKET_DEMAND   = 0.30
+W_HISTORICAL      = 0.25
+W_SENTIMENT       = 0.25
+W_LOCAL_INTENT    = 0.20
+
+
+# ── Signal normalizers ─────────────────────────────────────────────────────
+# Each returns a 0.0–1.0 float representing relative strength.
+# Thresholds are calibrated against the ATL market.
+
+def norm_seatgeek_deal_score(val):
+    """SeatGeek Deal Score is already 0-100."""
+    if val is None:
+        return 0.5   # neutral when unavailable
+    return max(0.0, min(1.0, val / 100))
+
+
+def norm_seatgeek_floor(val):
+    """
+    Higher floor price = stronger demand signal.
+    $0 → 0.0, $500+ → 1.0 (log-scaled to handle outliers).
+    """
+    if val is None:
+        return 0.4
+    if val <= 0:
+        return 0.0
+    return min(1.0, math.log1p(val) / math.log1p(500))
+
+
+def norm_listing_count(val, venue_cap):
+    """
+    Listing count relative to venue capacity.
+    Low sell-through = high listing count = LOW demand.
+    Inverted: fewer listings = higher score.
+    """
+    if val is None or venue_cap is None or venue_cap == 0:
+        return 0.5
+    ratio = val / venue_cap
+    # >80% of capacity listed = very low demand (0.0)
+    # <5% of capacity listed = very high demand (1.0)
+    return max(0.0, min(1.0, 1.0 - (ratio / 0.8)))
+
+
+def norm_tm_status(status):
+    """Ticketmaster on-sale status."""
+    mapping = {
+        "onsale":    0.7,
+        "offsale":   1.0,   # sold out
+        "cancelled": 0.0,
+        "postponed": 0.2,
+        "":          0.5,
+    }
+    return mapping.get(str(status).lower(), 0.5)
+
+
+def norm_spotify_popularity(val):
+    """Spotify popularity is already 0-100."""
+    if val is None:
+        return 0.4
+    return val / 100
+
+
+def norm_chartmetric_trend(val):
+    """
+    Chartmetric 30-day stream growth percentage.
+    -50% → 0.0, 0% → 0.5, +100% → 1.0
+    """
+    if val is None:
+        return 0.5
+    clamped = max(-50, min(100, val))
+    return (clamped + 50) / 150
+
+
+def norm_wikipedia_trend(val):
+    """
+    Wikipedia 7-day vs prior 7-day pageview delta percentage.
+    -100% → 0.0, 0% → 0.5, +200% → 1.0
+    """
+    if val is None:
+        return 0.5
+    clamped = max(-100, min(200, val))
+    return (clamped + 100) / 300
+
+
+def norm_google_trends(val):
+    """Google Trends ATL index is already 0-100."""
+    if val is None:
+        return 0.4
+    return val / 100
+
+
+def norm_bandsintown_rsvps(val, venue_cap):
+    """
+    RSVPs relative to venue capacity.
+    0 → 0.0, ≥30% of capacity → 1.0
+    """
+    if val is None or not venue_cap:
+        return 0.4
+    return min(1.0, val / (venue_cap * 0.3))
+
+
+# ── Venue capacity lookup ──────────────────────────────────────────────────
+VENUE_CAPS = {
+    "State Farm Arena":                                       21000,
+    "Mercedes-Benz Stadium":                                  71000,
+    "Ameris Bank Amphitheatre":                               12000,
+    "Synovus Bank Amphitheater at Chastain Park":              6900,
+    "Lakewood Amphitheatre":                                  19000,
+    "Coca-Cola Roxy":                                          3600,
+    "Truist Park":                                            41084,
+    "The Eastern":                                              500,
+    "Vinyl at Center Stage":                                    200,
+}
+
+
+# ── Pillar scoring ─────────────────────────────────────────────────────────
+
+def score_ticket_demand(signals):
+    """
+    Pillar 1 — Current Ticket Demand (30%)
+    Sources: SeatGeek Deal Score, SeatGeek floor price,
+             listing count vs capacity, Ticketmaster status.
+    """
+    components = [
+        (0.35, norm_seatgeek_deal_score(signals.get("seatgeek_deal_score"))),
+        (0.30, norm_seatgeek_floor(signals.get("seatgeek_floor"))),
+        (0.25, norm_listing_count(
+            signals.get("seatgeek_listing_count"),
+            VENUE_CAPS.get(signals.get("event_meta", {}).get("venue", ""), None)
+        )),
+        (0.10, norm_tm_status(signals.get("tm_status", ""))),
+    ]
+    return sum(w * v for w, v in components)
+
+
+def score_historical_sales(signals):
+    """
+    Pillar 2 — Historical Sales (25%)
+    Sources: Spotify popularity (proxy for commercial track record),
+             Wikipedia 30-day views (proxy for sustained public interest),
+             Chartmetric 30-day stream trend.
+    Note: Pollstar/Billboard Boxscore require paid subscriptions.
+    Wikipedia pageviews and Spotify popularity serve as accessible proxies.
+    """
+    components = [
+        (0.40, norm_spotify_popularity(signals.get("spotify_popularity"))),
+        (0.35, norm_wikipedia_trend(signals.get("wikipedia_7d_trend_pct"))),
+        (0.25, norm_chartmetric_trend(signals.get("cm_spotify_stream_trend"))),
+    ]
+    return sum(w * v for w, v in components)
+
+
+def score_sentiment(signals):
+    """
+    Pillar 3 — Public Sentiment (25%)
+    Sources: Spotify popularity (doubles as sentiment signal),
+             Chartmetric streaming velocity, Google Trends (partial overlap).
+    """
+    components = [
+        (0.45, norm_spotify_popularity(signals.get("spotify_popularity"))),
+        (0.35, norm_chartmetric_trend(signals.get("cm_spotify_stream_trend"))),
+        (0.20, norm_google_trends(signals.get("google_trends_atl"))),
+    ]
+    return sum(w * v for w, v in components)
+
+
+def score_local_intent(signals):
+    """
+    Pillar 4 — Local Intent Signals (20%)
+    Sources: Google Trends ATL DMA index,
+             Bands in Town RSVP count vs venue capacity.
+    """
+    venue_cap = VENUE_CAPS.get(
+        signals.get("event_meta", {}).get("venue", ""), None
+    )
+    components = [
+        (0.60, norm_google_trends(signals.get("google_trends_atl"))),
+        (0.40, norm_bandsintown_rsvps(signals.get("bandsintown_rsvps"), venue_cap)),
+    ]
+    return sum(w * v for w, v in components)
+
+
+def compute_final_score(signals):
+    """
+    Combine four pillars into a final 0-100 integer score.
+    """
+    p1 = score_ticket_demand(signals)
+    p2 = score_historical_sales(signals)
+    p3 = score_sentiment(signals)
+    p4 = score_local_intent(signals)
+
+    raw = (
+        W_TICKET_DEMAND * p1 +
+        W_HISTORICAL    * p2 +
+        W_SENTIMENT     * p3 +
+        W_LOCAL_INTENT  * p4
+    )
+    return round(raw * 100), {
+        "ticket_demand": round(p1 * 100),
+        "historical_sales": round(p2 * 100),
+        "sentiment": round(p3 * 100),
+        "local_intent": round(p4 * 100),
+    }
+
+
+def determine_signal_level(score):
+    """Map a 0-100 pillar score to High / Medium / Low."""
+    if score >= 65:
+        return "High"
+    elif score >= 35:
+        return "Medium"
+    return "Low"
+
+
+# ── Main scoring loop ──────────────────────────────────────────────────────
+
+def score_all():
+    print(f"[score] Starting scoring — {datetime.datetime.now().isoformat()}")
+
+    with open("data/raw_signals.json") as f:
+        raw = json.load(f)
+
+    scored = []
+    for event_id, signals in raw["events"].items():
+        meta = signals.get("event_meta", {})
+        final_score, pillar_scores = compute_final_score(signals)
+
+        scored.append({
+            "id":           event_id,
+            "name":         meta.get("name", ""),
+            "artist":       meta.get("artist", ""),
+            "venue":        meta.get("venue", ""),
+            "date":         meta.get("date", ""),
+            "genre":        meta.get("genre", ""),
+            "score":        final_score,
+            "pillar_scores": pillar_scores,
+            "signal_levels": {
+                "ticket_demand":    determine_signal_level(pillar_scores["ticket_demand"]),
+                "historical_sales": determine_signal_level(pillar_scores["historical_sales"]),
+                "sentiment":        determine_signal_level(pillar_scores["sentiment"]),
+                "local_intent":     determine_signal_level(pillar_scores["local_intent"]),
+            },
+            "raw_signals": {
+                "seatgeek_deal_score":    signals.get("seatgeek_deal_score"),
+                "seatgeek_floor":         signals.get("seatgeek_floor"),
+                "seatgeek_avg_price":     signals.get("seatgeek_avg_price"),
+                "seatgeek_listing_count": signals.get("seatgeek_listing_count"),
+                "tm_floor_price":         signals.get("tm_floor_price"),
+                "tm_status":              signals.get("tm_status"),
+                "spotify_popularity":     signals.get("spotify_popularity"),
+                "spotify_followers":      signals.get("spotify_followers"),
+                "cm_spotify_stream_trend": signals.get("cm_spotify_stream_trend"),
+                "google_trends_atl":      signals.get("google_trends_atl"),
+                "bandsintown_rsvps":      signals.get("bandsintown_rsvps"),
+                "wikipedia_30d_views":    signals.get("wikipedia_30d_views"),
+                "wikipedia_7d_trend_pct": signals.get("wikipedia_7d_trend_pct"),
+            },
+        })
+        print(f"  {meta.get('name', event_id)[:50]:50s}  score={final_score:3d}")
+
+    # Sort by score descending for convenience
+    scored.sort(key=lambda e: e["score"], reverse=True)
+
+    output = {
+        "scored_at": datetime.datetime.utcnow().isoformat() + "Z",
+        "events": scored,
+    }
+    with open("data/scored_events.json", "w") as f:
+        json.dump(output, f, indent=2)
+
+    print(f"[score] Done. Scored {len(scored)} events.")
+    return scored
+
+
+if __name__ == "__main__":
+    score_all()
