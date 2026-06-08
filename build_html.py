@@ -213,6 +213,11 @@ def build():
 
     events = data["events"]   # already sorted by score descending
 
+    # Debug: print all scores before sorting
+    print("[build] Event scores before sort:")
+    for ev in events:
+        print(f"  {ev.get('id','?'):40s}  score={ev.get('score')!r}")
+
     # Coerce any None scores to 0 before sorting to avoid comparison errors
     for ev in events:
         if ev.get("score") is None:
