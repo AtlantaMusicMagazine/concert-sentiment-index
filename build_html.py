@@ -213,6 +213,11 @@ def build():
 
     events = data["events"]   # already sorted by score descending
 
+    # Coerce any None scores to 0 before sorting to avoid comparison errors
+    for ev in events:
+        if ev.get("score") is None:
+            ev["score"] = 0
+
     top_events    = events[:TOP_N]
     bottom_events = sorted(events, key=lambda e: e["score"])[:BOTTOM_N]
 
