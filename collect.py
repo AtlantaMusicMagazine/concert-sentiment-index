@@ -6,6 +6,8 @@ Outputs: data/raw_signals.json
 
 Key integrations:
   - MusicBrainz  : keyless, album release recency + career depth
+  - Wikidata      : keyless, Grammy wins/nominations, active years,
+                   Wikipedia language count, genre breadth
   - YouTube v3   : view velocity via rolling cache (data/youtube_cache.json)
                    Cache persisted between runs via GitHub Actions cache@v4
   - Setlist.fm   : ATL market history, venue trajectory, sold-out flag
@@ -915,6 +917,143 @@ def fetch_spotify(event, token):
     }
 
 
+def fetch_wikidata(event):
+    """
+    Wikidata Query Service — structured career facts via SPARQL.
+    No API key required. User-Agent header is sufficient.
+    Rate limit: 60s query execution/minute shared — a single artist
+    lookup runs in <100ms so 42 events costs ~4s total.
+
+    Signals extracted:
+      wd_grammy_wins          : count of Grammy Award wins
+                                (Grammy winner = strong 35-65 demo trust signal)
+      wd_grammy_nominations   : total Grammy nominations including non-wins
+      wd_active_years         : career length in years from first release/formation
+                                (nostalgia premium proxy for heritage acts)
+      wd_wikipedia_languages  : number of Wikipedia language editions
+                                (global fame proxy — Ariana Grande: 80+,
+                                 Justine Skye: 3)
+      wd_genres_count         : number of distinct music genres listed
+                                (cross-genre breadth → broader addressable audience)
+
+    SPARQL strategy:
+      1. Look up the artist entity by MusicBrainz artist ID (most precise)
+      2. Extract the five fact properties in a single query
+      3. Fall back to artist name search if no MBID
+
+    Grammy detection uses Wikidata's award property (P166) filtered to
+    the Grammy Award item (Q41612) and its subclasses.
+    """
+    mbid        = event.get("musicbrainz_mbid", "")
+    artist_name = event.get("artist", "")
+
+    if not mbid and not artist_name:
+        return {}
+
+    # ── Build SPARQL query ────────────────────────────────────────────────
+    if mbid:
+        # Primary: lookup by MusicBrainz ID property (P434) — most precise
+        entity_clause = f'?artist wdt:P434 "{mbid}" .'
+    else:
+        # Fallback: lookup by artist label (less precise, may match wrong entity)
+        safe_name = artist_name.replace('"', '\\"')
+        entity_clause = f'?artist rdfs:label "{safe_name}"@en .'
+
+    sparql = f"""
+SELECT ?artist
+       (COUNT(DISTINCT ?grammyWin) AS ?grammy_wins)
+       (COUNT(DISTINCT ?grammyNom) AS ?grammy_nominations)
+       (MIN(?startYear) AS ?career_start)
+       (COUNT(DISTINCT ?lang) AS ?wiki_languages)
+       (COUNT(DISTINCT ?genre) AS ?genres_count)
+WHERE {{
+  {entity_clause}
+
+  # Grammy wins — award (P166) = Grammy Award (Q41612) or subclass
+  OPTIONAL {{
+    ?artist p:P166 ?awardStatement .
+    ?awardStatement ps:P166 ?award .
+    ?award wdt:P31?/wdt:P279* wd:Q41612 .
+    BIND(?award AS ?grammyWin)
+  }}
+
+  # Grammy nominations — nominated for (P1411) = Grammy Award
+  OPTIONAL {{
+    ?artist p:P1411 ?nomStatement .
+    ?nomStatement ps:P1411 ?nomAward .
+    ?nomAward wdt:P31?/wdt:P279* wd:Q41612 .
+    BIND(?nomAward AS ?grammyNom)
+  }}
+
+  # Career start — inception (P571) or start time on membership (P2031)
+  OPTIONAL {{
+    ?artist wdt:P571 ?inception .
+    BIND(YEAR(?inception) AS ?startYear)
+  }}
+
+  # Wikipedia sitelinks — count language editions
+  OPTIONAL {{
+    ?sitelink schema:about ?artist ;
+              schema:isPartOf ?lang .
+    FILTER(CONTAINS(STR(?lang), "wikipedia.org"))
+  }}
+
+  # Music genres (P136)
+  OPTIONAL {{ ?artist wdt:P136 ?genre . }}
+}}
+GROUP BY ?artist
+LIMIT 1
+"""
+
+    headers = {
+        "User-Agent":  MB_USER_AGENT,   # reuse MusicBrainz user-agent constant
+        "Accept":      "application/sparql-results+json",
+    }
+    data = safe_get(
+        "https://query.wikidata.org/sparql",
+        params={"query": sparql, "format": "json"},
+        headers=headers,
+        label=f"Wikidata: {artist_name}",
+        timeout=15,
+    )
+    time.sleep(0.5)   # be polite to shared service
+
+    if not data:
+        return {}
+
+    bindings = data.get("results", {}).get("bindings", [])
+    if not bindings:
+        return {}
+
+    row = bindings[0]
+
+    def int_val(key):
+        v = row.get(key, {}).get("value")
+        return int(v) if v else 0
+
+    grammy_wins  = int_val("grammy_wins")
+    grammy_noms  = int_val("grammy_nominations")
+    wiki_langs   = int_val("wiki_languages")
+    genres_count = int_val("genres_count")
+
+    career_start_raw = row.get("career_start", {}).get("value")
+    active_years     = None
+    if career_start_raw:
+        try:
+            start_year   = int(career_start_raw)
+            active_years = datetime.date.today().year - start_year
+        except (ValueError, TypeError):
+            pass
+
+    return {
+        "wd_grammy_wins":        grammy_wins,
+        "wd_grammy_nominations": grammy_noms,
+        "wd_active_years":       active_years,
+        "wd_wikipedia_languages": wiki_langs,
+        "wd_genres_count":       genres_count,
+    }
+
+
 def fetch_wikipedia_pageviews(event):
     title = event.get("wikipedia_title", "")
     if not title:
@@ -1539,6 +1678,7 @@ def collect_all():
             signals.update(fetch_wikipedia_pageviews(event)); time.sleep(0.3)
             signals.update(fetch_musicbrainz(event))
             signals.update(fetch_setlist(event))
+            signals.update(fetch_wikidata(event))          # keyless SPARQL — ~100ms/event
         except Exception as e:
             print(f"    [WARN] Historical sales fetch failed: {e}")
 
