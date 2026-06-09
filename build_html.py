@@ -136,6 +136,26 @@ def build_insight(ev):
     elif raw.get("mb_total_albums", 0) >= 10:
         parts.append(f"Deep catalog — {raw['mb_total_albums']} studio albums")
 
+    # Eventbrite demand signals
+    if raw.get("eb_is_sold_out") and raw.get("eb_has_waitlist"):
+        parts.append("Eventbrite: sold out &middot; waitlist active")
+    elif raw.get("eb_is_sold_out"):
+        parts.append("Eventbrite: sold out")
+    elif raw.get("eb_sell_through_pct") is not None:
+        pct = raw["eb_sell_through_pct"]
+        if pct >= 80:
+            parts.append(f"Eventbrite: {pct:.0f}% sold")
+        elif pct >= 50:
+            parts.append(f"Eventbrite: {pct:.0f}% sold")
+
+    # Last.fm fan depth — surfaces for high-obsession acts
+    ppl = raw.get("lastfm_plays_per_listener")
+    listeners = raw.get("lastfm_listeners")
+    if ppl is not None and ppl >= 200 and listeners:
+        parts.append(f"Last.fm: {listeners/1_000_000:.1f}M listeners &middot; {ppl:.0f} plays/fan")
+    elif listeners and listeners >= 1_000_000:
+        parts.append(f"Last.fm: {listeners/1_000_000:.1f}M weekly listeners")
+
     # Setlist.fm ATL market strength
     atl_shows = raw.get("setlist_atl_shows_5y")
     if atl_shows is not None:
