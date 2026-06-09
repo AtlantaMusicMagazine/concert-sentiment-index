@@ -413,6 +413,8 @@ def build_genre_pool_js(events):
     """
     pool_entries = []
     seen_ids = set()
+    skipped_window = []
+    skipped_dup    = []
 
     for ev in events:
         eid      = ev.get("id", "")
@@ -425,13 +427,16 @@ def build_genre_pool_js(events):
         try:
             show_date = datetime.date.fromisoformat(date_str)
             if not (WINDOW_START <= show_date <= WINDOW_END):
+                skipped_window.append(f"{eid} ({date_str})")
                 continue
         except (ValueError, TypeError):
+            skipped_window.append(f"{eid} (bad date: {date_str!r})")
             continue
 
         # Skip duplicates (Kali Uchis appears twice with different IDs)
         dedup_key = (ev.get("name", ""), genre)
         if dedup_key in seen_ids:
+            skipped_dup.append(eid)
             continue
         seen_ids.add(dedup_key)
 
@@ -561,6 +566,23 @@ def build_genre_pool_js(events):
         "renderGenreView sorts ascending for worst-to-best */\n"
         "  var GENRE_POOL_BOTTOM = GENRE_POOL_TOP.slice();"
     )
+
+    if skipped_window:
+        print(f"[build] Genre pool: {len(skipped_window)} events outside window {WINDOW_START}–{WINDOW_END}:")
+        for s in skipped_window[:5]:
+            print(f"  skipped: {s}")
+    if skipped_dup:
+        print(f"[build] Genre pool: {len(skipped_dup)} duplicates removed")
+
+    if not pool_entries:
+        print(f"[build] WARN: Genre pool is empty — no events matched window. "
+              f"Input events: {len(events)}, window: {WINDOW_START}–{WINDOW_END}")
+        # Return minimal valid JS so the dashboard doesn't break
+        return (
+            "  var GENRE_POOL_TOP = [];\n\n"
+            "  /* Bottom pool = same events */\n"
+            "  var GENRE_POOL_BOTTOM = GENRE_POOL_TOP.slice();"
+        )
 
     print(f"[build] Genre pool: {len(pool_entries)} events, "
           f"score range {min(e['score'] for e in pool_entries)}"
