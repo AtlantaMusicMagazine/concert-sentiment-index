@@ -126,6 +126,16 @@ def build_insight(ev):
     raw   = ev["raw_signals"]
     parts = []
 
+    # MusicBrainz release context — most meaningful first
+    if raw.get("mb_has_recent_album") and raw.get("mb_latest_album_title"):
+        days = raw.get("mb_days_since_last_album")
+        if days is not None and days <= 90:
+            parts.append(f"Touring on new album &ldquo;{raw['mb_latest_album_title']}&rdquo; ({days} days old)")
+        elif days is not None:
+            parts.append(f"New album &ldquo;{raw['mb_latest_album_title']}&rdquo; within past year")
+    elif raw.get("mb_total_albums", 0) >= 10:
+        parts.append(f"Deep catalog — {raw['mb_total_albums']} studio albums")
+
     if raw.get("seatgeek_floor"):
         parts.append(f"Secondary floor ${raw['seatgeek_floor']:.0f}")
     if raw.get("seatgeek_deal_score"):
