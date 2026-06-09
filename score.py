@@ -138,6 +138,54 @@ def norm_mb_career_depth(total_albums):
     return 0.3
 
 
+def norm_setlist_atl_market(atl_shows_5y):
+    """
+    Number of Atlanta-area shows in the past 5 years.
+    Measures local market strength — artists who return to ATL regularly
+    have an established local fanbase that converts reliably.
+    0 shows → unknown/new to market (0.4 neutral)
+    1 show  → occasional visitor (0.5)
+    2–3     → regular (0.7)
+    4–6     → strong local draw (0.85)
+    7+      → ATL anchor market (1.0)
+    """
+    if atl_shows_5y is None:
+        return 0.4
+    if atl_shows_5y >= 7:
+        return 1.0
+    if atl_shows_5y >= 4:
+        return 0.85
+    if atl_shows_5y >= 2:
+        return 0.7
+    if atl_shows_5y == 1:
+        return 0.5
+    return 0.4
+
+
+def norm_setlist_venue_trajectory(avg_venue_cap, current_venue_cap):
+    """
+    Average historical venue capacity vs. current show's venue capacity.
+    Ratio > 1: artist is graduating to larger venues → ascending demand (1.0)
+    Ratio ~1:  stable market position (0.7)
+    Ratio < 1: artist playing smaller than historical average → declining (0.3)
+    """
+    if avg_venue_cap is None or not current_venue_cap:
+        return 0.5
+    ratio = current_venue_cap / avg_venue_cap
+    if ratio >= 1.3:
+        return 1.0   # graduating up
+    if ratio >= 0.8:
+        return 0.7   # stable
+    if ratio >= 0.5:
+        return 0.45  # declining
+    return 0.3       # significant downsize
+
+
+def norm_setlist_sold_out(sold_out_flag):
+    """Prior ATL show sold out → strong local demand signal."""
+    return 1.0 if sold_out_flag else 0.5
+
+
 def norm_google_trends(val):
     """Google Trends ATL index is already 0-100."""
     if val is None:
@@ -203,26 +251,33 @@ def norm_wikipedia_trend(val):
 def score_historical_sales(signals):
     """
     Pillar 2 — Historical Sales (25%)
-    Sources: Spotify popularity, Wikipedia 7-day trend,
-             Chartmetric stream trend, MusicBrainz release recency,
-             MusicBrainz career depth (album count).
+    Sources: MusicBrainz release recency, Spotify popularity,
+             MusicBrainz career depth, Setlist.fm venue trajectory,
+             Wikipedia trend, Chartmetric stream trend.
 
-    Weight distribution within pillar:
-      30% — MB release recency (touring on new album vs. catalog)
-      25% — Spotify popularity (commercial track record proxy)
-      20% — MB career depth (total studio albums)
-      15% — Wikipedia 7-day trend (sustained public interest)
-      10% — Chartmetric stream trend (recent streaming momentum)
+    Weight distribution:
+      25% — MB release recency (touring on new album vs. catalog)
+      20% — Spotify popularity (commercial track record proxy)
+      20% — Setlist.fm venue trajectory (growing / stable / declining)
+      15% — MB career depth (total studio albums)
+      10% — Wikipedia 7-day trend
+      10% — Chartmetric stream trend
     """
-    has_recent  = signals.get("mb_has_recent_album")
-    days_since  = signals.get("mb_days_since_last_album")
-    total_albums = signals.get("mb_total_albums", 0)
+    venue       = signals.get("event_meta", {}).get("venue", "")
+    current_cap = VENUE_CAPS.get(venue)
 
     components = [
-        (0.30, norm_mb_recent_album(has_recent, days_since)),
-        (0.25, norm_spotify_popularity(signals.get("spotify_popularity"))),
-        (0.20, norm_mb_career_depth(total_albums)),
-        (0.15, norm_wikipedia_trend(signals.get("wikipedia_7d_trend_pct"))),
+        (0.25, norm_mb_recent_album(
+            signals.get("mb_has_recent_album"),
+            signals.get("mb_days_since_last_album"),
+        )),
+        (0.20, norm_spotify_popularity(signals.get("spotify_popularity"))),
+        (0.20, norm_setlist_venue_trajectory(
+            signals.get("setlist_avg_venue_cap"),
+            current_cap,
+        )),
+        (0.15, norm_mb_career_depth(signals.get("mb_total_albums", 0))),
+        (0.10, norm_wikipedia_trend(signals.get("wikipedia_7d_trend_pct"))),
         (0.10, norm_chartmetric_trend(signals.get("cm_spotify_stream_trend"))),
     ]
     return sum(w * v for w, v in components)
@@ -359,6 +414,10 @@ def score_all():
                 "mb_days_since_last_album":   signals.get("mb_days_since_last_album"),
                 "mb_total_albums":            signals.get("mb_total_albums"),
                 "mb_latest_album_title":      signals.get("mb_latest_album_title"),
+                "setlist_atl_shows_5y":       signals.get("setlist_atl_shows_5y"),
+                "setlist_avg_venue_cap":      signals.get("setlist_avg_venue_cap"),
+                "setlist_tour_shows_total":   signals.get("setlist_tour_shows_total"),
+                "setlist_sold_out_flag":      signals.get("setlist_sold_out_flag"),
             },
         })
         print(f"  {meta.get('name', event_id)[:50]:50s}  score={final_score:3d}")
