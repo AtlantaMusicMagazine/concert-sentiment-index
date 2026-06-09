@@ -91,6 +91,7 @@ API_SIGNAL_KEYS = [
     "lastfm_listeners", "lastfm_plays_per_listener",
     "setlist_atl_shows_5y", "setlist_avg_venue_cap",
     "eb_sell_through_pct", "eb_is_sold_out",
+    "yt_view_velocity_7d", "yt_subscriber_count",
 ]
 TOTAL_API_SIGNALS = len(API_SIGNAL_KEYS)
 
@@ -318,6 +319,54 @@ def norm_lastfm_peer_tier(avg_similar_listeners):
     return norm_lastfm_listeners(avg_similar_listeners)
 
 
+def norm_youtube_velocity(velocity_7d):
+    """
+    YouTube 7-day view velocity on the artist's most recent official video.
+    Measures current cultural acceleration — the most forward-looking
+    sentiment signal in the model.
+
+    Calibrated against typical artist velocities:
+      <100K views/week:   niche / declining        → 0.20
+      100K–500K:          moderate awareness        → 0.45
+      500K–2M:            mainstream momentum       → 0.65
+      2M–10M:             viral / peak cycle        → 0.85
+      10M+:               global breakout moment    → 1.0
+
+    None (first run, no prior cache):
+      Returns None — excluded from weighted average.
+      On second run (tomorrow) velocity is calculated normally.
+    """
+    if velocity_7d is None:
+        return None
+    v = int(velocity_7d)
+    if v < 0:
+        return 0.10    # declining views — negative signal
+    if v >= 10_000_000:
+        return 1.0
+    if v >= 2_000_000:
+        return 0.85
+    if v >= 500_000:
+        return 0.65
+    if v >= 100_000:
+        return 0.45
+    return 0.20
+
+
+def norm_youtube_subscribers(sub_count):
+    """
+    YouTube subscriber count — channel audience depth.
+    Log-scaled, same approach as Last.fm listeners.
+    <100K:   emerging     → 0.20
+    100K–1M: established  → 0.55
+    1M–10M:  major        → 0.75
+    10M+:    superstar    → 1.0
+    """
+    if not sub_count:
+        return None
+    sub_count = max(1, int(sub_count))
+    return min(1.0, round(math.log10(sub_count) / math.log10(50_000_000), 4))
+
+
 # ── Rec 3: Genre prior ────────────────────────────────────────────────────
 def norm_genre_prior(genre):
     """
@@ -473,33 +522,36 @@ def score_sentiment(signals):
     Pillar 3 — Public Sentiment (25%)
 
     Sources:
-      Rec 3 — Genre-tier prior   [KEYLESS — always fires]
-      Spotify popularity          [key required]
-      Last.fm listener breadth    [key required]
-      Last.fm fan depth           [key required]
-      Last.fm peer tier           [key required]
-      Chartmetric stream trend    [key required]
+      Genre-tier prior       [KEYLESS — always fires]
+      Spotify popularity     [key required]
+      Last.fm listeners      [key required]
+      Last.fm fan depth      [key required]
+      YouTube view velocity  [key required — velocity available from run 2+]
+      YouTube subscribers    [key required]
+      Chartmetric trend      [key required]
+      Last.fm peer tier      [key required]
 
     Intra-pillar weights:
-      20% — Genre-tier prior     [KEYLESS — always fires]
-      20% — Spotify popularity
-      20% — Last.fm listener breadth
-      18% — Last.fm fan depth (plays/listener)
-      12% — Chartmetric stream trend
-      10% — Last.fm peer tier
+      18% — Genre-tier prior         [KEYLESS]
+      18% — Spotify popularity
+      16% — Last.fm listener breadth
+      16% — YouTube view velocity    ← NEW
+      12% — Last.fm fan depth
+      10% — YouTube subscribers      ← NEW
+      06% — Chartmetric stream trend
+      04% — Last.fm peer tier
     """
     genre = signals.get("event_meta", {}).get("genre", "")
 
     components = [
-        # Genre prior — always returns a value
-        (0.20, norm_genre_prior(genre)),
-
-        # API signals
-        (0.20, norm_spotify_popularity(signals.get("spotify_popularity"))),
-        (0.20, norm_lastfm_listeners(signals.get("lastfm_listeners"))),
-        (0.18, norm_lastfm_depth(signals.get("lastfm_plays_per_listener"))),
-        (0.12, norm_chartmetric_trend(signals.get("cm_spotify_stream_trend"))),
-        (0.10, norm_lastfm_peer_tier(signals.get("lastfm_similar_listeners"))),
+        (0.18, norm_genre_prior(genre)),
+        (0.18, norm_spotify_popularity(signals.get("spotify_popularity"))),
+        (0.16, norm_lastfm_listeners(signals.get("lastfm_listeners"))),
+        (0.16, norm_youtube_velocity(signals.get("yt_view_velocity_7d"))),
+        (0.12, norm_lastfm_depth(signals.get("lastfm_plays_per_listener"))),
+        (0.10, norm_youtube_subscribers(signals.get("yt_subscriber_count"))),
+        (0.06, norm_chartmetric_trend(signals.get("cm_spotify_stream_trend"))),
+        (0.04, norm_lastfm_peer_tier(signals.get("lastfm_similar_listeners"))),
     ]
     return weighted_avg(components, neutral=0.50)
 
@@ -676,6 +728,11 @@ def score_all():
                 "lastfm_plays_per_listener":    signals.get("lastfm_plays_per_listener"),
                 "lastfm_on_tour":               signals.get("lastfm_on_tour"),
                 "lastfm_similar_listeners":     signals.get("lastfm_similar_listeners"),
+                "yt_video_id":                  signals.get("yt_video_id"),
+                "yt_view_count":                signals.get("yt_view_count"),
+                "yt_view_delta_24h":            signals.get("yt_view_delta_24h"),
+                "yt_view_velocity_7d":          signals.get("yt_view_velocity_7d"),
+                "yt_subscriber_count":          signals.get("yt_subscriber_count"),
                 "eb_has_listing":               signals.get("eb_has_listing"),
                 "eb_capacity":                  signals.get("eb_capacity"),
                 "eb_tickets_sold":              signals.get("eb_tickets_sold"),
