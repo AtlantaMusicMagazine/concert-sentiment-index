@@ -53,6 +53,8 @@ jobs:
           SERPAPI_KEY:         ${{ secrets.SERPAPI_KEY }}
           BANDSINTOWN_KEY:     ${{ secrets.BANDSINTOWN_KEY }}
           SETLISTFM_KEY:       ${{ secrets.SETLISTFM_KEY }}
+          LASTFM_KEY:          ${{ secrets.LASTFM_KEY }}
+          EVENTBRITE_TOKEN:    ${{ secrets.EVENTBRITE_TOKEN }}
 
           # ── Wikipedia (no key needed, just a user-agent string) ────────
           WIKIPEDIA_USER:      "atlanta-music-magazine/1.0 (contact@atlantamusicmagazine.com)"
