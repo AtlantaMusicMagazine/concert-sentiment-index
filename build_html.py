@@ -2,13 +2,16 @@
 build_html.py
 Atlanta Music Magazine — Dashboard HTML Builder
 Reads data/scored_events.json, generates fresh card HTML for each event,
-and writes the final dashboard to output/artist_card_module.html.
+and writes the final dashboard to output/artist_card_module_wp_ready.html.
 
-Strategy: the dashboard HTML has two sentinel comment blocks:
-  <!-- TOP_CARDS_START --> … <!-- TOP_CARDS_END -->
-  <!-- BOTTOM_CARDS_START --> … <!-- BOTTOM_CARDS_END -->
-This script replaces everything between those comments with freshly
-generated card HTML, preserving all CSS, JS, and structural markup.
+Strategy:
+  1. Load scored_events.json (produced by score.py)
+  2. Inject top-20 card HTML between <!-- TOP_CARDS_START/END --> sentinels
+  3. Inject bottom-20 card HTML between <!-- BOTTOM_CARDS_START/END --> sentinels
+  4. Regenerate the GENRE_POOL_TOP JS block from scored data so the genre
+     filter pills always stay in sync with the main panel scores
+  5. Update footer date
+  6. Write output/artist_card_module_wp_ready.html
 """
 
 import json
@@ -48,6 +51,19 @@ GENRE_STYLES = {
     "Pop / Soul":    ("background:#eeedfb;color:#4038b0;"),
 }
 GENRE_STYLE_DEFAULT = "background:#f0f0f4;color:#333340;"
+
+# ── Venue capacity lookup (mirrors score.py) ──────────────────────────────
+VENUE_CAPS = {
+    "State Farm Arena":                                  21000,
+    "Mercedes-Benz Stadium":                             71000,
+    "Ameris Bank Amphitheatre":                          12000,
+    "Synovus Bank Amphitheater at Chastain Park":         6900,
+    "Lakewood Amphitheatre":                             19000,
+    "Coca-Cola Roxy":                                     3600,
+    "Truist Park":                                       41084,
+    "The Eastern":                                         500,
+    "Vinyl at Center Stage":                               200,
+}
 
 
 def genre_style(genre):
@@ -282,6 +298,249 @@ def build_card(ev, rank, is_bottom=False):
   </article>"""
 
 
+# ── Window constants ──────────────────────────────────────────────────────
+WINDOW_START = datetime.date(2026, 6, 8)
+WINDOW_END   = datetime.date(2026, 9, 6)
+
+GENRE_POOL_START_MARKER = "  var GENRE_POOL_TOP = ["
+GENRE_POOL_END_MARKER   = "  var GENRE_POOL_BOTTOM = GENRE_POOL_TOP.slice();"
+
+# JS colour lookup for genre dots in the pool (mirrors GENRE_STYLES)
+GENRE_JS_COLORS = {
+    "Pop":           {"bg": "#eeedfb", "fg": "#4038b0"},
+    "Latin Pop":     {"bg": "#fef6e0", "fg": "#6a4400"},
+    "Country":       {"bg": "#fef6e0", "fg": "#6a4400"},
+    "Hip-Hop":       {"bg": "#e8f5ee", "fg": "#134a28"},
+    "R&B":           {"bg": "#e8f5ee", "fg": "#134a28"},
+    "Rock":          {"bg": "#fdecea", "fg": "#721a0a"},
+    "Alt / Rock":    {"bg": "#fdecea", "fg": "#721a0a"},
+    "Alt / R&B":     {"bg": "#eef0ff", "fg": "#283ab0"},
+    "Reggae":        {"bg": "#eef0ff", "fg": "#283ab0"},
+    "Indie / Psych": {"bg": "#fde8f8", "fg": "#650c5c"},
+    "Indie / Alt":   {"bg": "#fde8f8", "fg": "#650c5c"},
+    "Classic Rock":  {"bg": "#fef6e0", "fg": "#6a4400"},
+    "Metalcore":     {"bg": "#f2f2f4", "fg": "#36363e"},
+    "Hyperpop":      {"bg": "#eef0ff", "fg": "#283ab0"},
+    "Multi-Genre":   {"bg": "#eef0ff", "fg": "#283ab0"},
+    "Pop / Rock":    {"bg": "#eeedfb", "fg": "#4038b0"},
+    "Pop / Soul":    {"bg": "#eeedfb", "fg": "#4038b0"},
+}
+
+
+def _js_escape(s):
+    """Encode a Python string for safe embedding in a JS double-quoted string."""
+    result = []
+    for ch in str(s):
+        if ch == "\\":
+            result.append("\\\\")
+        elif ch == '"':
+            result.append('\\"')
+        elif ch == "'":
+            result.append("\\'")
+        elif ch == "\n":
+            result.append("\\n")
+        elif ord(ch) > 127:
+            result.append(f"\\u{ord(ch):04x}")
+        else:
+            result.append(ch)
+    return "".join(result)
+
+
+def _signal_level(score_int):
+    if score_int >= 65: return "high"
+    if score_int >= 35: return "medium"
+    return "low"
+
+
+def build_genre_pool_js(events):
+    """
+    Build the GENRE_POOL_TOP JS variable from scored_events.json data.
+    Called every build so the genre filter pills always reflect the
+    current nightly scores — never stale hardcoded values.
+
+    Filtering rules (must match the dashboard window):
+      - Event date must be within WINDOW_START to WINDOW_END
+      - Each event appears once per genre (no duplicates across panels)
+
+    Signal rows per card (8 total):
+      4 pillar summary rows — always present
+      4 structural / data rows — keyless signals that always fire
+    """
+    pool_entries = []
+    seen_ids = set()
+
+    for ev in events:
+        eid      = ev.get("id", "")
+        date_str = ev.get("date", "")
+        genre    = ev.get("genre", "")
+        score    = int(ev.get("score") or 0)
+        seed     = int(ev.get("seed_score") or score)
+
+        # Skip if outside window
+        try:
+            show_date = datetime.date.fromisoformat(date_str)
+            if not (WINDOW_START <= show_date <= WINDOW_END):
+                continue
+        except (ValueError, TypeError):
+            continue
+
+        # Skip duplicates (Kali Uchis appears twice with different IDs)
+        dedup_key = (ev.get("name", ""), genre)
+        if dedup_key in seen_ids:
+            continue
+        seen_ids.add(dedup_key)
+
+        # Pillar scores
+        ps      = ev.get("pillar_scores", {})
+        p_sent  = int(ps.get("sentiment", 50) or 50)
+        p_hist  = int(ps.get("historical_sales", 50) or 50)
+        p_tick  = int(ps.get("ticket_demand", 50) or 50)
+        p_local = int(ps.get("local_intent", 50) or 50)
+
+        # Raw signals for detail rows
+        raw    = ev.get("raw_signals", {})
+        wiki   = raw.get("wikipedia_7d_trend_pct")
+        gtrend = raw.get("google_trends_atl")
+        bit    = raw.get("bandsintown_rsvps")
+        sg_fl  = raw.get("seatgeek_floor")
+        mb_alb = raw.get("mb_latest_album_title")
+        mb_rec = raw.get("mb_has_recent_album")
+        lastfm = raw.get("lastfm_listeners")
+
+        # Build 8 signal rows
+        signals = [
+            [_signal_level(p_sent),  "Sentiment",      _pillar_label(p_sent)],
+            [_signal_level(p_hist),  "Sales history",  _pillar_label(p_hist)],
+            [_signal_level(p_tick),  "Ticket demand",  _pillar_label(p_tick)],
+            [_signal_level(p_local), "Local intent",   _pillar_label(p_local)],
+        ]
+
+        # Best available detail signal (first truthy one wins)
+        if wiki is not None:
+            direction = "+" if float(wiki) >= 0 else ""
+            signals.append(["medium", "Wikipedia 7-day",
+                             f"{direction}{float(wiki):.0f}%"])
+        elif mb_rec and mb_alb:
+            signals.append(["high", "New album", _js_escape(mb_alb)])
+        elif sg_fl is not None:
+            signals.append(["medium", "Secondary floor",
+                             f"${float(sg_fl):.0f}"])
+        elif gtrend is not None:
+            signals.append(["medium", "ATL Google Trends",
+                             f"{int(gtrend)}/100"])
+        else:
+            # Keyless fallback — venue capacity
+            cap = VENUE_CAPS.get(ev.get("venue", ""), 0)
+            signals.append(["medium", "Venue capacity",
+                             f"{cap:,}" if cap else "n/a"])
+
+        if bit is not None:
+            lvl = "high" if int(bit) >= 5000 else (
+                  "medium" if int(bit) >= 1000 else "low")
+            signals.append([lvl, "Bands in Town", f"{int(bit):,} ATL"])
+        elif lastfm is not None and int(lastfm) > 0:
+            lm = int(lastfm)
+            signals.append(["medium", "Last.fm listeners",
+                             f"{lm/1_000_000:.1f}M" if lm >= 1_000_000
+                             else f"{lm:,}"])
+        elif gtrend is not None and len([s for s in signals if s[1] != "ATL Google Trends"]) >= 5:
+            pass
+        else:
+            signals.append(["medium", "Score confidence",
+                             f"Seed {seed}"])
+
+        # Cap at 8
+        signals = signals[:8]
+
+        # Insight line — pick best available data
+        insight_parts = []
+        if mb_rec and mb_alb:
+            insight_parts.append(f"New album \u201c{mb_alb}\u201d")
+        if sg_fl is not None:
+            insight_parts.append(f"Secondary floor ${float(sg_fl):.0f}")
+        if wiki is not None:
+            direction = "+" if float(wiki) >= 0 else ""
+            insight_parts.append(f"Wikipedia {direction}{float(wiki):.0f}%")
+        if gtrend is not None:
+            insight_parts.append(f"ATL Trends {int(gtrend)}/100")
+        if not insight_parts:
+            # Keyless fallback
+            try:
+                days_out = (show_date - datetime.date.today()).days
+                if days_out >= 0:
+                    insight_parts.append(f"{days_out} days to show")
+            except Exception:
+                pass
+            insight_parts.append(f"Genre ATL index {int(_genre_prior(genre)*100)}/100")
+
+        insight = " \u00b7 ".join(insight_parts[:4])
+
+        # Format date for display
+        try:
+            y, m, d = date_str.split("-")
+            MONTHS = ["Jan","Feb","Mar","Apr","May","Jun",
+                      "Jul","Aug","Sep","Oct","Nov","Dec"]
+            date_display = f"{MONTHS[int(m)-1]} {int(d)}"
+        except Exception:
+            date_display = date_str
+
+        pool_entries.append({
+            "name":     ev.get("name", ""),
+            "date":     date_display,
+            "venue":    ev.get("venue", ""),
+            "genre":    genre,
+            "score":    score,
+            "signals":  signals,
+            "insight":  insight,
+        })
+
+    # Build JS string
+    entry_strs = []
+    for e in pool_entries:
+        sigs_js = ",".join(
+            f'["{_js_escape(s[0])}","{_js_escape(s[1])}","{_js_escape(str(s[2]))}"]'
+            for s in e["signals"]
+        )
+        entry_strs.append(
+            f'    {{name:"{_js_escape(e["name"])}",date:"{_js_escape(e["date"])}",'
+            f'venue:"{_js_escape(e["venue"])}",genre:"{_js_escape(e["genre"])}",'
+            f'score:{e["score"]},signals:[{sigs_js}],'
+            f'insight:"{_js_escape(e["insight"])}"}}'
+        )
+
+    pool_js = (
+        "  var GENRE_POOL_TOP = [\n"
+        + ",\n".join(entry_strs)
+        + "\n  ];\n\n"
+        "  /* Bottom pool = same events; "
+        "renderGenreView sorts ascending for worst-to-best */\n"
+        "  var GENRE_POOL_BOTTOM = GENRE_POOL_TOP.slice();"
+    )
+
+    print(f"[build] Genre pool: {len(pool_entries)} events, "
+          f"score range {min(e['score'] for e in pool_entries)}"
+          f"–{max(e['score'] for e in pool_entries)}")
+    return pool_js
+
+
+def _pillar_label(score_int):
+    if score_int >= 65: return "High"
+    if score_int >= 35: return "Medium"
+    return "Low"
+
+
+def _genre_prior(genre):
+    """Mirror of score.py's GENRE_DEMAND_PRIOR for insight fallback."""
+    priors = {
+        "Latin Pop": 0.76, "Pop": 0.70, "Hip-Hop": 0.68,
+        "R&B": 0.63, "Multi-Genre": 0.65, "Country": 0.62,
+        "Alt / R&B": 0.58, "Rock": 0.56, "Pop / Rock": 0.54,
+        "Indie / Psych": 0.52, "Reggae": 0.48, "Indie / Alt": 0.44,
+        "Classic Rock": 0.40, "Metalcore": 0.36, "Hyperpop": 0.22,
+    }
+    return priors.get(genre, 0.50)
+
+
 # ── Main build ────────────────────────────────────────────────────────────
 def build():
     print(f"[build] Building HTML — {datetime.datetime.now().isoformat()}")
@@ -348,6 +607,22 @@ def build():
     print(f"[build] TOP_CARDS_START present: {TOP_START in html}")
     print(f"[build] BOTTOM_CARDS_START present: {BOT_START in html}")
 
+    # ── Step 3: Regenerate genre pool JS ──────────────────────────────────
+    # Rebuild GENRE_POOL_TOP from current scored data so genre filter pills
+    # always reflect tonight's scores, not stale hardcoded values.
+    try:
+        new_pool_js = build_genre_pool_js(events)
+        ps = html.find(GENRE_POOL_START_MARKER)
+        pe = html.find(GENRE_POOL_END_MARKER)
+        if ps != -1 and pe != -1 and pe > ps:
+            html = html[:ps] + new_pool_js + html[pe + len(GENRE_POOL_END_MARKER):]
+            print("[build] Genre pool JS updated")
+        else:
+            print("[build] WARN: Genre pool markers not found — pool not updated")
+    except Exception as e:
+        print(f"[build] WARN: Genre pool update failed: {e} — keeping existing pool")
+
+    # ── Step 4: Inject card sentinels ─────────────────────────────────────
     html = inject_sentinel(html, TOP_START, TOP_END, top_html)
     print(f"[build] Injected {len(top_events)} top cards")
 
