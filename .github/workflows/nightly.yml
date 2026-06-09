@@ -52,6 +52,7 @@ jobs:
           # ── Local intent sources ───────────────────────────────────────
           SERPAPI_KEY:         ${{ secrets.SERPAPI_KEY }}
           BANDSINTOWN_KEY:     ${{ secrets.BANDSINTOWN_KEY }}
+          SETLISTFM_KEY:       ${{ secrets.SETLISTFM_KEY }}
 
           # ── Wikipedia (no key needed, just a user-agent string) ────────
           WIKIPEDIA_USER:      "atlanta-music-magazine/1.0 (contact@atlantamusicmagazine.com)"
