@@ -45,6 +45,7 @@ EVENTS = [
     # ── TOP 20 ──────────────────────────────────────────────────────────────
     {
         "id": "ariana-grande-2026",
+        "seed_score": 97,
         "name": "Ariana Grande — The Eternal Sunshine Tour",
         "artist": "Ariana Grande",
         "venue": "State Farm Arena",
@@ -59,6 +60,7 @@ EVENTS = [
     },
     {
         "id": "shakira-2026",
+        "seed_score": 94,
         "name": "Shakira — Las Mujeres Ya No Lloran World Tour",
         "artist": "Shakira",
         "venue": "State Farm Arena",
@@ -73,6 +75,7 @@ EVENTS = [
     },
     {
         "id": "megan-moroney-2026",
+        "seed_score": 89,
         "name": "Megan Moroney — The Cloud 9 Tour",
         "artist": "Megan Moroney",
         "venue": "State Farm Arena",
@@ -87,6 +90,7 @@ EVENTS = [
     },
     {
         "id": "j-cole-2026",
+        "seed_score": 88,
         "name": "J. Cole — The Fall-Off Tour",
         "artist": "J. Cole",
         "venue": "State Farm Arena",
@@ -101,6 +105,7 @@ EVENTS = [
     },
     {
         "id": "acdc-2026",
+        "seed_score": 83,
         "name": "AC/DC — Power Up Tour 2026",
         "artist": "AC/DC",
         "venue": "Mercedes-Benz Stadium",
@@ -115,6 +120,7 @@ EVENTS = [
     },
     {
         "id": "tame-impala-2026",
+        "seed_score": 79,
         "name": "Tame Impala — Deadbeat Tour",
         "artist": "Tame Impala",
         "venue": "State Farm Arena",
@@ -129,6 +135,7 @@ EVENTS = [
     },
     {
         "id": "asap-rocky-2026",
+        "seed_score": 75,
         "name": "A$AP Rocky — Don't Be Dumb World Tour",
         "artist": "A$AP Rocky",
         "venue": "State Farm Arena",
@@ -143,6 +150,7 @@ EVENTS = [
     },
     {
         "id": "usher-2026",
+        "seed_score": 72,
         "name": "Usher",
         "artist": "Usher",
         "venue": "State Farm Arena",
@@ -157,6 +165,7 @@ EVENTS = [
     },
     {
         "id": "louis-tomlinson-2026",
+        "seed_score": 67,
         "name": "Louis Tomlinson — How Did We Get Here? World Tour",
         "artist": "Louis Tomlinson",
         "venue": "State Farm Arena",
@@ -171,6 +180,7 @@ EVENTS = [
     },
     {
         "id": "olivia-dean-2026",
+        "seed_score": 65,
         "name": "Olivia Dean — The Art of Loving Tour",
         "artist": "Olivia Dean",
         "venue": "State Farm Arena",
@@ -185,6 +195,7 @@ EVENTS = [
     },
     {
         "id": "lynyrd-skynyrd-2026",
+        "seed_score": 60,
         "name": "Lynyrd Skynyrd & Foreigner",
         "artist": "Lynyrd Skynyrd",
         "venue": "Ameris Bank Amphitheatre",
@@ -199,6 +210,7 @@ EVENTS = [
     },
     {
         "id": "joji-2026",
+        "seed_score": 57,
         "name": "Joji — SOLARIS Tour",
         "artist": "Joji",
         "venue": "State Farm Arena",
@@ -213,6 +225,7 @@ EVENTS = [
     },
     {
         "id": "alex-warren-2026",
+        "seed_score": 56,
         "name": "Alex Warren — Little Orphan Alex Live",
         "artist": "Alex Warren",
         "venue": "State Farm Arena",
@@ -227,6 +240,7 @@ EVENTS = [
     },
     {
         "id": "yungblud-2026",
+        "seed_score": 53,
         "name": "YUNGBLUD — IDOLS World Tour",
         "artist": "YUNGBLUD",
         "venue": "Synovus Bank Amphitheater at Chastain Park",
@@ -241,6 +255,7 @@ EVENTS = [
     },
     {
         "id": "santana-doobie-2026",
+        "seed_score": 54,
         "name": "Santana & The Doobie Brothers — Oneness Tour",
         "artist": "Santana",
         "venue": "Ameris Bank Amphitheatre",
@@ -255,6 +270,7 @@ EVENTS = [
     },
     {
         "id": "hot1079-2026",
+        "seed_score": 52,
         "name": "Hot 107.9 Birthday Bash ATL — 30th Anniversary",
         "artist": "Hot 107.9 Birthday Bash",
         "venue": "State Farm Arena",
@@ -269,6 +285,7 @@ EVENTS = [
     },
     {
         "id": "buju-banton-2026",
+        "seed_score": 55,
         "name": "Buju Banton & Stephen Marley — Roots and Rhymes Tour",
         "artist": "Buju Banton",
         "venue": "Lakewood Amphitheatre",
@@ -283,6 +300,7 @@ EVENTS = [
     },
     {
         "id": "summer-walker-2026",
+        "seed_score": 49,
         "name": "Summer Walker — Still Finally Over It Tour",
         "artist": "Summer Walker",
         "venue": "State Farm Arena",
@@ -297,6 +315,7 @@ EVENTS = [
     },
     {
         "id": "5sos-2026",
+        "seed_score": 46,
         "name": "5 Seconds of Summer — EVERYONE'S A STAR! World Tour",
         "artist": "5 Seconds of Summer",
         "venue": "State Farm Arena",
@@ -311,6 +330,7 @@ EVENTS = [
     },
     {
         "id": "kali-uchis-top-2026",
+        "seed_score": 43,
         "name": "Kali Uchis — For The Girls Tour",
         "artist": "Kali Uchis",
         "venue": "Lakewood Amphitheatre",
@@ -327,6 +347,7 @@ EVENTS = [
     # ── BOTTOM 20 ────────────────────────────────────────────────────────────
     {
         "id": "slayyyter-2026",
+        "seed_score": 18,
         "name": "Slayyyter — Wor$t Girl in the World Tour",
         "artist": "Slayyyter",
         "venue": "The Eastern",
@@ -341,6 +362,7 @@ EVENTS = [
     },
     {
         "id": "isley-ojays-2026",
+        "seed_score": 21,
         "name": "The Isley Brothers & The O'Jays",
         "artist": "The Isley Brothers",
         "venue": "Synovus Bank Amphitheater at Chastain Park",
@@ -355,6 +377,7 @@ EVENTS = [
     },
     {
         "id": "justine-skye-2026",
+        "seed_score": 22,
         "name": "Justine Skye",
         "artist": "Justine Skye",
         "venue": "Vinyl at Center Stage",
@@ -369,6 +392,7 @@ EVENTS = [
     },
     {
         "id": "wynonna-melissa-2026",
+        "seed_score": 24,
         "name": "Wynonna Judd & Melissa Etheridge — Raised On Radio Tour",
         "artist": "Wynonna Judd",
         "venue": "Synovus Bank Amphitheater at Chastain Park",
@@ -383,6 +407,7 @@ EVENTS = [
     },
     {
         "id": "guess-who-2026",
+        "seed_score": 26,
         "name": "The Guess Who — Takin' It Back Tour",
         "artist": "The Guess Who",
         "venue": "Synovus Bank Amphitheater at Chastain Park",
@@ -397,6 +422,7 @@ EVENTS = [
     },
     {
         "id": "john-mellencamp-2026",
+        "seed_score": 27,
         "name": "John Mellencamp — Dancing Words Tour",
         "artist": "John Mellencamp",
         "venue": "Ameris Bank Amphitheatre",
@@ -411,6 +437,7 @@ EVENTS = [
     },
     {
         "id": "ne-yo-akon-2026",
+        "seed_score": 31,
         "name": "NE-YO & Akon — Nights Like This Tour",
         "artist": "NE-YO",
         "venue": "Lakewood Amphitheatre",
@@ -425,6 +452,7 @@ EVENTS = [
     },
     {
         "id": "styx-chicago-2026",
+        "seed_score": 36,
         "name": "Styx & Chicago — The Windy Cities Tour",
         "artist": "Styx",
         "venue": "Ameris Bank Amphitheatre",
@@ -439,6 +467,7 @@ EVENTS = [
     },
     {
         "id": "kali-uchis-bottom-2026",
+        "seed_score": 38,
         "name": "Kali Uchis — For The Girls Tour",
         "artist": "Kali Uchis",
         "venue": "Lakewood Amphitheatre",
@@ -453,6 +482,7 @@ EVENTS = [
     },
     {
         "id": "madison-beer-2026",
+        "seed_score": 39,
         "name": "Madison Beer — The Locket Tour",
         "artist": "Madison Beer",
         "venue": "Coca-Cola Roxy",
@@ -467,6 +497,7 @@ EVENTS = [
     },
     {
         "id": "motionless-2026",
+        "seed_score": 42,
         "name": "Motionless In White — Sweat and Blood Tour",
         "artist": "Motionless In White",
         "venue": "Ameris Bank Amphitheatre",
@@ -481,6 +512,7 @@ EVENTS = [
     },
     {
         "id": "hayley-williams-2026",
+        "seed_score": 43,
         "name": "The Hayley Williams Show w/ Magdalena Bay",
         "artist": "Hayley Williams",
         "venue": "Ameris Bank Amphitheatre",
@@ -495,6 +527,7 @@ EVENTS = [
     },
     {
         "id": "muse-2026",
+        "seed_score": 44,
         "name": "Muse — The Wow! Signal Tour",
         "artist": "Muse",
         "venue": "Lakewood Amphitheatre",
@@ -509,6 +542,7 @@ EVENTS = [
     },
     {
         "id": "evanescence-2026",
+        "seed_score": 45,
         "name": "Evanescence — 2026 World Tour",
         "artist": "Evanescence",
         "venue": "Ameris Bank Amphitheatre",
@@ -523,6 +557,7 @@ EVENTS = [
     },
     {
         "id": "motley-crue-2026",
+        "seed_score": 48,
         "name": "Mötley Crüe — Return of the Carnival of Sins",
         "artist": "Mötley Crüe",
         "venue": "Ameris Bank Amphitheatre",
@@ -537,6 +572,7 @@ EVENTS = [
     },
     {
         "id": "ella-mai-2026",
+        "seed_score": 52,
         "name": "Ella Mai",
         "artist": "Ella Mai",
         "venue": "Synovus Bank Amphitheater at Chastain Park",
@@ -551,6 +587,7 @@ EVENTS = [
     },
     {
         "id": "train-bnl-2026",
+        "seed_score": 32,
         "name": "Train, Barenaked Ladies & Matt Nathanson",
         "artist": "Train",
         "venue": "Ameris Bank Amphitheatre",
@@ -565,6 +602,7 @@ EVENTS = [
     },
     {
         "id": "hilary-duff-2026",
+        "seed_score": 29,
         "name": "Hilary Duff — The Lucky Me Tour",
         "artist": "Hilary Duff",
         "venue": "Ameris Bank Amphitheatre",
@@ -579,6 +617,7 @@ EVENTS = [
     },
     {
         "id": "parker-mccollum-2026",
+        "seed_score": 25,
         "name": "Parker McCollum",
         "artist": "Parker McCollum",
         "venue": "Ameris Bank Amphitheatre",
@@ -593,6 +632,7 @@ EVENTS = [
     },
     {
         "id": "jack-johnson-2026",
+        "seed_score": 22,
         "name": "Jack Johnson — SURFILMUSIC Tour",
         "artist": "Jack Johnson",
         "venue": "Ameris Bank Amphitheatre",
