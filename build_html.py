@@ -290,46 +290,62 @@ def build():
     with open(TEMPLATE_PATH) as f:
         html = f.read()
     print(f"[build] Template loaded — {len(html):,} bytes")
-    print(f"[build] TOP_CARDS_START present: {'<!-- TOP_CARDS_START -->' in html}")
-    print(f"[build] BOTTOM_CARDS_START present: {'<!-- BOTTOM_CARDS_START -->' in html}")
 
-    # Inject top cards
-    if "<!-- TOP_CARDS_START -->" in html:
-        html = re.sub(
-            r"<!-- TOP_CARDS_START -->.*?<!-- TOP_CARDS_END -->",
-            f"<!-- TOP_CARDS_START -->\n{top_html}\n<!-- TOP_CARDS_END -->",
-            html,
-            flags=re.DOTALL,
-        )
-        print("[build] Injected top cards")
-    else:
-        print("[build] WARNING: TOP_CARDS_START sentinel not found in template")
+    TOP_START    = "<!-- TOP_CARDS_START -->"
+    TOP_END      = "<!-- TOP_CARDS_END -->"
+    BOT_START    = "<!-- BOTTOM_CARDS_START -->"
+    BOT_END      = "<!-- BOTTOM_CARDS_END -->"
 
-    # Inject bottom cards
-    if "<!-- BOTTOM_CARDS_START -->" in html:
-        html = re.sub(
-            r"<!-- BOTTOM_CARDS_START -->.*?<!-- BOTTOM_CARDS_END -->",
-            f"<!-- BOTTOM_CARDS_START -->\n{bottom_html}\n<!-- BOTTOM_CARDS_END -->",
-            html,
-            flags=re.DOTALL,
-        )
-        print("[build] Injected bottom cards")
-    else:
-        print("[build] WARNING: BOTTOM_CARDS_START sentinel not found in template")
+    def inject_sentinel(content, start_marker, end_marker, new_cards):
+        """
+        Replace everything between start_marker and end_marker with
+        new_cards using plain string operations — no regex, no DOTALL,
+        no risk of matching JS code inside the <script> block.
+        """
+        s = content.find(start_marker)
+        e = content.find(end_marker)
+        if s == -1 or e == -1 or e <= s:
+            print(f"  [WARN] Sentinel not found: {start_marker!r}")
+            return content
+        # Replace from end of start_marker to start of end_marker
+        before = content[:s + len(start_marker)]
+        after  = content[e:]
+        return before + "\n" + new_cards + "\n" + after
 
-    # Update last-updated date in footer
+    print(f"[build] TOP_CARDS_START present: {TOP_START in html}")
+    print(f"[build] BOTTOM_CARDS_START present: {BOT_START in html}")
+
+    html = inject_sentinel(html, TOP_START, TOP_END, top_html)
+    print(f"[build] Injected {len(top_events)} top cards")
+
+    html = inject_sentinel(html, BOT_START, BOT_END, bottom_html)
+    print(f"[build] Injected {len(bottom_events)} bottom cards")
+
+    # Update last-updated date in footer — plain string, no DOTALL
     print("[build] Updating footer date")
-    today = datetime.date.today().isoformat()
-    html = re.sub(
-        r'<time datetime="[\d-]+">[^<]+</time>(?=\s*</p>)',
-        f'<time datetime="{today}">Last updated {datetime.date.today().strftime("%B %-d, %Y")}</time>',
-        html,
-    )
+    today     = datetime.date.today()
+    today_iso = today.isoformat()
+    today_str = today.strftime("%B %-d, %Y")
+    # Find the footer time element and replace it precisely
+    time_marker = '<time datetime="'
+    footer_pos  = html.rfind(time_marker)   # last occurrence = footer
+    if footer_pos != -1:
+        time_end = html.find("</time>", footer_pos) + len("</time>")
+        html = (
+            html[:footer_pos]
+            + f'<time datetime="{today_iso}">Last updated {today_str}</time>'
+            + html[time_end:]
+        )
 
     print(f"[build] Writing output to {OUTPUT_PATH}")
     with open(OUTPUT_PATH, "w") as f:
         f.write(html)
 
+    # Verify card counts in output
+    import re as _re
+    top_check = len(_re.findall(r'<article class="event-card"', html))
+    bot_check = len(_re.findall(r'<article class="event-card bottom"', html))
+    print(f"[build] Output verification — top cards: {top_check}  bottom cards: {bot_check}")
     print(f"[build] Wrote {OUTPUT_PATH}  ({len(top_events)} top, {len(bottom_events)} bottom events)")
     return OUTPUT_PATH
 
