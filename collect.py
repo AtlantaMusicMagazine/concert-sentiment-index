@@ -1251,32 +1251,45 @@ def _extract_tour_name(event_display_name):
 # ── Main collection loop ───────────────────────────────────────────────────
 def collect_all():
     print(f"[collect] Starting — {datetime.datetime.now().isoformat()}")
+    print(f"[collect] Total events to collect: {len(EVENTS)}")
     spotify_token = get_spotify_token()
 
     results = {}
-    for event in EVENTS:
+    for idx, event in enumerate(EVENTS):
         eid = event["id"]
-        print(f"  [{eid}] {event['name'][:55]}")
+        print(f"  [{idx+1}/{len(EVENTS)}] {event['name'][:55]}")
         signals = {"event_meta": event}
 
-        # 30% — Ticket Demand
-        signals.update(fetch_ticketmaster(event));  time.sleep(0.3)
-        signals.update(fetch_seatgeek(event));       time.sleep(0.3)
-        signals.update(fetch_eventbrite(event))      # rate-limited internally
+        try:
+            # 30% — Ticket Demand
+            signals.update(fetch_ticketmaster(event));  time.sleep(0.3)
+            signals.update(fetch_seatgeek(event));       time.sleep(0.3)
+            signals.update(fetch_eventbrite(event))      # rate-limited internally
+        except Exception as e:
+            print(f"    [WARN] Ticket demand fetch failed: {e}")
 
-        # 25% — Sentiment
-        signals.update(fetch_spotify(event, spotify_token)); time.sleep(0.2)
-        signals.update(fetch_chartmetric(event));            time.sleep(0.3)
-        signals.update(fetch_lastfm(event))                  # rate-limited internally
+        try:
+            # 25% — Sentiment
+            signals.update(fetch_spotify(event, spotify_token)); time.sleep(0.2)
+            signals.update(fetch_chartmetric(event));            time.sleep(0.3)
+            signals.update(fetch_lastfm(event))
+        except Exception as e:
+            print(f"    [WARN] Sentiment fetch failed: {e}")
 
-        # 25% — Historical Sales
-        signals.update(fetch_wikipedia_pageviews(event)); time.sleep(0.3)
-        signals.update(fetch_musicbrainz(event))   # rate-limited internally
-        signals.update(fetch_setlist(event))        # rate-limited internally
+        try:
+            # 25% — Historical Sales
+            signals.update(fetch_wikipedia_pageviews(event)); time.sleep(0.3)
+            signals.update(fetch_musicbrainz(event))
+            signals.update(fetch_setlist(event))
+        except Exception as e:
+            print(f"    [WARN] Historical sales fetch failed: {e}")
 
-        # 20% — Local Intent
-        signals.update(fetch_google_trends(event)); time.sleep(0.5)
-        signals.update(fetch_bandsintown(event));   time.sleep(0.2)
+        try:
+            # 20% — Local Intent
+            signals.update(fetch_google_trends(event)); time.sleep(0.5)
+            signals.update(fetch_bandsintown(event));   time.sleep(0.2)
+        except Exception as e:
+            print(f"    [WARN] Local intent fetch failed: {e}")
 
         results[eid] = signals
 
