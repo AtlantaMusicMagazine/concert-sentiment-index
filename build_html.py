@@ -19,8 +19,8 @@ from pathlib import Path
 
 Path("output").mkdir(exist_ok=True)
 
-TEMPLATE_PATH = "templates/artist_card_module.html"
-OUTPUT_PATH   = "output/artist_card_module.html"
+TEMPLATE_PATH = "templates/artist_card_module_wp_ready.html"
+OUTPUT_PATH   = "output/artist_card_module_wp_ready.html"
 SCORES_PATH   = "data/scored_events.json"
 
 TOP_N    = 20   # number of events in each panel
