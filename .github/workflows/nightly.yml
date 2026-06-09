@@ -73,7 +73,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: dashboard-${{ github.run_id }}
-          path: output/artist_card_module.html
+          path: output/artist_card_module_wp_ready.html
           retention-days: 7
 
       # 6. Upload raw signals and scores for debugging
