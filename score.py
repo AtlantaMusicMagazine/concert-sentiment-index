@@ -186,6 +186,103 @@ def norm_setlist_sold_out(sold_out_flag):
     return 1.0 if sold_out_flag else 0.5
 
 
+def norm_lastfm_listeners(val):
+    """
+    Last.fm weekly unique listeners — breadth of active audience.
+    Scaled against ATL-market-relevant thresholds (log scale).
+    <100K   → niche (0.2)
+    100K–1M → emerging mainstream (0.5)
+    1M–5M   → mainstream (0.75)
+    5M–15M  → major (0.9)
+    15M+    → global superstar (1.0)
+    """
+    if not val:
+        return 0.4
+    import math
+    # log scale: log10(15M) ≈ 7.18 as ceiling
+    clamped = max(1, min(val, 15_000_000))
+    return round(math.log10(clamped) / math.log10(15_000_000), 3)
+
+
+def norm_lastfm_depth(plays_per_listener):
+    """
+    Plays-per-listener ratio — fan obsession depth.
+    Low  (<50):   casual listeners, lower ticket conversion
+    Mid  (50–200): engaged fans
+    High (200–500): obsessive fans, strong ticket conversion
+    Very high (500+): cult following
+    """
+    if plays_per_listener is None:
+        return 0.5
+    if plays_per_listener >= 500:
+        return 1.0
+    if plays_per_listener >= 200:
+        return 0.85
+    if plays_per_listener >= 50:
+        return 0.65
+    return 0.35
+
+
+def norm_lastfm_peer_tier(avg_similar_listeners):
+    """
+    Average listener count of top 3 similar artists.
+    Measures which commercial tier the artist competes in.
+    If their peers are major artists, they likely are too.
+    Uses same log scale as norm_lastfm_listeners.
+    """
+    return norm_lastfm_listeners(avg_similar_listeners)
+
+
+def norm_eb_sell_through(sell_through_pct):
+    """
+    Eventbrite sell-through percentage.
+    0%   → no demand (0.0)
+    50%  → moderate (0.5)
+    80%  → strong (0.85)
+    100% → sold out (1.0)
+    None → no listing / data unavailable (0.5 neutral)
+    """
+    if sell_through_pct is None:
+        return 0.5
+    return max(0.0, min(1.0, sell_through_pct / 100))
+
+
+def norm_eb_sold_out(is_sold_out, has_waitlist):
+    """
+    Sold-out flag + waitlist flag — binary demand ceiling signals.
+    Sold out with waitlist: 1.0 (maximum demand signal)
+    Sold out, no waitlist:  0.9
+    Not sold out:           0.5 (fall through to sell-through normalizer)
+    """
+    if is_sold_out and has_waitlist:
+        return 1.0
+    if is_sold_out:
+        return 0.9
+    if has_waitlist:
+        return 0.8
+    return 0.5
+
+
+def norm_eb_ticket_tiers(num_tiers):
+    """
+    Number of distinct ticket price tiers.
+    More tiers = promoter expecting price-sensitive demand spectrum.
+    1 tier: simple GA or single price (0.5)
+    2–3:    standard tiered (0.65)
+    4–5:    high-demand show with premium/VIP tiers (0.8)
+    6+:     complex demand — multiple VIP packages (0.9)
+    """
+    if not num_tiers:
+        return 0.5
+    if num_tiers >= 6:
+        return 0.9
+    if num_tiers >= 4:
+        return 0.8
+    if num_tiers >= 2:
+        return 0.65
+    return 0.5
+
+
 def norm_google_trends(val):
     """Google Trends ATL index is already 0-100."""
     if val is None:
@@ -223,14 +320,29 @@ def score_ticket_demand(signals):
     """
     Pillar 1 — Current Ticket Demand (30%)
     Sources: SeatGeek Deal Score, SeatGeek floor price,
-             listing count vs capacity, Ticketmaster status.
+             listing count vs capacity, Ticketmaster status,
+             Eventbrite sell-through, Eventbrite sold-out/waitlist,
+             Eventbrite ticket tier count.
+
+    Weight distribution:
+      25% — SeatGeek Deal Score (composite secondary market signal)
+      20% — SeatGeek floor price (secondary market floor)
+      20% — Eventbrite sell-through % (primary market pace)
+      15% — Eventbrite sold-out / waitlist flag
+      10% — Listing count vs. venue capacity (inverse — fewer = more demand)
+      10% — Ticketmaster on-sale status
     """
     components = [
-        (0.35, norm_seatgeek_deal_score(signals.get("seatgeek_deal_score"))),
-        (0.30, norm_seatgeek_floor(signals.get("seatgeek_floor"))),
-        (0.25, norm_listing_count(
+        (0.25, norm_seatgeek_deal_score(signals.get("seatgeek_deal_score"))),
+        (0.20, norm_seatgeek_floor(signals.get("seatgeek_floor"))),
+        (0.20, norm_eb_sell_through(signals.get("eb_sell_through_pct"))),
+        (0.15, norm_eb_sold_out(
+            signals.get("eb_is_sold_out", False),
+            signals.get("eb_has_waitlist", False),
+        )),
+        (0.10, norm_listing_count(
             signals.get("seatgeek_listing_count"),
-            VENUE_CAPS.get(signals.get("event_meta", {}).get("venue", ""), None)
+            VENUE_CAPS.get(signals.get("event_meta", {}).get("venue", ""), None),
         )),
         (0.10, norm_tm_status(signals.get("tm_status", ""))),
     ]
@@ -286,13 +398,23 @@ def score_historical_sales(signals):
 def score_sentiment(signals):
     """
     Pillar 3 — Public Sentiment (25%)
-    Sources: Spotify popularity (doubles as sentiment signal),
-             Chartmetric streaming velocity, Google Trends (partial overlap).
+    Sources: Spotify popularity, Last.fm listener breadth,
+             Last.fm fan depth (plays/listener), Last.fm peer tier,
+             Chartmetric stream trend.
+
+    Weight distribution:
+      30% — Spotify popularity (mainstream commercial signal)
+      25% — Last.fm listener breadth (active weekly audience size)
+      20% — Last.fm fan depth (plays-per-listener obsession ratio)
+      15% — Chartmetric stream trend (30-day momentum)
+      10% — Last.fm peer tier (similar artist commercial level)
     """
     components = [
-        (0.45, norm_spotify_popularity(signals.get("spotify_popularity"))),
-        (0.35, norm_chartmetric_trend(signals.get("cm_spotify_stream_trend"))),
-        (0.20, norm_google_trends(signals.get("google_trends_atl"))),
+        (0.30, norm_spotify_popularity(signals.get("spotify_popularity"))),
+        (0.25, norm_lastfm_listeners(signals.get("lastfm_listeners"))),
+        (0.20, norm_lastfm_depth(signals.get("lastfm_plays_per_listener"))),
+        (0.15, norm_chartmetric_trend(signals.get("cm_spotify_stream_trend"))),
+        (0.10, norm_lastfm_peer_tier(signals.get("lastfm_similar_listeners"))),
     ]
     return sum(w * v for w, v in components)
 
@@ -418,6 +540,18 @@ def score_all():
                 "setlist_avg_venue_cap":      signals.get("setlist_avg_venue_cap"),
                 "setlist_tour_shows_total":   signals.get("setlist_tour_shows_total"),
                 "setlist_sold_out_flag":      signals.get("setlist_sold_out_flag"),
+                "lastfm_listeners":           signals.get("lastfm_listeners"),
+                "lastfm_playcount":           signals.get("lastfm_playcount"),
+                "lastfm_plays_per_listener":  signals.get("lastfm_plays_per_listener"),
+                "lastfm_on_tour":             signals.get("lastfm_on_tour"),
+                "lastfm_similar_listeners":   signals.get("lastfm_similar_listeners"),
+                "eb_has_listing":             signals.get("eb_has_listing"),
+                "eb_capacity":               signals.get("eb_capacity"),
+                "eb_tickets_sold":           signals.get("eb_tickets_sold"),
+                "eb_sell_through_pct":       signals.get("eb_sell_through_pct"),
+                "eb_is_sold_out":            signals.get("eb_is_sold_out"),
+                "eb_has_waitlist":           signals.get("eb_has_waitlist"),
+                "eb_ticket_types":           signals.get("eb_ticket_types"),
             },
         })
         print(f"  {meta.get('name', event_id)[:50]:50s}  score={final_score:3d}")
