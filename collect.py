@@ -969,23 +969,24 @@ SELECT ?artist
 WHERE {{
   {entity_clause}
 
-  # Grammy wins — award (P166) = Grammy Award (Q41612) or subclass
+  # Grammy wins — award (P166) that is a Grammy Award or Grammy subclass.
+  # wdt:P279* matches the item itself + all subclasses (zero-or-more).
+  # This covers Grammy Award (Q41612), Grammy Award for Best Pop Vocal
+  # Album, etc. without the invalid P31? syntax.
   OPTIONAL {{
-    ?artist p:P166 ?awardStatement .
-    ?awardStatement ps:P166 ?award .
-    ?award wdt:P31?/wdt:P279* wd:Q41612 .
+    ?artist wdt:P166 ?award .
+    ?award wdt:P279* wd:Q41612 .
     BIND(?award AS ?grammyWin)
   }}
 
-  # Grammy nominations — nominated for (P1411) = Grammy Award
+  # Grammy nominations — nominated for (P1411)
   OPTIONAL {{
-    ?artist p:P1411 ?nomStatement .
-    ?nomStatement ps:P1411 ?nomAward .
-    ?nomAward wdt:P31?/wdt:P279* wd:Q41612 .
+    ?artist wdt:P1411 ?nomAward .
+    ?nomAward wdt:P279* wd:Q41612 .
     BIND(?nomAward AS ?grammyNom)
   }}
 
-  # Career start — inception (P571) or start time on membership (P2031)
+  # Career start — inception (P571)
   OPTIONAL {{
     ?artist wdt:P571 ?inception .
     BIND(YEAR(?inception) AS ?startYear)
