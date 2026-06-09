@@ -38,24 +38,39 @@ def wp_auth_header():
 def upload_as_page_content(html_content):
     """
     Update the content of an existing WordPress page via REST API.
-    The page must already exist — create it once manually, then note its ID.
-    The page should use the 'Full Width' or equivalent template so the
-    dashboard fills the viewport without sidebar interference.
+
+    Wraps content in a Gutenberg <!-- wp:html --> raw HTML block so
+    WordPress stores and renders it exactly as-is without re-processing,
+    escaping, or adding paragraph/block wrappers around it.
+
+    The page must already exist — create it once manually, note its ID,
+    and add it as the WP_PAGE_ID secret.
     """
     if not all([WP_SITE_URL, WP_USERNAME, WP_APP_PASSWORD, WP_PAGE_ID]):
         print("[upload] Missing WordPress credentials — skipping upload.")
         print("         Set WP_SITE_URL, WP_USERNAME, WP_APP_PASSWORD, WP_PAGE_ID")
         return False
 
+    # Wrap in Gutenberg raw HTML block comment markers.
+    # This tells the block editor to treat the content as a Custom HTML
+    # block verbatim — no auto-paragraph, no escaping, no block conversion.
+    gutenberg_wrapped = (
+        "<!-- wp:html -->\n"
+        + html_content.strip()
+        + "\n<!-- /wp:html -->"
+    )
+
     url = f"{WP_SITE_URL.rstrip('/')}/wp-json/wp/v2/pages/{WP_PAGE_ID}"
     headers = {
         **wp_auth_header(),
         "Content-Type": "application/json",
     }
+
+    # Send only 'raw' — omitting 'rendered' prevents WordPress from
+    # double-processing the content through its content filter hooks.
     payload = {
         "content": {
-            "raw": html_content,
-            "rendered": html_content,
+            "raw": gutenberg_wrapped,
         },
         "status": "publish",
     }
@@ -159,7 +174,7 @@ def run():
     # Step 4: Upload to WordPress
     print("\n[4/4] Uploading to WordPress …")
     try:
-        with open(output_path) as f:
+        with open("output/artist_card_module_wp_ready.html") as f:
             html_content = f.read()
 
         if WP_UPLOAD_MODE == "file":
