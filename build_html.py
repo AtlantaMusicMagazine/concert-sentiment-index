@@ -151,6 +151,16 @@ def build_signals_html(ev):
                          f"{yt_subs/1_000_000:.1f}M" if yt_subs >= 1_000_000
                          else f"{yt_subs:,}"))
 
+    wd_grammys = raw.get("wd_grammy_wins")
+    if wd_grammys is not None and int(wd_grammys) > 0:
+        n = int(wd_grammys)
+        signals.append(("high", "Grammy wins", str(n)))
+
+    wd_langs = raw.get("wd_wikipedia_languages")
+    if wd_langs is not None and int(wd_langs) >= 10:
+        signals.append(("high" if int(wd_langs) >= 31 else "medium",
+                         "Wikipedia editions", str(int(wd_langs))))
+
     # Cap at 8 signals
     signals = signals[:8]
 
@@ -169,6 +179,16 @@ def build_insight(ev):
     """Generate a one-line insight string from available signal data."""
     raw   = ev["raw_signals"]
     parts = []
+
+    # Wikidata career facts — Grammy wins surface prominently
+    wd_wins = raw.get("wd_grammy_wins")
+    if wd_wins is not None and int(wd_wins) > 0:
+        n = int(wd_wins)
+        parts.append(f"{n}-time Grammy winner" if n > 1 else "Grammy winner")
+
+    wd_years = raw.get("wd_active_years")
+    if wd_years is not None and int(wd_years) >= 20:
+        parts.append(f"{wd_years} years active")
 
     # YouTube velocity — highest-impact forward signal when available
     yt_vel = raw.get("yt_view_velocity_7d")
