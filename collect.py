@@ -969,21 +969,25 @@ SELECT ?artist
 WHERE {{
   {entity_clause}
 
-  # Grammy wins — award (P166) that is a Grammy Award or Grammy subclass.
-  # wdt:P279* matches the item itself + all subclasses (zero-or-more).
-  # This covers Grammy Award (Q41612), Grammy Award for Best Pop Vocal
-  # Album, etc. without the invalid P31? syntax.
+  # Grammy wins — use full reification (p:/ps:) to reach award statements,
+  # then filter by award label containing "Grammy" (case-insensitive).
+  # This is more reliable than subclass traversal (wdt:P279*) which
+  # fails when Grammy subclass items are stored as leaf nodes without
+  # explicit P279 links back to Q41612.
   OPTIONAL {{
-    ?artist wdt:P166 ?award .
-    ?award wdt:P279* wd:Q41612 .
-    BIND(?award AS ?grammyWin)
+    ?artist p:P166 ?awardStmt .
+    ?awardStmt ps:P166 ?grammyWin .
+    ?grammyWin rdfs:label ?awardName .
+    FILTER(LANG(?awardName) = "en")
+    FILTER(CONTAINS(LCASE(?awardName), "grammy"))
   }}
 
-  # Grammy nominations — nominated for (P1411)
+  # Grammy nominations — nominated for (P1411), same label filter approach
   OPTIONAL {{
-    ?artist wdt:P1411 ?nomAward .
-    ?nomAward wdt:P279* wd:Q41612 .
-    BIND(?nomAward AS ?grammyNom)
+    ?artist wdt:P1411 ?grammyNom .
+    ?grammyNom rdfs:label ?nomName .
+    FILTER(LANG(?nomName) = "en")
+    FILTER(CONTAINS(LCASE(?nomName), "grammy"))
   }}
 
   # Career start — inception (P571)
