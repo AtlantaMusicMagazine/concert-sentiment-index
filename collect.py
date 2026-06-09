@@ -32,6 +32,8 @@ SERPAPI_KEY         = os.environ.get("SERPAPI_KEY", "")
 CHARTMETRIC_TOKEN   = os.environ.get("CHARTMETRIC_TOKEN", "")
 BANDSINTOWN_KEY     = os.environ.get("BANDSINTOWN_KEY", "")
 SETLISTFM_KEY       = os.environ.get("SETLISTFM_KEY", "")
+LASTFM_KEY          = os.environ.get("LASTFM_KEY", "")
+EVENTBRITE_TOKEN    = os.environ.get("EVENTBRITE_TOKEN", "")
 WIKIPEDIA_USER      = os.environ.get("WIKIPEDIA_USER", "atlanta-music-magazine/1.0 (contact@atlantamusicmagazine.com)")
 
 # MusicBrainz — no key required, just a descriptive user-agent
@@ -953,6 +955,170 @@ def fetch_chartmetric(event):
     }
 
 
+def fetch_eventbrite(event):
+    """
+    Eventbrite — event search for the artist in Atlanta.
+    Endpoint: /v3/events/search/
+
+    Signals extracted:
+      eb_has_listing        : True if this show has an Eventbrite listing
+      eb_capacity           : total ticket capacity on Eventbrite listing
+      eb_tickets_sold       : number of tickets sold (if public)
+      eb_sell_through_pct   : tickets_sold / capacity * 100
+      eb_is_sold_out        : True if event is marked sold out
+      eb_has_waitlist       : True if a waitlist is active (strong demand flag)
+      eb_attendee_capacity  : number of people who have RSVP'd or checked in
+      eb_ticket_types       : number of distinct ticket tiers listed
+                              (more tiers = promoter expects price-sensitive demand)
+
+    Note: Eventbrite capacity and sales data are only returned for events
+    where the organizer has made them public. Many major venue shows use
+    Ticketmaster as primary seller and may only have secondary Eventbrite
+    listings (fan meetups, pre-show events). Both are useful signals.
+    """
+    if not EVENTBRITE_TOKEN:
+        return {}
+
+    artist_name  = event.get("artist", "")
+    concert_date = event.get("date", "")
+    if not artist_name or not concert_date:
+        return {}
+
+    # Search for events in Atlanta matching the artist name around the date
+    # Eventbrite uses ISO 8601 with timezone for date filters
+    start_date = concert_date + "T00:00:00"
+    end_date   = concert_date + "T23:59:59"
+
+    data = safe_get(
+        "https://www.eventbriteapi.com/v3/events/search/",
+        params={
+            "q":                        artist_name,
+            "location.address":         "Atlanta, GA",
+            "location.within":          "30mi",
+            "start_date.range_start":   start_date,
+            "start_date.range_end":     end_date,
+            "expand":                   "ticket_classes,venue",
+            "token":                    EVENTBRITE_TOKEN,
+        },
+        label=f"Eventbrite: {artist_name}",
+    )
+    time.sleep(0.3)
+
+    if not data or not data.get("events"):
+        return {"eb_has_listing": False}
+
+    # Take the first matching event (most relevant)
+    ev = data["events"][0]
+
+    capacity      = ev.get("capacity", None)
+    sold          = ev.get("capacity_is_custom", None)
+    is_sold_out   = ev.get("is_sold_out", False)
+    has_waitlist  = bool(ev.get("waitlist_available", False))
+
+    # Ticket classes give us per-tier detail
+    ticket_classes = ev.get("ticket_classes", [])
+    total_sold     = sum(tc.get("quantity_sold", 0) or 0 for tc in ticket_classes)
+    total_capacity = sum(tc.get("capacity",      0) or 0 for tc in ticket_classes)
+    num_tiers      = len([tc for tc in ticket_classes if not tc.get("hidden", False)])
+
+    sell_through = None
+    if total_capacity and total_capacity > 0:
+        sell_through = round(total_sold / total_capacity * 100, 1)
+
+    return {
+        "eb_has_listing":      True,
+        "eb_capacity":         total_capacity or capacity,
+        "eb_tickets_sold":     total_sold,
+        "eb_sell_through_pct": sell_through,
+        "eb_is_sold_out":      is_sold_out,
+        "eb_has_waitlist":     has_waitlist,
+        "eb_ticket_types":     num_tiers,
+    }
+
+
+def fetch_lastfm(event):
+    """
+    Last.fm — artist engagement metrics via their free API.
+    Endpoint: artist.getInfo (no auth beyond API key required)
+
+    Signals extracted:
+      lastfm_listeners      : weekly unique listeners (breadth of audience)
+      lastfm_playcount      : all-time total scrobbles (depth of engagement)
+      lastfm_plays_per_listener: playcount / listeners ratio
+                              High ratio = obsessive fans (buy tickets)
+                              Low ratio  = casual listeners (don't)
+      lastfm_on_tour        : boolean — Last.fm shows this artist as on tour
+      lastfm_similar_score  : average listener count of top 3 similar artists
+                              (measures peer-group commercial tier)
+    """
+    if not LASTFM_KEY:
+        return {}
+
+    artist_name = event.get("artist", "")
+    if not artist_name:
+        return {}
+
+    # Primary artist info
+    data = safe_get(
+        "https://ws.audioscrobbler.com/2.0/",
+        params={
+            "method":  "artist.getInfo",
+            "artist":  artist_name,
+            "api_key": LASTFM_KEY,
+            "format":  "json",
+            "autocorrect": 1,
+        },
+        label=f"Last.fm artist: {artist_name}",
+    )
+    time.sleep(0.25)   # Last.fm rate limit: 5 req/sec
+
+    if not data or "artist" not in data:
+        return {}
+
+    artist     = data["artist"]
+    stats      = artist.get("stats", {})
+    listeners  = int(stats.get("listeners", 0) or 0)
+    playcount  = int(stats.get("playcount",  0) or 0)
+    on_tour    = artist.get("ontour", "0") == "1"
+
+    plays_per_listener = round(playcount / listeners, 1) if listeners > 0 else 0
+
+    # Similar artists — peer tier signal
+    similar_listeners = []
+    similar = artist.get("similar", {}).get("artist", [])
+    for sim in similar[:3]:
+        sim_data = safe_get(
+            "https://ws.audioscrobbler.com/2.0/",
+            params={
+                "method":  "artist.getInfo",
+                "artist":  sim.get("name", ""),
+                "api_key": LASTFM_KEY,
+                "format":  "json",
+                "autocorrect": 1,
+            },
+            label=f"Last.fm similar: {sim.get('name','')}",
+        )
+        time.sleep(0.25)
+        if sim_data and "artist" in sim_data:
+            sim_listeners = int(
+                sim_data["artist"].get("stats", {}).get("listeners", 0) or 0
+            )
+            similar_listeners.append(sim_listeners)
+
+    avg_similar_listeners = (
+        round(sum(similar_listeners) / len(similar_listeners))
+        if similar_listeners else None
+    )
+
+    return {
+        "lastfm_listeners":           listeners,
+        "lastfm_playcount":           playcount,
+        "lastfm_plays_per_listener":  plays_per_listener,
+        "lastfm_on_tour":             on_tour,
+        "lastfm_similar_listeners":   avg_similar_listeners,
+    }
+
+
 def fetch_setlist(event):
     """
     Setlist.fm — artist tour history via MusicBrainz MBID.
@@ -1096,10 +1262,12 @@ def collect_all():
         # 30% — Ticket Demand
         signals.update(fetch_ticketmaster(event));  time.sleep(0.3)
         signals.update(fetch_seatgeek(event));       time.sleep(0.3)
+        signals.update(fetch_eventbrite(event))      # rate-limited internally
 
         # 25% — Sentiment
         signals.update(fetch_spotify(event, spotify_token)); time.sleep(0.2)
         signals.update(fetch_chartmetric(event));            time.sleep(0.3)
+        signals.update(fetch_lastfm(event))                  # rate-limited internally
 
         # 25% — Historical Sales
         signals.update(fetch_wikipedia_pageviews(event)); time.sleep(0.3)
