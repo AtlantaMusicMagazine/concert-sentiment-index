@@ -92,6 +92,7 @@ API_SIGNAL_KEYS = [
     "setlist_atl_shows_5y", "setlist_avg_venue_cap",
     "eb_sell_through_pct", "eb_is_sold_out",
     "yt_view_velocity_7d", "yt_subscriber_count",
+    "wd_grammy_wins", "wd_wikipedia_languages", "wd_active_years",
 ]
 TOTAL_API_SIGNALS = len(API_SIGNAL_KEYS)
 
@@ -285,6 +286,118 @@ def norm_chartmetric_trend(val):
         return None
     clamped = max(-50, min(100, float(val)))
     return (clamped + 50) / 150
+
+
+# ── Wikidata career facts ─────────────────────────────────────────────────
+
+def norm_grammy_wins(wins):
+    """
+    Grammy wins — institutional recognition signal.
+    Strongest predictor of 35-65 demographic ticket demand.
+    No win:            None  (signal absent — excluded from weighted avg)
+    1–2 wins:  0.75   (Grammy winner — trust signal active)
+    3–5 wins:  0.90   (multiple winner — major commercial tier)
+    6+ wins:   1.0    (superstar tier — Beyoncé, Ariana Grande range)
+    """
+    if wins is None:
+        return None
+    wins = int(wins)
+    if wins == 0:
+        return 0.30    # explicitly confirmed no Grammys — negative signal
+    if wins >= 6:
+        return 1.0
+    if wins >= 3:
+        return 0.90
+    return 0.75
+
+
+def norm_grammy_nominations(noms):
+    """
+    Grammy nominations — commercial recognition including near-misses.
+    0 noms:    0.25  (no Grammy recognition)
+    1–3 noms:  0.55  (industry recognized)
+    4–9 noms:  0.75  (major nomination history)
+    10+ noms:  0.90  (perennial Grammy presence)
+    """
+    if noms is None:
+        return None
+    noms = int(noms)
+    if noms == 0:
+        return 0.25
+    if noms >= 10:
+        return 0.90
+    if noms >= 4:
+        return 0.75
+    return 0.55
+
+
+def norm_active_years(years):
+    """
+    Career longevity — nostalgia premium proxy.
+    Longer careers = deeper catalog = stronger nostalgia-driven demand
+    for heritage acts; also signals sustained commercial relevance.
+    <2 years:   emerging artist (0.35)
+    2–5 years:  developing     (0.50)
+    6–12 years: established    (0.65)
+    13–25 years: legacy draw   (0.80)
+    25+ years:  heritage act   (0.90)
+    None:       signal absent
+    """
+    if years is None:
+        return None
+    y = int(years)
+    if y >= 25:
+        return 0.90
+    if y >= 13:
+        return 0.80
+    if y >= 6:
+        return 0.65
+    if y >= 2:
+        return 0.50
+    return 0.35
+
+
+def norm_wikipedia_languages(lang_count):
+    """
+    Number of Wikipedia language editions — global fame proxy.
+    Correlates with the cross-demographic recognisability that drives
+    casual ticket purchases (the "I know who that is" buyer).
+    0–2:   virtually unknown outside niche    (0.10)
+    3–10:  English-speaking market presence   (0.35)
+    11–30: international recognition          (0.60)
+    31–60: global mainstream                  (0.80)
+    61+:   worldwide superstar               (1.0)
+    """
+    if lang_count is None:
+        return None
+    n = int(lang_count)
+    if n >= 61:
+        return 1.0
+    if n >= 31:
+        return 0.80
+    if n >= 11:
+        return 0.60
+    if n >= 3:
+        return 0.35
+    return 0.10
+
+
+def norm_genre_breadth(genres_count):
+    """
+    Number of distinct music genres — audience breadth proxy.
+    Cross-genre acts have wider addressable audiences.
+    1 genre:  specialist (0.40)
+    2–3:      cross-genre reach (0.65)
+    4+:       broad appeal (0.85)
+    """
+    if genres_count is None:
+        return None
+    n = int(genres_count)
+    if n >= 4:
+        return 0.85
+    if n >= 2:
+        return 0.65
+    return 0.40
 
 
 def norm_spotify_popularity(val):
@@ -485,34 +598,49 @@ def score_historical_sales(signals):
     Pillar 2 — Historical Sales (25%)
 
     Sources:
-      MusicBrainz release recency [KEYLESS]
-      MusicBrainz career depth    [KEYLESS]
-      Setlist.fm venue trajectory [key required]
-      Wikipedia 7-day trend       [KEYLESS]
-      Spotify popularity          [key required]
-      Chartmetric stream trend    [key required]
+      MusicBrainz release recency   [KEYLESS]
+      Wikipedia 7-day trend         [KEYLESS]
+      MusicBrainz career depth      [KEYLESS]
+      Wikidata Grammy wins          [KEYLESS]
+      Wikidata Wikipedia languages  [KEYLESS]
+      Wikidata active years         [KEYLESS]
+      Wikidata Grammy nominations   [KEYLESS]
+      Setlist.fm venue trajectory   [key required]
+      Spotify popularity            [key required]
+      Chartmetric stream trend      [key required]
+      Wikidata genre breadth        [KEYLESS]
 
-    Intra-pillar weights (Rec 1 — boosted toward keyless sources):
-      30% — MusicBrainz release recency  [KEYLESS]
-      22% — Wikipedia 7-day trend        [KEYLESS — boosted from 10%]
-      20% — MusicBrainz career depth     [KEYLESS — boosted from 15%]
-      15% — Setlist.fm venue trajectory
-      08% — Spotify popularity
-      05% — Chartmetric stream trend
+    Intra-pillar weights:
+      20% — MusicBrainz release recency     [KEYLESS]
+      15% — Wikidata Grammy wins            [KEYLESS]
+      15% — Wikidata Wikipedia languages    [KEYLESS]
+      12% — Wikipedia 7-day trend           [KEYLESS]
+      10% — Wikidata active years           [KEYLESS]
+      08% — MusicBrainz career depth        [KEYLESS]
+      06% — Wikidata Grammy nominations     [KEYLESS]
+      05% — Setlist.fm venue trajectory
+      05% — Spotify popularity
+      03% — Chartmetric stream trend
+      01% — Wikidata genre breadth          [KEYLESS]
     """
     venue       = signals.get("event_meta", {}).get("venue", "")
     current_cap = VENUE_CAPS.get(venue)
 
     components = [
-        (0.30, norm_mb_recent_album(
+        (0.20, norm_mb_recent_album(
                    signals.get("mb_has_recent_album"),
                    signals.get("mb_days_since_last_album"))),
-        (0.22, norm_wikipedia_trend(signals.get("wikipedia_7d_trend_pct"))),
-        (0.20, norm_mb_career_depth(signals.get("mb_total_albums"))),
-        (0.15, norm_setlist_venue_trajectory(
+        (0.15, norm_grammy_wins(signals.get("wd_grammy_wins"))),
+        (0.15, norm_wikipedia_languages(signals.get("wd_wikipedia_languages"))),
+        (0.12, norm_wikipedia_trend(signals.get("wikipedia_7d_trend_pct"))),
+        (0.10, norm_active_years(signals.get("wd_active_years"))),
+        (0.08, norm_mb_career_depth(signals.get("mb_total_albums"))),
+        (0.06, norm_grammy_nominations(signals.get("wd_grammy_nominations"))),
+        (0.05, norm_setlist_venue_trajectory(
                    signals.get("setlist_avg_venue_cap"), current_cap)),
-        (0.08, norm_spotify_popularity(signals.get("spotify_popularity"))),
-        (0.05, norm_chartmetric_trend(signals.get("cm_spotify_stream_trend"))),
+        (0.05, norm_spotify_popularity(signals.get("spotify_popularity"))),
+        (0.03, norm_chartmetric_trend(signals.get("cm_spotify_stream_trend"))),
+        (0.01, norm_genre_breadth(signals.get("wd_genres_count"))),
     ]
     return weighted_avg(components, neutral=0.50)
 
@@ -733,6 +861,11 @@ def score_all():
                 "yt_view_delta_24h":            signals.get("yt_view_delta_24h"),
                 "yt_view_velocity_7d":          signals.get("yt_view_velocity_7d"),
                 "yt_subscriber_count":          signals.get("yt_subscriber_count"),
+                "wd_grammy_wins":               signals.get("wd_grammy_wins"),
+                "wd_grammy_nominations":        signals.get("wd_grammy_nominations"),
+                "wd_active_years":              signals.get("wd_active_years"),
+                "wd_wikipedia_languages":       signals.get("wd_wikipedia_languages"),
+                "wd_genres_count":              signals.get("wd_genres_count"),
                 "eb_has_listing":               signals.get("eb_has_listing"),
                 "eb_capacity":                  signals.get("eb_capacity"),
                 "eb_tickets_sold":              signals.get("eb_tickets_sold"),
