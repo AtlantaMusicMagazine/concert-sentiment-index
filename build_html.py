@@ -126,30 +126,45 @@ def build_insight(ev):
     raw   = ev["raw_signals"]
     parts = []
 
-    # MusicBrainz release context — most meaningful first
+    # MusicBrainz release context
     if raw.get("mb_has_recent_album") and raw.get("mb_latest_album_title"):
         days = raw.get("mb_days_since_last_album")
         if days is not None and days <= 90:
             parts.append(f"Touring on new album &ldquo;{raw['mb_latest_album_title']}&rdquo; ({days} days old)")
-        elif days is not None:
+        else:
             parts.append(f"New album &ldquo;{raw['mb_latest_album_title']}&rdquo; within past year")
     elif raw.get("mb_total_albums", 0) >= 10:
         parts.append(f"Deep catalog — {raw['mb_total_albums']} studio albums")
 
+    # Setlist.fm ATL market strength
+    atl_shows = raw.get("setlist_atl_shows_5y")
+    if atl_shows is not None:
+        if atl_shows == 0:
+            parts.append("First ATL appearance in 5+ years")
+        elif atl_shows >= 4:
+            parts.append(f"Strong ATL market — {atl_shows} shows in past 5 years")
+    if raw.get("setlist_sold_out_flag"):
+        parts.append("Prior ATL show sold out")
+
+    # Ticket demand signals
     if raw.get("seatgeek_floor"):
         parts.append(f"Secondary floor ${raw['seatgeek_floor']:.0f}")
     if raw.get("seatgeek_deal_score"):
         parts.append(f"SeatGeek Deal Score {raw['seatgeek_deal_score']}/100")
+
+    # Local intent
     if raw.get("google_trends_atl"):
         parts.append(f"ATL Trends index {raw['google_trends_atl']}")
     if raw.get("bandsintown_rsvps"):
         parts.append(f"Bands in Town: {raw['bandsintown_rsvps']:,} ATL intents")
+
+    # Wikipedia trend
     if raw.get("wikipedia_7d_trend_pct") is not None:
         trend = raw["wikipedia_7d_trend_pct"]
         direction = "+" if trend >= 0 else ""
         parts.append(f"Wikipedia 7-day trend: {direction}{trend:.0f}%")
 
-    return " &middot; ".join(parts) if parts else f"Score {ev['score']} — updated {datetime.date.today().strftime('%b %d, %Y')}"
+    return " &middot; ".join(parts[:5]) if parts else f"Score {ev['score']} — updated {datetime.date.today().strftime('%b %d, %Y')}"
 
 
 # ── Risk flag (bottom panel) ──────────────────────────────────────────────
