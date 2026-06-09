@@ -92,15 +92,50 @@ def norm_chartmetric_trend(val):
     return (clamped + 50) / 150
 
 
-def norm_wikipedia_trend(val):
+def norm_mb_recent_album(has_recent, days_since):
     """
-    Wikipedia 7-day vs prior 7-day pageview delta percentage.
-    -100% → 0.0, 0% → 0.5, +200% → 1.0
+    MusicBrainz release recency signal.
+    Touring on a new album (released within 365 days of concert) is one
+    of the strongest predictors of ticket demand in the historical sales pillar.
+
+    has_recent=True, days_since 0–90:   peak commercial cycle → 1.0
+    has_recent=True, days_since 91–365: active cycle → 0.75
+    has_recent=False, days_since 366–730: heritage tour → 0.45
+    has_recent=False, days_since 730+:  deep catalog → 0.25
+    has_recent=None (no data):          neutral → 0.5
     """
-    if val is None:
+    if has_recent is None:
         return 0.5
-    clamped = max(-100, min(200, val))
-    return (clamped + 100) / 300
+    if has_recent:
+        if days_since is None:
+            return 0.75
+        if days_since <= 90:
+            return 1.0
+        return 0.75
+    if days_since is None:
+        return 0.45
+    if days_since <= 730:
+        return 0.45
+    return 0.25
+
+
+def norm_mb_career_depth(total_albums):
+    """
+    Total studio album count as a proxy for sustained commercial track record.
+    1 album → emerging (0.3)
+    2–4 albums → established (0.6)
+    5–9 albums → proven (0.8)
+    10+ albums → legacy (1.0)
+    """
+    if not total_albums:
+        return 0.4
+    if total_albums >= 10:
+        return 1.0
+    if total_albums >= 5:
+        return 0.8
+    if total_albums >= 2:
+        return 0.6
+    return 0.3
 
 
 def norm_google_trends(val):
@@ -154,19 +189,41 @@ def score_ticket_demand(signals):
     return sum(w * v for w, v in components)
 
 
+def norm_wikipedia_trend(val):
+    """
+    Wikipedia 7-day vs prior 7-day pageview delta percentage.
+    -100% → 0.0, 0% → 0.5, +200% → 1.0
+    """
+    if val is None:
+        return 0.5
+    clamped = max(-100, min(200, val))
+    return (clamped + 100) / 300
+
+
 def score_historical_sales(signals):
     """
     Pillar 2 — Historical Sales (25%)
-    Sources: Spotify popularity (proxy for commercial track record),
-             Wikipedia 30-day views (proxy for sustained public interest),
-             Chartmetric 30-day stream trend.
-    Note: Pollstar/Billboard Boxscore require paid subscriptions.
-    Wikipedia pageviews and Spotify popularity serve as accessible proxies.
+    Sources: Spotify popularity, Wikipedia 7-day trend,
+             Chartmetric stream trend, MusicBrainz release recency,
+             MusicBrainz career depth (album count).
+
+    Weight distribution within pillar:
+      30% — MB release recency (touring on new album vs. catalog)
+      25% — Spotify popularity (commercial track record proxy)
+      20% — MB career depth (total studio albums)
+      15% — Wikipedia 7-day trend (sustained public interest)
+      10% — Chartmetric stream trend (recent streaming momentum)
     """
+    has_recent  = signals.get("mb_has_recent_album")
+    days_since  = signals.get("mb_days_since_last_album")
+    total_albums = signals.get("mb_total_albums", 0)
+
     components = [
-        (0.40, norm_spotify_popularity(signals.get("spotify_popularity"))),
-        (0.35, norm_wikipedia_trend(signals.get("wikipedia_7d_trend_pct"))),
-        (0.25, norm_chartmetric_trend(signals.get("cm_spotify_stream_trend"))),
+        (0.30, norm_mb_recent_album(has_recent, days_since)),
+        (0.25, norm_spotify_popularity(signals.get("spotify_popularity"))),
+        (0.20, norm_mb_career_depth(total_albums)),
+        (0.15, norm_wikipedia_trend(signals.get("wikipedia_7d_trend_pct"))),
+        (0.10, norm_chartmetric_trend(signals.get("cm_spotify_stream_trend"))),
     ]
     return sum(w * v for w, v in components)
 
@@ -284,19 +341,24 @@ def score_all():
                 "local_intent":     determine_signal_level(pillar_scores["local_intent"]),
             },
             "raw_signals": {
-                "seatgeek_deal_score":     signals.get("seatgeek_deal_score"),
-                "seatgeek_floor":          signals.get("seatgeek_floor"),
-                "seatgeek_avg_price":      signals.get("seatgeek_avg_price"),
-                "seatgeek_listing_count":  signals.get("seatgeek_listing_count"),
-                "tm_floor_price":          signals.get("tm_floor_price"),
-                "tm_status":               signals.get("tm_status"),
-                "spotify_popularity":      signals.get("spotify_popularity"),
-                "spotify_followers":       signals.get("spotify_followers"),
-                "cm_spotify_stream_trend": signals.get("cm_spotify_stream_trend"),
-                "google_trends_atl":       signals.get("google_trends_atl"),
-                "bandsintown_rsvps":       signals.get("bandsintown_rsvps"),
-                "wikipedia_30d_views":     signals.get("wikipedia_30d_views"),
-                "wikipedia_7d_trend_pct":  signals.get("wikipedia_7d_trend_pct"),
+                "seatgeek_deal_score":        signals.get("seatgeek_deal_score"),
+                "seatgeek_floor":             signals.get("seatgeek_floor"),
+                "seatgeek_avg_price":         signals.get("seatgeek_avg_price"),
+                "seatgeek_listing_count":     signals.get("seatgeek_listing_count"),
+                "tm_floor_price":             signals.get("tm_floor_price"),
+                "tm_status":                  signals.get("tm_status"),
+                "spotify_popularity":         signals.get("spotify_popularity"),
+                "spotify_followers":          signals.get("spotify_followers"),
+                "spotify_top_track_popularity": signals.get("spotify_top_track_popularity"),
+                "cm_spotify_stream_trend":    signals.get("cm_spotify_stream_trend"),
+                "google_trends_atl":          signals.get("google_trends_atl"),
+                "bandsintown_rsvps":          signals.get("bandsintown_rsvps"),
+                "wikipedia_30d_views":        signals.get("wikipedia_30d_views"),
+                "wikipedia_7d_trend_pct":     signals.get("wikipedia_7d_trend_pct"),
+                "mb_has_recent_album":        signals.get("mb_has_recent_album"),
+                "mb_days_since_last_album":   signals.get("mb_days_since_last_album"),
+                "mb_total_albums":            signals.get("mb_total_albums"),
+                "mb_latest_album_title":      signals.get("mb_latest_album_title"),
             },
         })
         print(f"  {meta.get('name', event_id)[:50]:50s}  score={final_score:3d}")
