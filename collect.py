@@ -31,6 +31,7 @@ SPOTIFY_SECRET      = os.environ.get("SPOTIFY_SECRET", "")
 SERPAPI_KEY         = os.environ.get("SERPAPI_KEY", "")
 CHARTMETRIC_TOKEN   = os.environ.get("CHARTMETRIC_TOKEN", "")
 BANDSINTOWN_KEY     = os.environ.get("BANDSINTOWN_KEY", "")
+SETLISTFM_KEY       = os.environ.get("SETLISTFM_KEY", "")
 WIKIPEDIA_USER      = os.environ.get("WIKIPEDIA_USER", "atlanta-music-magazine/1.0 (contact@atlantamusicmagazine.com)")
 
 # MusicBrainz — no key required, just a descriptive user-agent
@@ -952,6 +953,135 @@ def fetch_chartmetric(event):
     }
 
 
+def fetch_setlist(event):
+    """
+    Setlist.fm — artist tour history via MusicBrainz MBID.
+    Signals extracted:
+      setlist_atl_shows_5y    : number of Atlanta-area shows in past 5 years
+                                (measures local market strength)
+      setlist_avg_venue_cap   : average venue capacity over past 10 shows
+                                (career trajectory — growing or shrinking)
+      setlist_tour_shows_total: total shows on this specific named tour
+                                (scale of current touring cycle)
+      setlist_sold_out_flag   : True if any recent ATL show listed as sold out
+    """
+    if not SETLISTFM_KEY:
+        return {}
+    mbid = event.get("musicbrainz_mbid", "")
+    if not mbid:
+        return {}
+
+    # Fetch up to 3 pages of recent setlists (20 per page = 60 shows)
+    all_setlists = []
+    for page in range(1, 4):
+        data = safe_get(
+            f"https://api.setlist.fm/rest/1.0/artist/{mbid}/setlists",
+            params={"p": page},
+            headers={
+                "x-api-key": SETLISTFM_KEY,
+                "Accept": "application/json",
+            },
+            label=f"Setlist.fm p{page}: {event['artist']}",
+        )
+        time.sleep(0.5)   # setlist.fm rate limit: 2 req/sec
+        if not data or not data.get("setlist"):
+            break
+        all_setlists.extend(data["setlist"])
+        # Stop early if we have enough
+        if len(all_setlists) >= 40:
+            break
+
+    if not all_setlists:
+        return {}
+
+    concert_date  = datetime.date.fromisoformat(event["date"])
+    cutoff_5y     = concert_date - datetime.timedelta(days=365 * 5)
+    tour_name     = _extract_tour_name(event["name"])  # from event display name
+
+    atl_shows_5y     = 0
+    tour_shows_total = 0
+    sold_out_flag    = False
+    venue_caps       = []
+
+    VENUE_CAPS_SF = {
+        "State Farm Arena":                    21000,
+        "Mercedes-Benz Stadium":               71000,
+        "Ameris Bank Amphitheatre":            12000,
+        "Lakewood Amphitheatre":               19000,
+        "Chastain Park Amphitheatre":           6900,
+        "Coca-Cola Roxy":                       3600,
+        "Madison Square Garden":               20789,
+        "Staples Center":                      20000,
+        "United Center":                       20491,
+        "Barclays Center":                     19000,
+        "TD Garden":                           19156,
+        "Scotiabank Arena":                    19800,
+        "Rogers Centre":                       53506,
+        "Wembley Stadium":                     90000,
+        "The O2":                              20000,
+        "Forum":                               17500,
+        "Hollywood Bowl":                      17376,
+        "Red Rocks Amphitheatre":               9525,
+    }
+
+    for sl in all_setlists:
+        # Parse show date
+        raw_date = sl.get("eventDate", "")
+        try:
+            # Setlist.fm uses DD-MM-YYYY
+            parts = raw_date.split("-")
+            show_date = datetime.date(int(parts[2]), int(parts[1]), int(parts[0]))
+        except (ValueError, IndexError):
+            continue
+
+        city    = sl.get("venue", {}).get("city", {}).get("name", "").lower()
+        state   = sl.get("venue", {}).get("city", {}).get("stateCode", "").upper()
+        venue_n = sl.get("venue", {}).get("name", "")
+        tour_n  = sl.get("tour", {}).get("name", "") if sl.get("tour") else ""
+
+        # ATL shows in past 5 years
+        if show_date >= cutoff_5y:
+            if "atlanta" in city or (state == "GA" and any(
+                a in city for a in ["atlanta", "alpharetta", "marietta"]
+            )):
+                atl_shows_5y += 1
+                if sl.get("info", "").lower().find("sold out") != -1:
+                    sold_out_flag = True
+
+        # Count shows on current tour
+        if tour_name and tour_name.lower() in tour_n.lower():
+            tour_shows_total += 1
+
+        # Collect venue capacities for trajectory calc
+        cap = VENUE_CAPS_SF.get(venue_n)
+        if cap:
+            venue_caps.append(cap)
+
+    avg_venue_cap = round(sum(venue_caps) / len(venue_caps)) if venue_caps else None
+
+    return {
+        "setlist_atl_shows_5y":     atl_shows_5y,
+        "setlist_avg_venue_cap":    avg_venue_cap,
+        "setlist_tour_shows_total": tour_shows_total,
+        "setlist_sold_out_flag":    sold_out_flag,
+    }
+
+
+def _extract_tour_name(event_display_name):
+    """
+    Pull the tour name substring from an event display name.
+    e.g. 'Ariana Grande — The Eternal Sunshine Tour' → 'Eternal Sunshine'
+    Returns empty string if no tour name found.
+    """
+    if " — " in event_display_name:
+        tour_part = event_display_name.split(" — ", 1)[1]
+        # Strip common suffixes
+        for suffix in [" Tour", " World Tour", " Live", " Concert"]:
+            tour_part = tour_part.replace(suffix, "")
+        return tour_part.strip()
+    return ""
+
+
 # ── Main collection loop ───────────────────────────────────────────────────
 def collect_all():
     print(f"[collect] Starting — {datetime.datetime.now().isoformat()}")
@@ -973,7 +1103,8 @@ def collect_all():
 
         # 25% — Historical Sales
         signals.update(fetch_wikipedia_pageviews(event)); time.sleep(0.3)
-        signals.update(fetch_musicbrainz(event))  # rate-limited internally (1.1s sleep)
+        signals.update(fetch_musicbrainz(event))   # rate-limited internally
+        signals.update(fetch_setlist(event))        # rate-limited internally
 
         # 20% — Local Intent
         signals.update(fetch_google_trends(event)); time.sleep(0.5)
