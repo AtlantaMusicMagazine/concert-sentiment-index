@@ -94,18 +94,29 @@ def build_signals_html(ev):
     ]
 
     # Dynamic detail signals based on available raw data
-    if raw.get("seatgeek_deal_score") is not None:
-        lvl = "high" if raw["seatgeek_deal_score"] >= 65 else ("medium" if raw["seatgeek_deal_score"] >= 35 else "low")
-        signals.append((lvl, "SeatGeek Deal Score", f"{raw['seatgeek_deal_score']}/100"))
-    if raw.get("seatgeek_floor") is not None:
-        lvl = "high" if raw["seatgeek_floor"] >= 150 else ("medium" if raw["seatgeek_floor"] >= 60 else "low")
-        signals.append((lvl, "Secondary floor", f"${raw['seatgeek_floor']:.0f}"))
-    if raw.get("google_trends_atl") is not None:
-        lvl = "high" if raw["google_trends_atl"] >= 65 else ("medium" if raw["google_trends_atl"] >= 35 else "low")
-        signals.append((lvl, "ATL Google Trends index", str(raw["google_trends_atl"])))
-    if raw.get("bandsintown_rsvps") is not None:
-        lvl = "high" if raw["bandsintown_rsvps"] >= 5000 else ("medium" if raw["bandsintown_rsvps"] >= 1000 else "low")
-        signals.append((lvl, "Bands in Town intent", f"{raw['bandsintown_rsvps']:,}"))
+    sg_deal = raw.get("seatgeek_deal_score")
+    if sg_deal is not None:
+        sg_deal = int(sg_deal)
+        lvl = "high" if sg_deal >= 65 else ("medium" if sg_deal >= 35 else "low")
+        signals.append((lvl, "SeatGeek Deal Score", f"{sg_deal}/100"))
+
+    sg_floor = raw.get("seatgeek_floor")
+    if sg_floor is not None:
+        sg_floor = float(sg_floor)
+        lvl = "high" if sg_floor >= 150 else ("medium" if sg_floor >= 60 else "low")
+        signals.append((lvl, "Secondary floor", f"${sg_floor:.0f}"))
+
+    gtrends = raw.get("google_trends_atl")
+    if gtrends is not None:
+        gtrends = int(gtrends)
+        lvl = "high" if gtrends >= 65 else ("medium" if gtrends >= 35 else "low")
+        signals.append((lvl, "ATL Google Trends index", str(gtrends)))
+
+    bit = raw.get("bandsintown_rsvps")
+    if bit is not None:
+        bit = int(bit)
+        lvl = "high" if bit >= 5000 else ("medium" if bit >= 1000 else "low")
+        signals.append((lvl, "Bands in Town intent", f"{bit:,}"))
 
     # Cap at 8 signals
     signals = signals[:8]
@@ -191,14 +202,23 @@ def build_insight(ev):
 def build_risk(ev):
     raw = ev["raw_signals"]
     flags = []
-    if raw.get("seatgeek_listing_count", 0) and ev.get("_venue_cap"):
-        ratio = raw["seatgeek_listing_count"] / ev["_venue_cap"]
+
+    # Guard every comparison against None explicitly
+    listing_count = raw.get("seatgeek_listing_count") or 0
+    venue_cap     = ev.get("_venue_cap") or 0
+    if listing_count and venue_cap:
+        ratio = listing_count / venue_cap
         if ratio > 0.4:
-            flags.append(f"High listing volume ({raw['seatgeek_listing_count']:,} available)")
-    if raw.get("google_trends_atl", 50) < 20:
-        flags.append(f"ATL Trends: {raw['google_trends_atl']}")
-    if raw.get("bandsintown_rsvps", 9999) < 500:
-        flags.append(f"Bands in Town: {raw.get('bandsintown_rsvps', 'n/a')}")
+            flags.append(f"High listing volume ({listing_count:,} available)")
+
+    trends_atl = raw.get("google_trends_atl")
+    if trends_atl is not None and int(trends_atl) < 20:
+        flags.append(f"ATL Trends: {trends_atl}")
+
+    bit_rsvps = raw.get("bandsintown_rsvps")
+    if bit_rsvps is not None and int(bit_rsvps) < 500:
+        flags.append(f"Bands in Town: {bit_rsvps}")
+
     return " &middot; ".join(flags[:3]) if flags else ""
 
 
