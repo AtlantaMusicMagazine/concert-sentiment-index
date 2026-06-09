@@ -52,6 +52,7 @@ VENUE_CAPS = {
     "Truist Park":                                       41084,
     "The Eastern":                                         500,
     "Vinyl at Center Stage":                               200,
+    "Piedmont Park":                                     40000,   # Shaky Knees festival grounds
 }
 
 # ── Rec 3: Genre-tier prior ───────────────────────────────────────────────
