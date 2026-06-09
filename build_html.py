@@ -135,6 +135,22 @@ def build_signals_html(ev):
         lvl = "high" if bit >= 5000 else ("medium" if bit >= 1000 else "low")
         signals.append((lvl, "Bands in Town intent", f"{bit:,}"))
 
+    yt_vel = raw.get("yt_view_velocity_7d")
+    if yt_vel is not None:
+        yt_vel = int(yt_vel)
+        lvl = "high" if yt_vel >= 2_000_000 else ("medium" if yt_vel >= 500_000 else "low")
+        signals.append((lvl, "YouTube 7-day views",
+                         f"{yt_vel/1_000_000:.1f}M" if yt_vel >= 1_000_000
+                         else f"{yt_vel:,}"))
+
+    yt_subs = raw.get("yt_subscriber_count")
+    if yt_subs is not None and int(yt_subs) > 0:
+        yt_subs = int(yt_subs)
+        lvl = "high" if yt_subs >= 10_000_000 else ("medium" if yt_subs >= 1_000_000 else "low")
+        signals.append((lvl, "YouTube subscribers",
+                         f"{yt_subs/1_000_000:.1f}M" if yt_subs >= 1_000_000
+                         else f"{yt_subs:,}"))
+
     # Cap at 8 signals
     signals = signals[:8]
 
@@ -153,6 +169,14 @@ def build_insight(ev):
     """Generate a one-line insight string from available signal data."""
     raw   = ev["raw_signals"]
     parts = []
+
+    # YouTube velocity — highest-impact forward signal when available
+    yt_vel = raw.get("yt_view_velocity_7d")
+    if yt_vel is not None and int(yt_vel) > 0:
+        yt_vel = int(yt_vel)
+        vel_str = (f"{yt_vel/1_000_000:.1f}M views/week"
+                   if yt_vel >= 1_000_000 else f"{yt_vel:,} views/week")
+        parts.append(f"YouTube: {vel_str}")
 
     # MusicBrainz release context
     if raw.get("mb_has_recent_album") and raw.get("mb_latest_album_title"):
