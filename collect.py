@@ -4,12 +4,13 @@ Atlanta Music Magazine — Nightly Data Collection
 Fetches signals from all data sources for every tracked event.
 Outputs: data/raw_signals.json
 
-MusicBrainz integration:
-  - resolve_mbid()     : one-time lookup to find an artist's MBID and
-                         cross-reference their Spotify ID if missing
-  - fetch_musicbrainz(): nightly call for new album release recency
-                         (did this artist release an album within 365 days
-                          of the concert date?) — feeds historical sales pillar
+Key integrations:
+  - MusicBrainz  : keyless, album release recency + career depth
+  - YouTube v3   : view velocity via rolling cache (data/youtube_cache.json)
+                   Cache persisted between runs via GitHub Actions cache@v4
+  - Setlist.fm   : ATL market history, venue trajectory, sold-out flag
+  - Last.fm      : listener breadth, plays/listener depth, peer tier
+  - Eventbrite   : sell-through %, sold-out + waitlist flag
 """
 
 import os
@@ -33,6 +34,7 @@ CHARTMETRIC_TOKEN   = os.environ.get("CHARTMETRIC_TOKEN", "")
 BANDSINTOWN_KEY     = os.environ.get("BANDSINTOWN_KEY", "")
 SETLISTFM_KEY       = os.environ.get("SETLISTFM_KEY", "")
 LASTFM_KEY          = os.environ.get("LASTFM_KEY", "")
+YOUTUBE_API_KEY     = os.environ.get("YOUTUBE_API_KEY", "")
 EVENTBRITE_TOKEN    = os.environ.get("EVENTBRITE_TOKEN", "")
 WIKIPEDIA_USER      = os.environ.get("WIKIPEDIA_USER", "atlanta-music-magazine/1.0 (contact@atlantamusicmagazine.com)")
 
@@ -1091,6 +1093,200 @@ def fetch_eventbrite(event):
     }
 
 
+YOUTUBE_CACHE_PATH = "data/youtube_cache.json"
+
+
+def load_youtube_cache():
+    """
+    Load the rolling view-count cache from disk.
+    Returns a dict of {event_id: {"view_count": int, "date": str, "video_id": str}}.
+    Called once at the start of collect_all(); the result is passed into
+    every fetch_youtube() call so lookups are O(1).
+    """
+    try:
+        with open(YOUTUBE_CACHE_PATH) as f:
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return {}
+
+
+def save_youtube_cache(cache):
+    """
+    Write the updated cache back to disk after all events are collected.
+    GitHub Actions cache@v4 will then persist this file between runs.
+    """
+    with open(YOUTUBE_CACHE_PATH, "w") as f:
+        json.dump(cache, f, indent=2)
+
+
+def fetch_youtube(event, cache):
+    """
+    YouTube Data API v3 — video view velocity signal.
+    Endpoint: youtube/v3/search + youtube/v3/videos
+
+    Strategy:
+      1. Search for the artist's official channel using their name
+      2. Get the most recent uploaded video from that channel
+      3. Compare today's view count against the cached count from
+         the previous run to compute a 24-hour view delta
+      4. Update the cache with today's count for tomorrow's delta
+
+    Signals returned:
+      yt_video_id           : YouTube video ID of the most recent official video
+      yt_view_count         : current total view count
+      yt_view_delta_24h     : views gained in the past ~24 hours
+                              (None on first run — no prior count to diff against)
+      yt_view_velocity_7d   : estimated 7-day velocity = delta * 7
+                              (proxy — only accurate after 7 days of daily runs)
+      yt_subscriber_count   : channel subscriber count
+      yt_channel_id         : YouTube channel ID (cached to avoid repeat searches)
+
+    Cache schema per event_id:
+      {
+        "event_id": {
+          "channel_id":  "UC...",
+          "video_id":    "dQw4w9WgXcQ",
+          "view_count":  12345678,
+          "date":        "2026-06-09"
+        }
+      }
+
+    Rate budget: ~4 units per event (1 search + 1 videos.list).
+    At 42 events = 168 units/night. Free quota = 10,000 units/day.
+    """
+    if not YOUTUBE_API_KEY:
+        return {}
+
+    eid         = event["id"]
+    artist_name = event.get("artist", "")
+    if not artist_name:
+        return {}
+
+    today_str   = datetime.date.today().isoformat()
+    cached      = cache.get(eid, {})
+    channel_id  = cached.get("channel_id", "")
+
+    # ── Step 1: Find the artist's channel (skip if cached) ───────────────
+    if not channel_id:
+        search_data = safe_get(
+            "https://www.googleapis.com/youtube/v3/search",
+            params={
+                "part":       "snippet",
+                "q":          f"{artist_name} official",
+                "type":       "channel",
+                "maxResults": 1,
+                "key":        YOUTUBE_API_KEY,
+            },
+            label=f"YouTube channel search: {artist_name}",
+        )
+        time.sleep(0.2)
+        if not search_data or not search_data.get("items"):
+            return {}
+        channel_id = search_data["items"][0].get("id", {}).get("channelId", "")
+        if not channel_id:
+            return {}
+
+    # ── Step 2: Get most recent video from the channel ────────────────────
+    video_id   = cached.get("video_id", "")
+    # Refresh video ID weekly (Monday) or when not yet cached
+    should_refresh_video = (
+        not video_id
+        or datetime.date.today().weekday() == 0  # Monday
+    )
+
+    if should_refresh_video:
+        recent_data = safe_get(
+            "https://www.googleapis.com/youtube/v3/search",
+            params={
+                "part":       "snippet",
+                "channelId":  channel_id,
+                "order":      "date",
+                "type":       "video",
+                "maxResults": 1,
+                "key":        YOUTUBE_API_KEY,
+            },
+            label=f"YouTube recent video: {artist_name}",
+        )
+        time.sleep(0.2)
+        if recent_data and recent_data.get("items"):
+            video_id = (recent_data["items"][0]
+                        .get("id", {}).get("videoId", video_id))
+
+    if not video_id:
+        return {}
+
+    # ── Step 3: Get current stats for the video + channel ────────────────
+    stats_data = safe_get(
+        "https://www.googleapis.com/youtube/v3/videos",
+        params={
+            "part":  "statistics",
+            "id":    video_id,
+            "key":   YOUTUBE_API_KEY,
+        },
+        label=f"YouTube video stats: {artist_name}",
+    )
+    time.sleep(0.2)
+
+    if not stats_data or not stats_data.get("items"):
+        return {}
+
+    stats        = stats_data["items"][0].get("statistics", {})
+    view_count   = int(stats.get("viewCount", 0) or 0)
+
+    # Channel subscriber count (separate call, costs 1 unit)
+    chan_data = safe_get(
+        "https://www.googleapis.com/youtube/v3/channels",
+        params={
+            "part": "statistics",
+            "id":   channel_id,
+            "key":  YOUTUBE_API_KEY,
+        },
+        label=f"YouTube channel stats: {artist_name}",
+    )
+    time.sleep(0.2)
+    subscriber_count = 0
+    if chan_data and chan_data.get("items"):
+        chan_stats       = chan_data["items"][0].get("statistics", {})
+        subscriber_count = int(chan_stats.get("subscriberCount", 0) or 0)
+
+    # ── Step 4: Compute velocity from cache delta ─────────────────────────
+    prior_count  = cached.get("view_count")
+    prior_date   = cached.get("date", "")
+    view_delta   = None
+    velocity_7d  = None
+
+    if prior_count is not None and prior_date and prior_date != today_str:
+        try:
+            days_elapsed = (
+                datetime.date.fromisoformat(today_str)
+                - datetime.date.fromisoformat(prior_date)
+            ).days
+            if days_elapsed > 0:
+                daily_rate  = (view_count - prior_count) / days_elapsed
+                view_delta  = int(view_count - prior_count)
+                velocity_7d = int(daily_rate * 7)
+        except (ValueError, ZeroDivisionError):
+            pass
+
+    # ── Step 5: Update cache entry for tomorrow ───────────────────────────
+    cache[eid] = {
+        "channel_id":      channel_id,
+        "video_id":        video_id,
+        "view_count":      view_count,
+        "date":            today_str,
+        "subscriber_count": subscriber_count,
+    }
+
+    return {
+        "yt_video_id":         video_id,
+        "yt_view_count":       view_count,
+        "yt_view_delta_24h":   view_delta,
+        "yt_view_velocity_7d": velocity_7d,
+        "yt_subscriber_count": subscriber_count,
+        "yt_channel_id":       channel_id,
+    }
+
+
 def fetch_lastfm(event):
     """
     Last.fm — artist engagement metrics via their free API.
@@ -1309,6 +1505,11 @@ def collect_all():
     print(f"[collect] Total events to collect: {len(EVENTS)}")
     spotify_token = get_spotify_token()
 
+    # Load YouTube view-count cache from previous run
+    # (persisted between runs via GitHub Actions cache@v4 — see nightly.yml)
+    yt_cache = load_youtube_cache()
+    print(f"[collect] YouTube cache loaded: {len(yt_cache)} cached entries")
+
     results = {}
     for idx, event in enumerate(EVENTS):
         eid = event["id"]
@@ -1319,7 +1520,7 @@ def collect_all():
             # 30% — Ticket Demand
             signals.update(fetch_ticketmaster(event));  time.sleep(0.3)
             signals.update(fetch_seatgeek(event));       time.sleep(0.3)
-            signals.update(fetch_eventbrite(event))      # rate-limited internally
+            signals.update(fetch_eventbrite(event))
         except Exception as e:
             print(f"    [WARN] Ticket demand fetch failed: {e}")
 
@@ -1328,6 +1529,8 @@ def collect_all():
             signals.update(fetch_spotify(event, spotify_token)); time.sleep(0.2)
             signals.update(fetch_chartmetric(event));            time.sleep(0.3)
             signals.update(fetch_lastfm(event))
+            # YouTube: pass cache by reference so fetch_youtube can update it
+            signals.update(fetch_youtube(event, yt_cache))
         except Exception as e:
             print(f"    [WARN] Sentiment fetch failed: {e}")
 
@@ -1347,6 +1550,11 @@ def collect_all():
             print(f"    [WARN] Local intent fetch failed: {e}")
 
         results[eid] = signals
+
+    # Persist updated YouTube cache for tomorrow's velocity calculation
+    save_youtube_cache(yt_cache)
+    cached_count = sum(1 for v in yt_cache.values() if v.get("view_count"))
+    print(f"[collect] YouTube cache saved: {cached_count} entries")
 
     output_path = "data/raw_signals.json"
     with open(output_path, "w") as f:
