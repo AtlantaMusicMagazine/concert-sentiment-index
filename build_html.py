@@ -63,6 +63,7 @@ VENUE_CAPS = {
     "Truist Park":                                       41084,
     "The Eastern":                                         500,
     "Vinyl at Center Stage":                               200,
+    "Piedmont Park":                                     40000,   # Shaky Knees festival grounds
 }
 
 
@@ -300,7 +301,7 @@ def build_card(ev, rank, is_bottom=False):
 
 # ── Window constants ──────────────────────────────────────────────────────
 WINDOW_START = datetime.date(2026, 6, 8)
-WINDOW_END   = datetime.date(2026, 9, 6)
+WINDOW_END   = datetime.date(2026, 9, 20)   # extended to include Shaky Knees Sep 18-20
 
 GENRE_POOL_START_MARKER = "  var GENRE_POOL_TOP = ["
 GENRE_POOL_END_MARKER   = "  var GENRE_POOL_BOTTOM = GENRE_POOL_TOP.slice();"
