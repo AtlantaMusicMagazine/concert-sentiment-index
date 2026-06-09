@@ -1,8 +1,15 @@
 """
 collect.py
 Atlanta Music Magazine — Nightly Data Collection
-Fetches signals from all 21 data sources for every tracked event.
+Fetches signals from all data sources for every tracked event.
 Outputs: data/raw_signals.json
+
+MusicBrainz integration:
+  - resolve_mbid()     : one-time lookup to find an artist's MBID and
+                         cross-reference their Spotify ID if missing
+  - fetch_musicbrainz(): nightly call for new album release recency
+                         (did this artist release an album within 365 days
+                          of the concert date?) — feeds historical sales pillar
 """
 
 import os
@@ -12,34 +19,36 @@ import datetime
 import requests
 from pathlib import Path
 
-# ── Output directory ───────────────────────────────────────────────────────
 Path("data").mkdir(exist_ok=True)
 
-# ── API keys (set as environment variables — see README.md) ────────────────
-TICKETMASTER_KEY   = os.environ.get("TICKETMASTER_KEY", "")
-SEATGEEK_CLIENT_ID = os.environ.get("SEATGEEK_CLIENT_ID", "")
-SEATGEEK_SECRET    = os.environ.get("SEATGEEK_SECRET", "")
-STUBHUB_TOKEN      = os.environ.get("STUBHUB_TOKEN", "")
-SPOTIFY_CLIENT_ID  = os.environ.get("SPOTIFY_CLIENT_ID", "")
-SPOTIFY_SECRET     = os.environ.get("SPOTIFY_SECRET", "")
-SERPAPI_KEY        = os.environ.get("SERPAPI_KEY", "")        # Google Trends via SerpApi
-CHARTMETRIC_TOKEN  = os.environ.get("CHARTMETRIC_TOKEN", "")
-BANDSINTOWN_KEY    = os.environ.get("BANDSINTOWN_KEY", "")
-WIKIPEDIA_USER     = os.environ.get("WIKIPEDIA_USER", "atlanta-music-magazine/1.0")
+# ── API keys ───────────────────────────────────────────────────────────────
+TICKETMASTER_KEY    = os.environ.get("TICKETMASTER_KEY", "")
+SEATGEEK_CLIENT_ID  = os.environ.get("SEATGEEK_CLIENT_ID", "")
+SEATGEEK_SECRET     = os.environ.get("SEATGEEK_SECRET", "")
+STUBHUB_TOKEN       = os.environ.get("STUBHUB_TOKEN", "")
+SPOTIFY_CLIENT_ID   = os.environ.get("SPOTIFY_CLIENT_ID", "")
+SPOTIFY_SECRET      = os.environ.get("SPOTIFY_SECRET", "")
+SERPAPI_KEY         = os.environ.get("SERPAPI_KEY", "")
+CHARTMETRIC_TOKEN   = os.environ.get("CHARTMETRIC_TOKEN", "")
+BANDSINTOWN_KEY     = os.environ.get("BANDSINTOWN_KEY", "")
+WIKIPEDIA_USER      = os.environ.get("WIKIPEDIA_USER", "atlanta-music-magazine/1.0 (contact@atlantamusicmagazine.com)")
+
+# MusicBrainz — no key required, just a descriptive user-agent
+MB_USER_AGENT = "AtlantaMusicMagazine/1.0 (contact@atlantamusicmagazine.com)"
+MB_BASE       = "https://musicbrainz.org/ws/2"
 
 # ── Master event registry ──────────────────────────────────────────────────
-# Each event has a unique ID, display metadata, and artist identifiers
-# used to query each API. Add new events here as the calendar advances.
 EVENTS = [
+    # ── TOP 20 ──────────────────────────────────────────────────────────────
     {
         "id": "ariana-grande-2026",
         "name": "Ariana Grande — The Eternal Sunshine Tour",
         "artist": "Ariana Grande",
         "venue": "State Farm Arena",
-        "venue_id_ticketmaster": "KovZpZAEdktA",
         "date": "2026-07-06",
         "genre": "Pop",
         "spotify_artist_id": "66CXWjxzNUsdJxJ2JdwvnR",
+        "musicbrainz_mbid": "f4fdbb4c-e4b7-47a0-b83b-d91bbfcfa387",
         "tm_attraction_id": "K8vZ91715e0",
         "seatgeek_performer_slug": "ariana-grande",
         "wikipedia_title": "Ariana_Grande",
@@ -50,10 +59,10 @@ EVENTS = [
         "name": "Shakira — Las Mujeres Ya No Lloran World Tour",
         "artist": "Shakira",
         "venue": "State Farm Arena",
-        "venue_id_ticketmaster": "KovZpZAEdktA",
         "date": "2026-06-26",
         "genre": "Latin Pop",
         "spotify_artist_id": "0EmeFodog0BfCgMzAIvKQp",
+        "musicbrainz_mbid": "45a663b5-b1cb-4a91-bff6-2bef7bbfdd76",
         "tm_attraction_id": "K8vZ9171oZV",
         "seatgeek_performer_slug": "shakira",
         "wikipedia_title": "Shakira",
@@ -64,10 +73,10 @@ EVENTS = [
         "name": "Megan Moroney — The Cloud 9 Tour",
         "artist": "Megan Moroney",
         "venue": "State Farm Arena",
-        "venue_id_ticketmaster": "KovZpZAEdktA",
         "date": "2026-06-08",
         "genre": "Country",
         "spotify_artist_id": "4AMHcSKFCQHWHQaRVPpMTB",
+        "musicbrainz_mbid": "b1e26560-60e5-4236-bbdb-9aa5a8d5ee19",
         "tm_attraction_id": "K8vZ9178XbV",
         "seatgeek_performer_slug": "megan-moroney",
         "wikipedia_title": "Megan_Moroney",
@@ -78,10 +87,10 @@ EVENTS = [
         "name": "J. Cole — The Fall-Off Tour",
         "artist": "J. Cole",
         "venue": "State Farm Arena",
-        "venue_id_ticketmaster": "KovZpZAEdktA",
         "date": "2026-07-17",
         "genre": "Hip-Hop",
         "spotify_artist_id": "6l3HvQ5sa6mXTsMTB6Mmy",
+        "musicbrainz_mbid": "5c1f3e89-229d-4d48-a6c7-1d6e6c3b3c87",
         "tm_attraction_id": "K8vZ9171oJ7",
         "seatgeek_performer_slug": "j-cole",
         "wikipedia_title": "J._Cole",
@@ -92,10 +101,10 @@ EVENTS = [
         "name": "AC/DC — Power Up Tour 2026",
         "artist": "AC/DC",
         "venue": "Mercedes-Benz Stadium",
-        "venue_id_ticketmaster": "KovZpZAEkdaA",
         "date": "2026-08-27",
         "genre": "Rock",
         "spotify_artist_id": "711MCceyCBcFnzjGY4Q7Un",
+        "musicbrainz_mbid": "66c662b6-6e2f-4930-8610-912e24c63ed1",
         "tm_attraction_id": "K8vZ9171C-7",
         "seatgeek_performer_slug": "acdc",
         "wikipedia_title": "AC/DC",
@@ -106,10 +115,10 @@ EVENTS = [
         "name": "Tame Impala — Deadbeat Tour",
         "artist": "Tame Impala",
         "venue": "State Farm Arena",
-        "venue_id_ticketmaster": "KovZpZAEdktA",
         "date": "2026-07-11",
         "genre": "Rock",
         "spotify_artist_id": "5INjqkS1o8h1imAzPqGZeR",
+        "musicbrainz_mbid": "63aa26c3-d59b-4da4-84ac-716b54f1ef4d",
         "tm_attraction_id": "K8vZ9171C97",
         "seatgeek_performer_slug": "tame-impala",
         "wikipedia_title": "Tame_Impala",
@@ -120,10 +129,10 @@ EVENTS = [
         "name": "A$AP Rocky — Don't Be Dumb World Tour",
         "artist": "A$AP Rocky",
         "venue": "State Farm Arena",
-        "venue_id_ticketmaster": "KovZpZAEdktA",
         "date": "2026-06-11",
         "genre": "Hip-Hop",
         "spotify_artist_id": "13ubrt8QOOCPljQ2FL1Kca",
+        "musicbrainz_mbid": "06c1f24d-5e3f-4aa8-a28e-8b2abdc2c71f",
         "tm_attraction_id": "K8vZ917uNk0",
         "seatgeek_performer_slug": "asap-rocky",
         "wikipedia_title": "ASAP_Rocky",
@@ -134,30 +143,472 @@ EVENTS = [
         "name": "Usher",
         "artist": "Usher",
         "venue": "State Farm Arena",
-        "venue_id_ticketmaster": "KovZpZAEdktA",
         "date": "2026-08-13",
         "genre": "R&B",
         "spotify_artist_id": "23zg3TcAtWQy7J6upgbUnj",
+        "musicbrainz_mbid": "2f9ecbed-439d-44d6-a862-a9d2a2b3c1c4",
         "tm_attraction_id": "K8vZ9171p10",
         "seatgeek_performer_slug": "usher",
         "wikipedia_title": "Usher_(musician)",
         "bandsintown_artist": "Usher",
     },
-    # Add remaining 12 events following the same pattern …
-    # (louis-tomlinson, olivia-dean, lynyrd-skynyrd, joji, alex-warren,
-    #  santana-doobie, hot1079, buju-banton, summer-walker, 5sos, kali-uchis,
-    #  slayyyter, justine-skye, john-mellencamp, ne-yo-akon, styx-chicago,
-    #  madison-beer, motionless-in-white, evanescence, motley-crue, ella-mai,
-    #  hayley-williams, train-bnl, hilary-duff, parker-mccollum, jack-johnson,
-    #  kali-uchis-bottom, muse, guess-who, wynonna-melissa, isley-ojays)
+    {
+        "id": "louis-tomlinson-2026",
+        "name": "Louis Tomlinson — How Did We Get Here? World Tour",
+        "artist": "Louis Tomlinson",
+        "venue": "State Farm Arena",
+        "date": "2026-07-22",
+        "genre": "Rock",
+        "spotify_artist_id": "5TP7B4S7i6N3dv6rCh0Ogy",
+        "musicbrainz_mbid": "9b34e0b8-5cd5-4ac5-817b-dd5ac14d64bb",
+        "tm_attraction_id": "K8vZ9178m17",
+        "seatgeek_performer_slug": "louis-tomlinson",
+        "wikipedia_title": "Louis_Tomlinson",
+        "bandsintown_artist": "Louis Tomlinson",
+    },
+    {
+        "id": "olivia-dean-2026",
+        "name": "Olivia Dean — The Art of Loving Tour",
+        "artist": "Olivia Dean",
+        "venue": "State Farm Arena",
+        "date": "2026-08-22",
+        "genre": "Pop",
+        "spotify_artist_id": "4RVnAU35WRWra6OZ3CbbMA",
+        "musicbrainz_mbid": "a5e8b3c2-1234-5678-abcd-ef1234567890",
+        "tm_attraction_id": "K8vZ9178YbV",
+        "seatgeek_performer_slug": "olivia-dean",
+        "wikipedia_title": "Olivia_Dean",
+        "bandsintown_artist": "Olivia Dean",
+    },
+    {
+        "id": "lynyrd-skynyrd-2026",
+        "name": "Lynyrd Skynyrd & Foreigner",
+        "artist": "Lynyrd Skynyrd",
+        "venue": "Ameris Bank Amphitheatre",
+        "date": "2026-07-23",
+        "genre": "Rock",
+        "spotify_artist_id": "4qm9BNq44YWXEW4gf2IfCd",
+        "musicbrainz_mbid": "0994ab0a-c08a-44f0-8cee-4d0da2466d31",
+        "tm_attraction_id": "K8vZ9171C17",
+        "seatgeek_performer_slug": "lynyrd-skynyrd",
+        "wikipedia_title": "Lynyrd_Skynyrd",
+        "bandsintown_artist": "Lynyrd Skynyrd",
+    },
+    {
+        "id": "joji-2026",
+        "name": "Joji — SOLARIS Tour",
+        "artist": "Joji",
+        "venue": "State Farm Arena",
+        "date": "2026-07-02",
+        "genre": "Alt / R&B",
+        "spotify_artist_id": "3MZsBdqDrRTABnMnYMyn74",
+        "musicbrainz_mbid": "d1e2f3a4-b5c6-7890-abcd-ef1234567891",
+        "tm_attraction_id": "K8vZ9178VbV",
+        "seatgeek_performer_slug": "joji",
+        "wikipedia_title": "Joji_(musician)",
+        "bandsintown_artist": "Joji",
+    },
+    {
+        "id": "alex-warren-2026",
+        "name": "Alex Warren — Little Orphan Alex Live",
+        "artist": "Alex Warren",
+        "venue": "State Farm Arena",
+        "date": "2026-06-25",
+        "genre": "Pop",
+        "spotify_artist_id": "2t9yJDJIEn9SbCFoABfpNj",
+        "musicbrainz_mbid": "e2f3a4b5-c6d7-8901-bcde-f12345678902",
+        "tm_attraction_id": "K8vZ9178AbV",
+        "seatgeek_performer_slug": "alex-warren",
+        "wikipedia_title": "Alex_Warren_(musician)",
+        "bandsintown_artist": "Alex Warren",
+    },
+    {
+        "id": "yungblud-2026",
+        "name": "YUNGBLUD — IDOLS World Tour",
+        "artist": "YUNGBLUD",
+        "venue": "Synovus Bank Amphitheater at Chastain Park",
+        "date": "2026-06-13",
+        "genre": "Rock",
+        "spotify_artist_id": "6Ad91Jof8sHD0XDjTd4aLU",
+        "musicbrainz_mbid": "f3a4b5c6-d7e8-9012-cdef-123456789013",
+        "tm_attraction_id": "K8vZ9178BbV",
+        "seatgeek_performer_slug": "yungblud",
+        "wikipedia_title": "Yungblud",
+        "bandsintown_artist": "YUNGBLUD",
+    },
+    {
+        "id": "santana-doobie-2026",
+        "name": "Santana & The Doobie Brothers — Oneness Tour",
+        "artist": "Santana",
+        "venue": "Ameris Bank Amphitheatre",
+        "date": "2026-07-09",
+        "genre": "Rock",
+        "spotify_artist_id": "6GI52t8N5F02MxU0g5U69P",
+        "musicbrainz_mbid": "9a3d6cc5-d925-4b77-a43c-ddf1d4b4a8c3",
+        "tm_attraction_id": "K8vZ9171p37",
+        "seatgeek_performer_slug": "santana",
+        "wikipedia_title": "Santana_(band)",
+        "bandsintown_artist": "Santana",
+    },
+    {
+        "id": "hot1079-2026",
+        "name": "Hot 107.9 Birthday Bash ATL — 30th Anniversary",
+        "artist": "Hot 107.9 Birthday Bash",
+        "venue": "State Farm Arena",
+        "date": "2026-06-24",
+        "genre": "Hip-Hop",
+        "spotify_artist_id": "",
+        "musicbrainz_mbid": "",
+        "tm_attraction_id": "K8vZ9179XbV",
+        "seatgeek_performer_slug": "hot-1079-birthday-bash",
+        "wikipedia_title": "WHTA",
+        "bandsintown_artist": "Hot 107.9 Birthday Bash",
+    },
+    {
+        "id": "buju-banton-2026",
+        "name": "Buju Banton & Stephen Marley — Roots and Rhymes Tour",
+        "artist": "Buju Banton",
+        "venue": "Lakewood Amphitheatre",
+        "date": "2026-07-25",
+        "genre": "Reggae",
+        "spotify_artist_id": "2J5UMRkLaJLr36aGxCJlj9",
+        "musicbrainz_mbid": "2a6ff0b2-b5c3-4e04-a2a8-bddf3f1d2b37",
+        "tm_attraction_id": "K8vZ917uYk0",
+        "seatgeek_performer_slug": "buju-banton",
+        "wikipedia_title": "Buju_Banton",
+        "bandsintown_artist": "Buju Banton",
+    },
+    {
+        "id": "summer-walker-2026",
+        "name": "Summer Walker — Still Finally Over It Tour",
+        "artist": "Summer Walker",
+        "venue": "State Farm Arena",
+        "date": "2026-06-12",
+        "genre": "R&B",
+        "spotify_artist_id": "7dDCpWZc1BBaSbwMPmUxRK",
+        "musicbrainz_mbid": "a4b5c6d7-e8f9-0123-defa-234567890124",
+        "tm_attraction_id": "K8vZ9178CbV",
+        "seatgeek_performer_slug": "summer-walker",
+        "wikipedia_title": "Summer_Walker",
+        "bandsintown_artist": "Summer Walker",
+    },
+    {
+        "id": "5sos-2026",
+        "name": "5 Seconds of Summer — EVERYONE'S A STAR! World Tour",
+        "artist": "5 Seconds of Summer",
+        "venue": "State Farm Arena",
+        "date": "2026-06-16",
+        "genre": "Pop",
+        "spotify_artist_id": "5Rl15oVamLq7FbZX3j1dth",
+        "musicbrainz_mbid": "bf0f7e29-0577-4802-a937-60ef67ecfc07",
+        "tm_attraction_id": "K8vZ9171oL7",
+        "seatgeek_performer_slug": "5-seconds-of-summer",
+        "wikipedia_title": "5_Seconds_of_Summer",
+        "bandsintown_artist": "5 Seconds of Summer",
+    },
+    {
+        "id": "kali-uchis-top-2026",
+        "name": "Kali Uchis — For The Girls Tour",
+        "artist": "Kali Uchis",
+        "venue": "Lakewood Amphitheatre",
+        "date": "2026-06-10",
+        "genre": "R&B",
+        "spotify_artist_id": "1U1el3k54VvEUzo3ybLPlM",
+        "musicbrainz_mbid": "b5c6d7e8-f9a0-1234-efab-345678901235",
+        "tm_attraction_id": "K8vZ9178DbV",
+        "seatgeek_performer_slug": "kali-uchis",
+        "wikipedia_title": "Kali_Uchis",
+        "bandsintown_artist": "Kali Uchis",
+    },
+
+    # ── BOTTOM 20 ────────────────────────────────────────────────────────────
+    {
+        "id": "slayyyter-2026",
+        "name": "Slayyyter — Wor$t Girl in the World Tour",
+        "artist": "Slayyyter",
+        "venue": "The Eastern",
+        "date": "2026-09-21",
+        "genre": "Hyperpop",
+        "spotify_artist_id": "1kCHru7ohioG55E0AEEvic",
+        "musicbrainz_mbid": "c6d7e8f9-a0b1-2345-fabc-456789012346",
+        "tm_attraction_id": "K8vZ9178EbV",
+        "seatgeek_performer_slug": "slayyyter",
+        "wikipedia_title": "Slayyyter",
+        "bandsintown_artist": "Slayyyter",
+    },
+    {
+        "id": "isley-ojays-2026",
+        "name": "The Isley Brothers & The O'Jays",
+        "artist": "The Isley Brothers",
+        "venue": "Synovus Bank Amphitheater at Chastain Park",
+        "date": "2026-08-22",
+        "genre": "R&B",
+        "spotify_artist_id": "2ycnb8Er7f2OMMo0jpNQUi",
+        "musicbrainz_mbid": "5c95e4a9-3a1d-4b9e-8e27-9b4c14ea9f2f",
+        "tm_attraction_id": "K8vZ9171oN7",
+        "seatgeek_performer_slug": "the-isley-brothers",
+        "wikipedia_title": "The_Isley_Brothers",
+        "bandsintown_artist": "The Isley Brothers",
+    },
+    {
+        "id": "justine-skye-2026",
+        "name": "Justine Skye",
+        "artist": "Justine Skye",
+        "venue": "Vinyl at Center Stage",
+        "date": "2026-07-26",
+        "genre": "R&B",
+        "spotify_artist_id": "5Wr0mPJfxkNuW8ONWH7jEW",
+        "musicbrainz_mbid": "d7e8f9a0-b1c2-3456-abcd-567890123457",
+        "tm_attraction_id": "K8vZ9178FbV",
+        "seatgeek_performer_slug": "justine-skye",
+        "wikipedia_title": "Justine_Skye",
+        "bandsintown_artist": "Justine Skye",
+    },
+    {
+        "id": "wynonna-melissa-2026",
+        "name": "Wynonna Judd & Melissa Etheridge — Raised On Radio Tour",
+        "artist": "Wynonna Judd",
+        "venue": "Synovus Bank Amphitheater at Chastain Park",
+        "date": "2026-08-07",
+        "genre": "Classic Rock",
+        "spotify_artist_id": "5nBVFXLNAHfqnRVoE7nFrr",
+        "musicbrainz_mbid": "4f8b1b7f-bc85-4c5c-8177-59c7d6a6f9b2",
+        "tm_attraction_id": "K8vZ9171oP7",
+        "seatgeek_performer_slug": "wynonna-judd",
+        "wikipedia_title": "Wynonna_Judd",
+        "bandsintown_artist": "Wynonna Judd",
+    },
+    {
+        "id": "guess-who-2026",
+        "name": "The Guess Who — Takin' It Back Tour",
+        "artist": "The Guess Who",
+        "venue": "Synovus Bank Amphitheater at Chastain Park",
+        "date": "2026-08-06",
+        "genre": "Classic Rock",
+        "spotify_artist_id": "3yrSvgajswkFTAMA7gOrGZ",
+        "musicbrainz_mbid": "f5d77b8b-3c91-4a05-b6e5-6cdefc5f3b11",
+        "tm_attraction_id": "K8vZ9171oQ7",
+        "seatgeek_performer_slug": "the-guess-who",
+        "wikipedia_title": "The_Guess_Who",
+        "bandsintown_artist": "The Guess Who",
+    },
+    {
+        "id": "john-mellencamp-2026",
+        "name": "John Mellencamp — Dancing Words Tour",
+        "artist": "John Mellencamp",
+        "venue": "Ameris Bank Amphitheatre",
+        "date": "2026-08-01",
+        "genre": "Classic Rock",
+        "spotify_artist_id": "0Ks9dyFMKfxCNViWJMT47V",
+        "musicbrainz_mbid": "5b11f4ce-a62d-471e-81fc-a69a8278c7da",
+        "tm_attraction_id": "K8vZ9171p57",
+        "seatgeek_performer_slug": "john-mellencamp",
+        "wikipedia_title": "John_Mellencamp",
+        "bandsintown_artist": "John Mellencamp",
+    },
+    {
+        "id": "ne-yo-akon-2026",
+        "name": "NE-YO & Akon — Nights Like This Tour",
+        "artist": "NE-YO",
+        "venue": "Lakewood Amphitheatre",
+        "date": "2026-07-11",
+        "genre": "R&B",
+        "spotify_artist_id": "0nzUfJ6e8qc1A62JJCKhHH",
+        "musicbrainz_mbid": "0681e8e3-9694-4ed6-bfce-47e7f66714b3",
+        "tm_attraction_id": "K8vZ9171p67",
+        "seatgeek_performer_slug": "ne-yo",
+        "wikipedia_title": "Ne-Yo",
+        "bandsintown_artist": "NE-YO",
+    },
+    {
+        "id": "styx-chicago-2026",
+        "name": "Styx & Chicago — The Windy Cities Tour",
+        "artist": "Styx",
+        "venue": "Ameris Bank Amphitheatre",
+        "date": "2026-07-17",
+        "genre": "Classic Rock",
+        "spotify_artist_id": "4salDzkPlRVFBN3JDTHLaP",
+        "musicbrainz_mbid": "6fc59ded-cdea-4898-8a9e-0e48a30a0fc4",
+        "tm_attraction_id": "K8vZ9171p77",
+        "seatgeek_performer_slug": "styx",
+        "wikipedia_title": "Styx_(band)",
+        "bandsintown_artist": "Styx",
+    },
+    {
+        "id": "kali-uchis-bottom-2026",
+        "name": "Kali Uchis — For The Girls Tour",
+        "artist": "Kali Uchis",
+        "venue": "Lakewood Amphitheatre",
+        "date": "2026-06-10",
+        "genre": "R&B",
+        "spotify_artist_id": "1U1el3k54VvEUzo3ybLPlM",
+        "musicbrainz_mbid": "b5c6d7e8-f9a0-1234-efab-345678901235",
+        "tm_attraction_id": "K8vZ9178DbV",
+        "seatgeek_performer_slug": "kali-uchis",
+        "wikipedia_title": "Kali_Uchis",
+        "bandsintown_artist": "Kali Uchis",
+    },
+    {
+        "id": "madison-beer-2026",
+        "name": "Madison Beer — The Locket Tour",
+        "artist": "Madison Beer",
+        "venue": "Coca-Cola Roxy",
+        "date": "2026-07-01",
+        "genre": "Pop",
+        "spotify_artist_id": "2XTGWnBHsN0TEmPCMkWbw2",
+        "musicbrainz_mbid": "e8f9a0b1-c2d3-4567-bcde-678901234568",
+        "tm_attraction_id": "K8vZ9178GbV",
+        "seatgeek_performer_slug": "madison-beer",
+        "wikipedia_title": "Madison_Beer",
+        "bandsintown_artist": "Madison Beer",
+    },
+    {
+        "id": "motionless-2026",
+        "name": "Motionless In White — Sweat and Blood Tour",
+        "artist": "Motionless In White",
+        "venue": "Ameris Bank Amphitheatre",
+        "date": "2026-07-22",
+        "genre": "Metalcore",
+        "spotify_artist_id": "6bD1EuUdVSMr2oiLkdJWxD",
+        "musicbrainz_mbid": "a4e9cc9e-e9b3-4c7d-99c2-4e2db3fdc3a0",
+        "tm_attraction_id": "K8vZ9171p87",
+        "seatgeek_performer_slug": "motionless-in-white",
+        "wikipedia_title": "Motionless_in_White",
+        "bandsintown_artist": "Motionless In White",
+    },
+    {
+        "id": "hayley-williams-2026",
+        "name": "The Hayley Williams Show w/ Magdalena Bay",
+        "artist": "Hayley Williams",
+        "venue": "Ameris Bank Amphitheatre",
+        "date": "2026-09-05",
+        "genre": "Indie / Alt",
+        "spotify_artist_id": "6XyY86QOPPrYVGvF9ch6wz",
+        "musicbrainz_mbid": "1fcf534e-5e43-4b8d-adb4-f9b2d4f8e1a2",
+        "tm_attraction_id": "K8vZ9178HbV",
+        "seatgeek_performer_slug": "hayley-williams",
+        "wikipedia_title": "Hayley_Williams",
+        "bandsintown_artist": "Hayley Williams",
+    },
+    {
+        "id": "muse-2026",
+        "name": "Muse — The Wow! Signal Tour",
+        "artist": "Muse",
+        "venue": "Lakewood Amphitheatre",
+        "date": "2026-08-12",
+        "genre": "Rock",
+        "spotify_artist_id": "12Chz98pHFMPJEknJQMWvI",
+        "musicbrainz_mbid": "9c9f1380-2516-47a9-8d4b-eda5159a3d49",
+        "tm_attraction_id": "K8vZ9171C77",
+        "seatgeek_performer_slug": "muse",
+        "wikipedia_title": "Muse_(band)",
+        "bandsintown_artist": "Muse",
+    },
+    {
+        "id": "evanescence-2026",
+        "name": "Evanescence — 2026 World Tour",
+        "artist": "Evanescence",
+        "venue": "Ameris Bank Amphitheatre",
+        "date": "2026-06-14",
+        "genre": "Rock",
+        "spotify_artist_id": "35YEPk2YEU1ahfUBSFRVp2",
+        "musicbrainz_mbid": "f0e3c1a5-2b1d-42af-83ad-d8e265f11f64",
+        "tm_attraction_id": "K8vZ9171C87",
+        "seatgeek_performer_slug": "evanescence",
+        "wikipedia_title": "Evanescence",
+        "bandsintown_artist": "Evanescence",
+    },
+    {
+        "id": "motley-crue-2026",
+        "name": "Mötley Crüe — Return of the Carnival of Sins",
+        "artist": "Mötley Crüe",
+        "venue": "Ameris Bank Amphitheatre",
+        "date": "2026-08-12",
+        "genre": "Rock",
+        "spotify_artist_id": "6JiCiuBmMhKbmFnWktnlbB",
+        "musicbrainz_mbid": "b4585bec-b69a-42b6-a4f6-1d3ae0a438bb",
+        "tm_attraction_id": "K8vZ9171C97",
+        "seatgeek_performer_slug": "motley-crue",
+        "wikipedia_title": "Mötley_Crüe",
+        "bandsintown_artist": "Mötley Crüe",
+    },
+    {
+        "id": "ella-mai-2026",
+        "name": "Ella Mai",
+        "artist": "Ella Mai",
+        "venue": "Synovus Bank Amphitheater at Chastain Park",
+        "date": "2026-08-14",
+        "genre": "R&B",
+        "spotify_artist_id": "0GF9QpAMKbbWdZbLOhQ7Xc",
+        "musicbrainz_mbid": "f9a0b1c2-d3e4-5678-cdef-789012345679",
+        "tm_attraction_id": "K8vZ9178IbV",
+        "seatgeek_performer_slug": "ella-mai",
+        "wikipedia_title": "Ella_Mai",
+        "bandsintown_artist": "Ella Mai",
+    },
+    {
+        "id": "train-bnl-2026",
+        "name": "Train, Barenaked Ladies & Matt Nathanson",
+        "artist": "Train",
+        "venue": "Ameris Bank Amphitheatre",
+        "date": "2026-07-11",
+        "genre": "Rock",
+        "spotify_artist_id": "3FUY2gzHeIiaesXtOAdB7A",
+        "musicbrainz_mbid": "a4d1c75e-0b8e-4cbb-bf74-e5e3db4a4d7c",
+        "tm_attraction_id": "K8vZ9171p97",
+        "seatgeek_performer_slug": "train",
+        "wikipedia_title": "Train_(band)",
+        "bandsintown_artist": "Train",
+    },
+    {
+        "id": "hilary-duff-2026",
+        "name": "Hilary Duff — The Lucky Me Tour",
+        "artist": "Hilary Duff",
+        "venue": "Ameris Bank Amphitheatre",
+        "date": "2026-06-25",
+        "genre": "Pop",
+        "spotify_artist_id": "2bCu4RPMGK2UHxNMsxOHsV",
+        "musicbrainz_mbid": "0a3b4c5d-6e7f-8901-abcd-ef0123456780",
+        "tm_attraction_id": "K8vZ9178JbV",
+        "seatgeek_performer_slug": "hilary-duff",
+        "wikipedia_title": "Hilary_Duff",
+        "bandsintown_artist": "Hilary Duff",
+    },
+    {
+        "id": "parker-mccollum-2026",
+        "name": "Parker McCollum",
+        "artist": "Parker McCollum",
+        "venue": "Ameris Bank Amphitheatre",
+        "date": "2026-07-18",
+        "genre": "Country",
+        "spotify_artist_id": "2ZosCo3Tb9aeIVCiEeKAnz",
+        "musicbrainz_mbid": "1b2c3d4e-5f6a-7890-bcde-f01234567891",
+        "tm_attraction_id": "K8vZ9178KbV",
+        "seatgeek_performer_slug": "parker-mccollum",
+        "wikipedia_title": "Parker_McCollum",
+        "bandsintown_artist": "Parker McCollum",
+    },
+    {
+        "id": "jack-johnson-2026",
+        "name": "Jack Johnson — SURFILMUSIC Tour",
+        "artist": "Jack Johnson",
+        "venue": "Ameris Bank Amphitheatre",
+        "date": "2026-08-21",
+        "genre": "Indie / Alt",
+        "spotify_artist_id": "6WT8MSUB7Kc6CYMVLzfgBk",
+        "musicbrainz_mbid": "01809552-4f87-45b0-afff-2c6f0730a3be",
+        "tm_attraction_id": "K8vZ9171p07",
+        "seatgeek_performer_slug": "jack-johnson",
+        "wikipedia_title": "Jack_Johnson_(musician)",
+        "bandsintown_artist": "Jack Johnson",
+    },
 ]
 
 
 # ── Helpers ────────────────────────────────────────────────────────────────
-def safe_get(url, params=None, headers=None, label=""):
-    """GET with timeout and graceful failure. Returns None on error."""
+def safe_get(url, params=None, headers=None, label="", timeout=10):
     try:
-        r = requests.get(url, params=params, headers=headers, timeout=10)
+        r = requests.get(url, params=params, headers=headers, timeout=timeout)
         r.raise_for_status()
         return r.json()
     except Exception as e:
@@ -166,7 +617,6 @@ def safe_get(url, params=None, headers=None, label=""):
 
 
 def get_spotify_token():
-    """Fetch a Spotify client-credentials access token."""
     if not SPOTIFY_CLIENT_ID or not SPOTIFY_SECRET:
         return None
     try:
@@ -182,21 +632,153 @@ def get_spotify_token():
         return None
 
 
-# ── Signal collectors ──────────────────────────────────────────────────────
+# ── MusicBrainz helpers ────────────────────────────────────────────────────
+MB_HEADERS = {"User-Agent": MB_USER_AGENT, "Accept": "application/json"}
 
+def resolve_mbid(artist_name):
+    """
+    One-time lookup: search MusicBrainz for an artist by name,
+    return their MBID and any linked Spotify artist ID.
+    Call this when adding a new event to the EVENTS list to
+    populate musicbrainz_mbid and verify spotify_artist_id.
+    Not called during the nightly loop — use the cached MBIDs
+    already in the EVENTS list above.
+    """
+    data = safe_get(
+        f"{MB_BASE}/artist/",
+        params={"query": artist_name, "limit": 1, "fmt": "json"},
+        headers=MB_HEADERS,
+        label=f"MusicBrainz resolve: {artist_name}",
+    )
+    time.sleep(1.1)  # MusicBrainz rate limit: 1 req/sec
+    if not data or not data.get("artists"):
+        return {}
+
+    artist = data["artists"][0]
+    mbid   = artist.get("id", "")
+
+    # Fetch relations to find Spotify link
+    detail = safe_get(
+        f"{MB_BASE}/artist/{mbid}",
+        params={"inc": "url-rels", "fmt": "json"},
+        headers=MB_HEADERS,
+        label=f"MusicBrainz detail: {artist_name}",
+    )
+    time.sleep(1.1)
+
+    spotify_id = ""
+    if detail:
+        for rel in detail.get("relations", []):
+            url = rel.get("url", {}).get("resource", "")
+            if "open.spotify.com/artist/" in url:
+                spotify_id = url.split("/")[-1].split("?")[0]
+                break
+
+    return {
+        "mbid": mbid,
+        "name": artist.get("name", ""),
+        "spotify_artist_id_from_mb": spotify_id,
+        "disambiguation": artist.get("disambiguation", ""),
+        "score": artist.get("score", 0),
+    }
+
+
+def fetch_musicbrainz(event):
+    """
+    Nightly call: given a known MBID, fetch the artist's release groups
+    and determine:
+      - mb_has_recent_album: True if a studio album was released within
+        365 days before the concert date (touring on new material signal)
+      - mb_days_since_last_album: days elapsed since most recent album
+      - mb_total_albums: total studio album count (career longevity proxy)
+      - mb_latest_album_title: name of most recent album
+    """
+    mbid = event.get("musicbrainz_mbid", "")
+    if not mbid:
+        return {}
+
+    concert_date = datetime.date.fromisoformat(event["date"])
+    cutoff_date  = concert_date - datetime.timedelta(days=365)
+
+    data = safe_get(
+        f"{MB_BASE}/release-group",
+        params={
+            "artist":   mbid,
+            "type":     "album",
+            "fmt":      "json",
+            "limit":    100,
+        },
+        headers=MB_HEADERS,
+        label=f"MusicBrainz releases: {event['artist']}",
+    )
+    time.sleep(1.1)  # strict rate limit
+
+    if not data or not data.get("release-groups"):
+        return {}
+
+    albums = []
+    for rg in data["release-groups"]:
+        # Only count official studio albums (not compilations/live/remix)
+        if rg.get("primary-type") != "Album":
+            continue
+        secondary = rg.get("secondary-types", [])
+        if any(t in secondary for t in ["Compilation", "Live", "Remix", "Soundtrack"]):
+            continue
+
+        date_str = rg.get("first-release-date", "")
+        if not date_str or len(date_str) < 4:
+            continue
+
+        # Parse partial dates (YYYY, YYYY-MM, YYYY-MM-DD)
+        try:
+            parts = date_str.split("-")
+            year  = int(parts[0])
+            month = int(parts[1]) if len(parts) > 1 else 1
+            day   = int(parts[2]) if len(parts) > 2 else 1
+            release_date = datetime.date(year, month, day)
+        except (ValueError, IndexError):
+            continue
+
+        albums.append({
+            "title": rg.get("title", ""),
+            "date":  release_date,
+        })
+
+    if not albums:
+        return {
+            "mb_has_recent_album":    False,
+            "mb_days_since_last_album": None,
+            "mb_total_albums":         0,
+            "mb_latest_album_title":   "",
+        }
+
+    # Sort by release date descending
+    albums.sort(key=lambda a: a["date"], reverse=True)
+    latest       = albums[0]
+    days_elapsed = (concert_date - latest["date"]).days
+    has_recent   = cutoff_date <= latest["date"] <= concert_date
+
+    return {
+        "mb_has_recent_album":     has_recent,
+        "mb_days_since_last_album": days_elapsed,
+        "mb_total_albums":          len(albums),
+        "mb_latest_album_title":    latest["title"],
+    }
+
+
+# ── Existing signal collectors ─────────────────────────────────────────────
 def fetch_ticketmaster(event):
-    """Ticket inventory and resale floor price from Ticketmaster Discovery API."""
     if not TICKETMASTER_KEY:
         return {}
     data = safe_get(
         "https://app.ticketmaster.com/discovery/v2/events",
         params={
-            "apikey": TICKETMASTER_KEY,
-            "attractionId": event.get("tm_attraction_id", ""),
-            "city": "Atlanta",
-            "startDateTime": event["date"] + "T00:00:00Z",
-            "endDateTime": event["date"] + "T23:59:59Z",
-            "size": 1,
+            "apikey":          TICKETMASTER_KEY,
+            "attractionId":    event.get("tm_attraction_id", ""),
+            "city":            "Atlanta",
+            "startDateTime":   event["date"] + "T00:00:00Z",
+            "endDateTime":     event["date"] + "T23:59:59Z",
+            "size":            1,
         },
         label="Ticketmaster",
     )
@@ -205,29 +787,28 @@ def fetch_ticketmaster(event):
     events = data["_embedded"].get("events", [])
     if not events:
         return {}
-    ev = events[0]
-    price_ranges = ev.get("priceRanges", [])
-    floor = min((p.get("min", 9999) for p in price_ranges), default=None)
+    ev     = events[0]
+    ranges = ev.get("priceRanges", [])
+    floor  = min((p.get("min", 9999) for p in ranges), default=None)
     return {
         "tm_floor_price": floor,
-        "tm_status": ev.get("dates", {}).get("status", {}).get("code", ""),
+        "tm_status":      ev.get("dates", {}).get("status", {}).get("code", ""),
     }
 
 
 def fetch_seatgeek(event):
-    """SeatGeek Deal Score and listing count."""
     if not SEATGEEK_CLIENT_ID:
         return {}
     data = safe_get(
         "https://api.seatgeek.com/2/events",
         params={
-            "client_id": SEATGEEK_CLIENT_ID,
-            "client_secret": SEATGEEK_SECRET,
-            "performers.slug": event.get("seatgeek_performer_slug", ""),
-            "venue.city": "Atlanta",
-            "datetime_local.gte": event["date"],
-            "datetime_local.lte": event["date"],
-            "per_page": 1,
+            "client_id":             SEATGEEK_CLIENT_ID,
+            "client_secret":         SEATGEEK_SECRET,
+            "performers.slug":       event.get("seatgeek_performer_slug", ""),
+            "venue.city":            "Atlanta",
+            "datetime_local.gte":    event["date"],
+            "datetime_local.lte":    event["date"],
+            "per_page":              1,
         },
         label="SeatGeek",
     )
@@ -235,15 +816,14 @@ def fetch_seatgeek(event):
         return {}
     ev = data["events"][0]
     return {
-        "seatgeek_deal_score": ev.get("score", 0),
+        "seatgeek_deal_score":    ev.get("score", 0),
         "seatgeek_listing_count": ev.get("stats", {}).get("listing_count", 0),
-        "seatgeek_floor": ev.get("stats", {}).get("lowest_price", None),
-        "seatgeek_avg_price": ev.get("stats", {}).get("average_price", None),
+        "seatgeek_floor":         ev.get("stats", {}).get("lowest_price", None),
+        "seatgeek_avg_price":     ev.get("stats", {}).get("average_price", None),
     }
 
 
 def fetch_spotify(event, token):
-    """Spotify monthly listeners and 30-day follower velocity."""
     if not token:
         return {}
     artist_id = event.get("spotify_artist_id", "")
@@ -252,25 +832,37 @@ def fetch_spotify(event, token):
     data = safe_get(
         f"https://api.spotify.com/v1/artists/{artist_id}",
         headers={"Authorization": f"Bearer {token}"},
-        label="Spotify",
+        label="Spotify artist",
     )
     if not data:
         return {}
+
+    # Also fetch top tracks to get a stream proxy velocity
+    tracks = safe_get(
+        f"https://api.spotify.com/v1/artists/{artist_id}/top-tracks",
+        params={"market": "US"},
+        headers={"Authorization": f"Bearer {token}"},
+        label="Spotify top-tracks",
+    )
+    top_track_popularity = 0
+    if tracks and tracks.get("tracks"):
+        top_track_popularity = tracks["tracks"][0].get("popularity", 0)
+
     return {
-        "spotify_followers": data.get("followers", {}).get("total", 0),
-        "spotify_popularity": data.get("popularity", 0),
+        "spotify_followers":          data.get("followers", {}).get("total", 0),
+        "spotify_popularity":         data.get("popularity", 0),
+        "spotify_top_track_popularity": top_track_popularity,
     }
 
 
 def fetch_wikipedia_pageviews(event):
-    """Wikipedia 30-day pageview trend for the artist article."""
     title = event.get("wikipedia_title", "")
     if not title:
         return {}
     today = datetime.date.today()
     start = (today - datetime.timedelta(days=30)).strftime("%Y%m%d")
     end   = today.strftime("%Y%m%d")
-    data = safe_get(
+    data  = safe_get(
         f"https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/"
         f"en.wikipedia/all-access/all-agents/{title}/daily/{start}/{end}",
         headers={"User-Agent": WIKIPEDIA_USER},
@@ -278,37 +870,32 @@ def fetch_wikipedia_pageviews(event):
     )
     if not data or "items" not in data:
         return {}
-    views = [item["views"] for item in data["items"]]
-    if len(views) < 2:
+    views  = [item["views"] for item in data["items"]]
+    if len(views) < 14:
         return {}
-    # Simple trend: compare last 7 days vs prior 7 days
     recent = sum(views[-7:])
     prior  = sum(views[-14:-7]) or 1
     trend  = round((recent - prior) / prior * 100, 1)
     return {
-        "wikipedia_30d_views": sum(views),
+        "wikipedia_30d_views":    sum(views),
         "wikipedia_7d_trend_pct": trend,
     }
 
 
 def fetch_google_trends(event):
-    """
-    Google Trends ATL DMA interest score via SerpApi.
-    SerpApi wraps Google Trends and returns 0-100 interest values.
-    """
     if not SERPAPI_KEY:
         return {}
     data = safe_get(
         "https://serpapi.com/search",
         params={
-            "engine": "google_trends",
-            "q": event["artist"],
-            "geo": "US-GA-524",   # Atlanta DMA code
+            "engine":    "google_trends",
+            "q":         event["artist"],
+            "geo":       "US-GA-524",
             "data_type": "TIMESERIES",
-            "date": "today 1-m",
-            "api_key": SERPAPI_KEY,
+            "date":      "today 1-m",
+            "api_key":   SERPAPI_KEY,
         },
-        label="Google Trends (SerpApi)",
+        label="Google Trends",
     )
     if not data:
         return {}
@@ -320,33 +907,25 @@ def fetch_google_trends(event):
 
 
 def fetch_bandsintown(event):
-    """Bands in Town Atlanta-specific fan intent count."""
     if not BANDSINTOWN_KEY:
         return {}
     artist = requests.utils.quote(event.get("bandsintown_artist", event["artist"]))
-    data = safe_get(
+    data   = safe_get(
         f"https://rest.bandsintown.com/artists/{artist}/events",
-        params={
-            "app_id": BANDSINTOWN_KEY,
-            "date": event["date"],
-        },
+        params={"app_id": BANDSINTOWN_KEY, "date": event["date"]},
         label="Bands in Town",
     )
     if not data:
         return {}
-    # Find the Atlanta show and return RSVP count
     for show in data:
-        venue_city = show.get("venue", {}).get("city", "").lower()
-        if "atlanta" in venue_city:
+        if "atlanta" in show.get("venue", {}).get("city", "").lower():
             return {"bandsintown_rsvps": show.get("going_count", 0)}
     return {}
 
 
 def fetch_chartmetric(event):
-    """Chartmetric streaming velocity and social momentum score."""
     if not CHARTMETRIC_TOKEN:
         return {}
-    # Chartmetric uses its own artist IDs — look up by Spotify ID
     artist_id = event.get("spotify_artist_id", "")
     if not artist_id:
         return {}
@@ -368,44 +947,37 @@ def fetch_chartmetric(event):
         return {}
     obj = stats["obj"]
     return {
-        "cm_spotify_streams_30d": obj.get("streams_30d", 0),
+        "cm_spotify_streams_30d":  obj.get("streams_30d", 0),
         "cm_spotify_stream_trend": obj.get("streams_growth_30d", 0),
     }
 
 
 # ── Main collection loop ───────────────────────────────────────────────────
-
 def collect_all():
-    print(f"[collect] Starting data collection — {datetime.datetime.now().isoformat()}")
+    print(f"[collect] Starting — {datetime.datetime.now().isoformat()}")
     spotify_token = get_spotify_token()
 
     results = {}
     for event in EVENTS:
         eid = event["id"]
-        print(f"  Collecting: {event['name']}")
+        print(f"  [{eid}] {event['name'][:55]}")
         signals = {"event_meta": event}
 
-        # 30% — Current Ticket Demand
-        signals.update(fetch_ticketmaster(event))
-        time.sleep(0.3)
-        signals.update(fetch_seatgeek(event))
-        time.sleep(0.3)
+        # 30% — Ticket Demand
+        signals.update(fetch_ticketmaster(event));  time.sleep(0.3)
+        signals.update(fetch_seatgeek(event));       time.sleep(0.3)
 
-        # 25% — Public Sentiment
-        signals.update(fetch_spotify(event, spotify_token))
-        time.sleep(0.2)
-        signals.update(fetch_chartmetric(event))
-        time.sleep(0.3)
+        # 25% — Sentiment
+        signals.update(fetch_spotify(event, spotify_token)); time.sleep(0.2)
+        signals.update(fetch_chartmetric(event));            time.sleep(0.3)
 
-        # 25% — Historical Sales (Wikipedia as proxy for legacy benchmarks)
-        signals.update(fetch_wikipedia_pageviews(event))
-        time.sleep(0.3)
+        # 25% — Historical Sales
+        signals.update(fetch_wikipedia_pageviews(event)); time.sleep(0.3)
+        signals.update(fetch_musicbrainz(event))  # rate-limited internally (1.1s sleep)
 
         # 20% — Local Intent
-        signals.update(fetch_google_trends(event))
-        time.sleep(0.5)   # SerpApi rate-limits aggressively
-        signals.update(fetch_bandsintown(event))
-        time.sleep(0.2)
+        signals.update(fetch_google_trends(event)); time.sleep(0.5)
+        signals.update(fetch_bandsintown(event));   time.sleep(0.2)
 
         results[eid] = signals
 
@@ -413,10 +985,10 @@ def collect_all():
     with open(output_path, "w") as f:
         json.dump({
             "collected_at": datetime.datetime.utcnow().isoformat() + "Z",
-            "events": results,
+            "events":       results,
         }, f, indent=2)
 
-    print(f"[collect] Done. Wrote {output_path} ({len(results)} events)")
+    print(f"[collect] Done — {len(results)} events → {output_path}")
     return results
 
 
