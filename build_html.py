@@ -140,36 +140,44 @@ def build_insight(ev):
     # MusicBrainz release context
     if raw.get("mb_has_recent_album") and raw.get("mb_latest_album_title"):
         days = raw.get("mb_days_since_last_album")
-        if days is not None and days <= 90:
+        if days is not None and int(days) <= 90:
             parts.append(f"Touring on new album &ldquo;{raw['mb_latest_album_title']}&rdquo; ({days} days old)")
         else:
             parts.append(f"New album &ldquo;{raw['mb_latest_album_title']}&rdquo; within past year")
-    elif raw.get("mb_total_albums", 0) >= 10:
-        parts.append(f"Deep catalog — {raw['mb_total_albums']} studio albums")
+    else:
+        total_albums = raw.get("mb_total_albums")
+        if total_albums is not None and int(total_albums) >= 10:
+            parts.append(f"Deep catalog — {total_albums} studio albums")
 
     # Eventbrite demand signals
     if raw.get("eb_is_sold_out") and raw.get("eb_has_waitlist"):
         parts.append("Eventbrite: sold out &middot; waitlist active")
     elif raw.get("eb_is_sold_out"):
         parts.append("Eventbrite: sold out")
-    elif raw.get("eb_sell_through_pct") is not None:
-        pct = raw["eb_sell_through_pct"]
-        if pct >= 80:
-            parts.append(f"Eventbrite: {pct:.0f}% sold")
-        elif pct >= 50:
-            parts.append(f"Eventbrite: {pct:.0f}% sold")
+    else:
+        pct = raw.get("eb_sell_through_pct")
+        if pct is not None:
+            pct = float(pct)
+            if pct >= 50:
+                parts.append(f"Eventbrite: {pct:.0f}% sold")
 
-    # Last.fm fan depth — surfaces for high-obsession acts
-    ppl = raw.get("lastfm_plays_per_listener")
+    # Last.fm fan depth
+    ppl       = raw.get("lastfm_plays_per_listener")
     listeners = raw.get("lastfm_listeners")
-    if ppl is not None and ppl >= 200 and listeners:
-        parts.append(f"Last.fm: {listeners/1_000_000:.1f}M listeners &middot; {ppl:.0f} plays/fan")
-    elif listeners and listeners >= 1_000_000:
-        parts.append(f"Last.fm: {listeners/1_000_000:.1f}M weekly listeners")
+    if ppl is not None and listeners is not None:
+        ppl       = float(ppl)
+        listeners = int(listeners)
+        if ppl >= 200 and listeners > 0:
+            parts.append(f"Last.fm: {listeners/1_000_000:.1f}M listeners &middot; {ppl:.0f} plays/fan")
+        elif listeners >= 1_000_000:
+            parts.append(f"Last.fm: {listeners/1_000_000:.1f}M weekly listeners")
+    elif listeners is not None and int(listeners) >= 1_000_000:
+        parts.append(f"Last.fm: {int(listeners)/1_000_000:.1f}M weekly listeners")
 
     # Setlist.fm ATL market strength
     atl_shows = raw.get("setlist_atl_shows_5y")
     if atl_shows is not None:
+        atl_shows = int(atl_shows)
         if atl_shows == 0:
             parts.append("First ATL appearance in 5+ years")
         elif atl_shows >= 4:
@@ -178,20 +186,25 @@ def build_insight(ev):
         parts.append("Prior ATL show sold out")
 
     # Ticket demand signals
-    if raw.get("seatgeek_floor"):
-        parts.append(f"Secondary floor ${raw['seatgeek_floor']:.0f}")
-    if raw.get("seatgeek_deal_score"):
-        parts.append(f"SeatGeek Deal Score {raw['seatgeek_deal_score']}/100")
+    sg_floor = raw.get("seatgeek_floor")
+    if sg_floor is not None:
+        parts.append(f"Secondary floor ${float(sg_floor):.0f}")
+    sg_deal = raw.get("seatgeek_deal_score")
+    if sg_deal is not None:
+        parts.append(f"SeatGeek Deal Score {sg_deal}/100")
 
     # Local intent
-    if raw.get("google_trends_atl"):
-        parts.append(f"ATL Trends index {raw['google_trends_atl']}")
-    if raw.get("bandsintown_rsvps"):
-        parts.append(f"Bands in Town: {raw['bandsintown_rsvps']:,} ATL intents")
+    gtrends = raw.get("google_trends_atl")
+    if gtrends is not None:
+        parts.append(f"ATL Trends index {gtrends}")
+    bit = raw.get("bandsintown_rsvps")
+    if bit is not None:
+        parts.append(f"Bands in Town: {int(bit):,} ATL intents")
 
     # Wikipedia trend
-    if raw.get("wikipedia_7d_trend_pct") is not None:
-        trend = raw["wikipedia_7d_trend_pct"]
+    trend = raw.get("wikipedia_7d_trend_pct")
+    if trend is not None:
+        trend     = float(trend)
         direction = "+" if trend >= 0 else ""
         parts.append(f"Wikipedia 7-day trend: {direction}{trend:.0f}%")
 
