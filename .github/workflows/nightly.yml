@@ -1,25 +1,20 @@
 name: Nightly Dashboard Refresh
 
 on:
-  # Runs every night at 11:00 PM Eastern Time (03:00 UTC).
-  # GitHub Actions runs on UTC, so 11 PM ET = 03:00 UTC (04:00 UTC during EDT).
-  # We use 03:00 UTC to cover both EST and EDT safely.
   schedule:
     - cron: "0 3 * * *"
-
-  # Also allows manual trigger from the GitHub Actions UI (Actions tab → Run workflow)
   workflow_dispatch:
 
 jobs:
   refresh:
     name: Collect → Score → Build → Upload
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
-      # 1. Check out the repository so the scripts are available
+      # 1. Check out the repository
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -33,33 +28,60 @@ jobs:
       - name: Install Python dependencies
         run: pip install -r requirements.txt
 
-      # 4. Run the full pipeline
-      #    All API keys and WordPress credentials are stored as GitHub Secrets
-      #    (Repository Settings → Secrets and variables → Actions → New repository secret)
+      # 4. Restore YouTube view-count cache from previous run
+      #    Key rotates weekly (YYYY-Www) so stale view counts never
+      #    accumulate beyond 7 days. Falls back to prior week's cache
+      #    if the current week's cache doesn't exist yet (new week).
+      #    The cache is stored at data/youtube_cache.json and read
+      #    by collect.py to compute 24-hour view deltas.
+      - name: Restore YouTube cache
+        id: yt-cache-restore
+        uses: actions/cache@v4
+        with:
+          path: data/youtube_cache.json
+          key: youtube-cache-${{ github.run_number }}
+          restore-keys: |
+            youtube-cache-
+
+      - name: Report YouTube cache status
+        run: |
+          if [ "${{ steps.yt-cache-restore.outputs.cache-hit }}" == "true" ]; then
+            echo "[cache] YouTube cache restored from previous run"
+            python3 -c "import json; c=json.load(open('data/youtube_cache.json')); print(f'[cache] {len(c)} events cached')" 2>/dev/null || echo "[cache] Cache file present"
+          else
+            echo "[cache] No prior YouTube cache found — first run or expired"
+            mkdir -p data
+            echo '{}' > data/youtube_cache.json
+          fi
+
+      # 5. Run the full pipeline
       - name: Run nightly pipeline
         env:
-          # ── Ticket demand sources ──────────────────────────────────────
+          # ── Ticket demand ────────────────────────────────────────────────
           TICKETMASTER_KEY:    ${{ secrets.TICKETMASTER_KEY }}
           SEATGEEK_CLIENT_ID:  ${{ secrets.SEATGEEK_CLIENT_ID }}
           SEATGEEK_SECRET:     ${{ secrets.SEATGEEK_SECRET }}
           STUBHUB_TOKEN:       ${{ secrets.STUBHUB_TOKEN }}
 
-          # ── Sentiment / streaming sources ──────────────────────────────
+          # ── Sentiment / streaming ────────────────────────────────────────
           SPOTIFY_CLIENT_ID:   ${{ secrets.SPOTIFY_CLIENT_ID }}
           SPOTIFY_SECRET:      ${{ secrets.SPOTIFY_SECRET }}
           CHARTMETRIC_TOKEN:   ${{ secrets.CHARTMETRIC_TOKEN }}
-
-          # ── Local intent sources ───────────────────────────────────────
-          SERPAPI_KEY:         ${{ secrets.SERPAPI_KEY }}
-          BANDSINTOWN_KEY:     ${{ secrets.BANDSINTOWN_KEY }}
-          SETLISTFM_KEY:       ${{ secrets.SETLISTFM_KEY }}
           LASTFM_KEY:          ${{ secrets.LASTFM_KEY }}
+          YOUTUBE_API_KEY:     ${{ secrets.YOUTUBE_API_KEY }}
           EVENTBRITE_TOKEN:    ${{ secrets.EVENTBRITE_TOKEN }}
 
-          # ── Wikipedia (no key needed, just a user-agent string) ────────
+          # ── Historical sales ─────────────────────────────────────────────
+          SETLISTFM_KEY:       ${{ secrets.SETLISTFM_KEY }}
+
+          # ── Local intent ─────────────────────────────────────────────────
+          SERPAPI_KEY:         ${{ secrets.SERPAPI_KEY }}
+          BANDSINTOWN_KEY:     ${{ secrets.BANDSINTOWN_KEY }}
+
+          # ── Wikipedia (keyless) ──────────────────────────────────────────
           WIKIPEDIA_USER:      "atlanta-music-magazine/1.0 (contact@atlantamusicmagazine.com)"
 
-          # ── WordPress upload ───────────────────────────────────────────
+          # ── WordPress upload ─────────────────────────────────────────────
           WP_SITE_URL:         ${{ secrets.WP_SITE_URL }}
           WP_USERNAME:         ${{ secrets.WP_USERNAME }}
           WP_APP_PASSWORD:     ${{ secrets.WP_APP_PASSWORD }}
@@ -68,18 +90,27 @@ jobs:
 
         run: python pipeline.py
 
-      # 5. Upload the built HTML as a GitHub Actions artifact
-      #    This means you can download the file directly from GitHub
-      #    even if the WordPress upload fails, and inspect it for debugging.
+      # 6. Save updated YouTube cache for next run
+      #    Runs even if the pipeline step fails so a partial cache
+      #    is never lost. The cache@v4 action uses the key set in
+      #    step 4 — same key = this run's cache overwrites last run's.
+      - name: Save YouTube cache
+        if: always()
+        uses: actions/cache@v4
+        with:
+          path: data/youtube_cache.json
+          key: youtube-cache-${{ github.run_number }}
+
+      # 7. Upload dashboard HTML artifact
       - name: Upload dashboard artifact
-        if: always()   # run even if a previous step failed
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: dashboard-${{ github.run_id }}
           path: output/artist_card_module_wp_ready.html
           retention-days: 7
 
-      # 6. Upload raw signals and scores for debugging
+      # 8. Upload pipeline data artifacts for debugging
       - name: Upload data artifacts
         if: always()
         uses: actions/upload-artifact@v4
