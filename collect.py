@@ -961,7 +961,7 @@ def fetch_wikidata(event):
 
     sparql = f"""
 SELECT ?artist
-       (COUNT(DISTINCT ?grammyWin) AS ?grammy_wins)
+       (COUNT(?awardStmt) AS ?grammy_wins)
        (COUNT(DISTINCT ?grammyNom) AS ?grammy_nominations)
        (MIN(?startYear) AS ?career_start)
        (COUNT(DISTINCT ?lang) AS ?wiki_languages)
@@ -969,15 +969,16 @@ SELECT ?artist
 WHERE {{
   {entity_clause}
 
-  # Grammy wins (competitive Recording Academy awards only).
-  # Filter: label must START WITH "Grammy Award for " — this precisely
-  # matches all 86 competitive Grammy categories (e.g. "Grammy Award
-  # for Best Pop Vocal Album") while excluding:
-  #   - Latin Grammy Award (starts with "Latin Grammy")
-  #   - Grammy Hall of Fame (Q1378073, label "Grammy Hall of Fame Award")
-  #   - Grammy Lifetime Achievement Award (label "Grammy Lifetime ...")
-  #   - Grammy Legend Award, Grammy Trustees Award (non-competitive)
-  # STRSTARTS is more precise than CONTAINS which matched too broadly.
+  # Grammy wins — COUNT(?awardStmt) not COUNT(DISTINCT ?grammyWin).
+  # Wikidata stores Grammy wins as award CATEGORY items (e.g. one Q-item
+  # for "Grammy Award for Best Pop Vocal Album" shared across all winners
+  # and all years). COUNT(DISTINCT ?grammyWin) collapses multiple wins
+  # in the same category to 1. Counting statement nodes (?awardStmt)
+  # gives one count per individual P166 statement = one per win.
+  #
+  # STRSTARTS("grammy award for ") excludes:
+  #   Latin Grammy (starts "latin grammy"), Grammy Hall of Fame,
+  #   Grammy Lifetime Achievement, Grammy Trustees Award (non-competitive).
   OPTIONAL {{
     ?artist p:P166 ?awardStmt .
     ?awardStmt ps:P166 ?grammyWin .
@@ -986,7 +987,8 @@ WHERE {{
     FILTER(STRSTARTS(LCASE(STR(?awardName)), "grammy award for "))
   }}
 
-  # Grammy nominations — nominated for (P1411), same precise filter
+  # Grammy nominations (P1411) — category items here are naturally
+  # distinct per nomination, so DISTINCT is correct.
   OPTIONAL {{
     ?artist wdt:P1411 ?grammyNom .
     ?grammyNom rdfs:label ?nomName .
