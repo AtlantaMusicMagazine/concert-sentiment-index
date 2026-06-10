@@ -49,6 +49,7 @@ EVENTS = [
     # ── TOP 20 ──────────────────────────────────────────────────────────────
     {
         "id": "ariana-grande-2026",
+        "grammy_wins_override": 2,
         "seed_score": 97,
         "name": "Ariana Grande — The Eternal Sunshine Tour",
         "artist": "Ariana Grande",
@@ -64,6 +65,7 @@ EVENTS = [
     },
     {
         "id": "shakira-2026",
+        "grammy_wins_override": 4,
         "seed_score": 94,
         "name": "Shakira — Las Mujeres Ya No Lloran World Tour",
         "artist": "Shakira",
@@ -154,6 +156,7 @@ EVENTS = [
     },
     {
         "id": "usher-2026",
+        "grammy_wins_override": 8,
         "seed_score": 72,
         "name": "Usher",
         "artist": "Usher",
@@ -259,6 +262,7 @@ EVENTS = [
     },
     {
         "id": "santana-doobie-2026",
+        "grammy_wins_override": 9,
         "seed_score": 54,
         "name": "Santana & The Doobie Brothers — Oneness Tour",
         "artist": "Santana",
@@ -289,6 +293,7 @@ EVENTS = [
     },
     {
         "id": "buju-banton-2026",
+        "grammy_wins_override": 1,
         "seed_score": 55,
         "name": "Buju Banton & Stephen Marley — Roots and Rhymes Tour",
         "artist": "Buju Banton",
@@ -381,6 +386,7 @@ EVENTS = [
     },
     {
         "id": "isley-ojays-2026",
+        "grammy_wins_override": 3,
         "seed_score": 21,
         "name": "The Isley Brothers & The O'Jays",
         "artist": "The Isley Brothers",
@@ -411,6 +417,7 @@ EVENTS = [
     },
     {
         "id": "wynonna-melissa-2026",
+        "grammy_wins_override": 1,
         "seed_score": 24,
         "name": "Wynonna Judd & Melissa Etheridge — Raised On Radio Tour",
         "artist": "Wynonna Judd",
@@ -441,6 +448,7 @@ EVENTS = [
     },
     {
         "id": "john-mellencamp-2026",
+        "grammy_wins_override": 1,
         "seed_score": 27,
         "name": "John Mellencamp — Dancing Words Tour",
         "artist": "John Mellencamp",
@@ -456,6 +464,7 @@ EVENTS = [
     },
     {
         "id": "ne-yo-akon-2026",
+        "grammy_wins_override": 3,
         "seed_score": 31,
         "name": "NE-YO & Akon — Nights Like This Tour",
         "artist": "NE-YO",
@@ -561,6 +570,7 @@ EVENTS = [
     },
     {
         "id": "evanescence-2026",
+        "grammy_wins_override": 1,
         "seed_score": 45,
         "name": "Evanescence — 2026 World Tour",
         "artist": "Evanescence",
@@ -606,6 +616,7 @@ EVENTS = [
     },
     {
         "id": "train-bnl-2026",
+        "grammy_wins_override": 3,
         "seed_score": 32,
         "name": "Train, Barenaked Ladies & Matt Nathanson",
         "artist": "Train",
@@ -1054,16 +1065,24 @@ LIMIT 1
         except (ValueError, TypeError):
             pass
 
+    # Apply grammy_wins_override from the EVENTS entry when present.
+    # Wikidata's Grammy data is often incomplete — missing recent wins,
+    # miscategorised awards, or sparse P166 coverage. The override provides
+    # a verified count from official Grammy.com / Wikipedia for affected artists.
+    # Other Wikidata signals (wiki_langs, active_years, genres) are still
+    # fetched from SPARQL as normal — only Grammy wins use the override.
+    override = event.get("grammy_wins_override")
+    if override is not None:
+        grammy_wins = int(override)
+
     return {
-        "wd_grammy_wins":        grammy_wins,
-        "wd_grammy_nominations": grammy_noms,
-        "wd_active_years":       active_years,
+        "wd_grammy_wins":         grammy_wins,
+        "wd_grammy_nominations":  grammy_noms,
+        "wd_active_years":        active_years,
         "wd_wikipedia_languages": wiki_langs,
-        "wd_genres_count":       genres_count,
+        "wd_genres_count":        genres_count,
     }
 
-
-def fetch_wikipedia_pageviews(event):
     title = event.get("wikipedia_title", "")
     if not title:
         return {}
