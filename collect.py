@@ -961,7 +961,7 @@ def fetch_wikidata(event):
 
     sparql = f"""
 SELECT ?artist
-       (COUNT(?awardStmt) AS ?grammy_wins)
+       (COUNT(DISTINCT ?awardStmt) AS ?grammy_wins)
        (COUNT(DISTINCT ?grammyNom) AS ?grammy_nominations)
        (MIN(?startYear) AS ?career_start)
        (COUNT(DISTINCT ?lang) AS ?wiki_languages)
@@ -969,31 +969,29 @@ SELECT ?artist
 WHERE {{
   {entity_clause}
 
-  # Grammy wins — COUNT(?awardStmt) not COUNT(DISTINCT ?grammyWin).
-  # Wikidata stores Grammy wins as award CATEGORY items (e.g. one Q-item
-  # for "Grammy Award for Best Pop Vocal Album" shared across all winners
-  # and all years). COUNT(DISTINCT ?grammyWin) collapses multiple wins
-  # in the same category to 1. Counting statement nodes (?awardStmt)
-  # gives one count per individual P166 statement = one per win.
-  #
-  # STRSTARTS("grammy award for ") excludes:
-  #   Latin Grammy (starts "latin grammy"), Grammy Hall of Fame,
-  #   Grammy Lifetime Achievement, Grammy Trustees Award (non-competitive).
+  # Grammy wins — uses FILTER EXISTS for the label check so the label
+  # triple is never joined into the result set. This prevents row
+  # multiplication from Wikidata award items having multiple rdfs:label
+  # triples (label + aliases in multiple languages).
+  # COUNT(DISTINCT ?awardStmt) counts one per P166 statement node.
   OPTIONAL {{
     ?artist p:P166 ?awardStmt .
     ?awardStmt ps:P166 ?grammyWin .
-    ?grammyWin rdfs:label ?awardName .
-    FILTER(LANG(?awardName) = "en")
-    FILTER(STRSTARTS(LCASE(STR(?awardName)), "grammy award for "))
+    FILTER EXISTS {{
+      ?grammyWin rdfs:label ?lbl .
+      FILTER(LANG(?lbl) = "en")
+      FILTER(STRSTARTS(LCASE(STR(?lbl)), "grammy award for "))
+    }}
   }}
 
-  # Grammy nominations (P1411) — category items here are naturally
-  # distinct per nomination, so DISTINCT is correct.
+  # Grammy nominations (P1411) — FILTER EXISTS same pattern
   OPTIONAL {{
     ?artist wdt:P1411 ?grammyNom .
-    ?grammyNom rdfs:label ?nomName .
-    FILTER(LANG(?nomName) = "en")
-    FILTER(STRSTARTS(LCASE(STR(?nomName)), "grammy award for "))
+    FILTER EXISTS {{
+      ?grammyNom rdfs:label ?nomLbl .
+      FILTER(LANG(?nomLbl) = "en")
+      FILTER(STRSTARTS(LCASE(STR(?nomLbl)), "grammy award for "))
+    }}
   }}
 
   # Career start — inception (P571)
