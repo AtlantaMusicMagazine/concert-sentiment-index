@@ -1648,6 +1648,133 @@ def _extract_tour_name(event_display_name):
 
 
 # ── Main collection loop ───────────────────────────────────────────────────
+def fetch_itunes(event):
+    """
+    iTunes Search API — artist metadata.
+    No key required. Free, no rate limit for reasonable usage.
+    Endpoint: itunes.apple.com/search
+
+    Signals extracted:
+      itunes_album_count      : number of albums in iTunes catalog
+                                (cross-validates MusicBrainz album count)
+      itunes_primary_genre    : primary genre classification from Apple
+                                (useful sanity-check against our genre field)
+      itunes_artist_id        : Apple Music artist ID (stable identifier)
+    """
+    artist_name = event.get("artist", "")
+    if not artist_name:
+        return {}
+
+    data = safe_get(
+        "https://itunes.apple.com/search",
+        params={
+            "term":      artist_name,
+            "entity":    "musicArtist",
+            "attribute": "artistTerm",
+            "limit":     5,
+        },
+        label=f"iTunes: {artist_name}",
+    )
+    time.sleep(0.2)
+
+    if not data or not data.get("results"):
+        return {}
+
+    # Find best-matching result by name similarity
+    results = data["results"]
+    best    = None
+    artist_lower = artist_name.lower()
+    for r in results:
+        if r.get("artistName", "").lower() == artist_lower:
+            best = r
+            break
+    if best is None:
+        best = results[0]   # fallback to first result
+
+    # Fetch album count via lookup
+    artist_id = best.get("artistId")
+    album_count = 0
+    if artist_id:
+        album_data = safe_get(
+            "https://itunes.apple.com/lookup",
+            params={
+                "id":     artist_id,
+                "entity": "album",
+                "limit":  200,
+            },
+            label=f"iTunes albums: {artist_name}",
+        )
+        time.sleep(0.2)
+        if album_data and album_data.get("resultCount", 0) > 1:
+            # resultCount includes the artist record itself
+            album_count = album_data["resultCount"] - 1
+
+    return {
+        "itunes_album_count":   album_count,
+        "itunes_primary_genre": best.get("primaryGenreName", ""),
+        "itunes_artist_id":     artist_id,
+    }
+
+
+def fetch_deezer(event):
+    """
+    Deezer API — fan count and album count.
+    No key required. Free public GET endpoints.
+    Endpoint: api.deezer.com/search/artist
+
+    Signals extracted:
+      deezer_fans        : total Deezer fan count (follower equivalent)
+                           Europe-weighted — strong signal for international
+                           acts like Shakira, Usher, AC/DC
+      deezer_album_count : number of albums in Deezer catalog
+      deezer_artist_id   : Deezer artist ID
+    """
+    artist_name = event.get("artist", "")
+    if not artist_name:
+        return {}
+
+    data = safe_get(
+        "https://api.deezer.com/search/artist",
+        params={"q": artist_name, "limit": 5},
+        label=f"Deezer: {artist_name}",
+    )
+    time.sleep(0.2)
+
+    if not data or not data.get("data"):
+        return {}
+
+    results = data["data"]
+    best    = None
+    artist_lower = artist_name.lower()
+    for r in results:
+        if r.get("name", "").lower() == artist_lower:
+            best = r
+            break
+    if best is None:
+        best = results[0]
+
+    deezer_id = best.get("id")
+    fans      = int(best.get("nb_fan", 0) or 0)
+
+    # Fetch album count from artist detail endpoint
+    album_count = 0
+    if deezer_id:
+        detail = safe_get(
+            f"https://api.deezer.com/artist/{deezer_id}/albums",
+            params={"limit": 1},   # only need total count from header
+            label=f"Deezer albums: {artist_name}",
+        )
+        time.sleep(0.2)
+        if detail:
+            album_count = int(detail.get("total", 0) or 0)
+
+    return {
+        "deezer_fans":        fans,
+        "deezer_album_count": album_count,
+        "deezer_artist_id":   deezer_id,
+    }
+
+
 def collect_all():
     print(f"[collect] Starting — {datetime.datetime.now().isoformat()}")
     print(f"[collect] Total events to collect: {len(EVENTS)}")
@@ -1677,8 +1804,9 @@ def collect_all():
             signals.update(fetch_spotify(event, spotify_token)); time.sleep(0.2)
             signals.update(fetch_chartmetric(event));            time.sleep(0.3)
             signals.update(fetch_lastfm(event))
-            # YouTube: pass cache by reference so fetch_youtube can update it
             signals.update(fetch_youtube(event, yt_cache))
+            signals.update(fetch_itunes(event))
+            signals.update(fetch_deezer(event))
         except Exception as e:
             print(f"    [WARN] Sentiment fetch failed: {e}")
 
