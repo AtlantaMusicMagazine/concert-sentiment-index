@@ -972,38 +972,11 @@ def fetch_wikidata(event):
 
     sparql = f"""
 SELECT ?artist
-       (COUNT(DISTINCT ?awardStmt) AS ?grammy_wins)
-       (COUNT(DISTINCT ?grammyNom) AS ?grammy_nominations)
        (MIN(?startYear) AS ?career_start)
        (COUNT(DISTINCT ?lang) AS ?wiki_languages)
        (COUNT(DISTINCT ?genre) AS ?genres_count)
 WHERE {{
   {entity_clause}
-
-  # Grammy wins — uses FILTER EXISTS for the label check so the label
-  # triple is never joined into the result set. This prevents row
-  # multiplication from Wikidata award items having multiple rdfs:label
-  # triples (label + aliases in multiple languages).
-  # COUNT(DISTINCT ?awardStmt) counts one per P166 statement node.
-  OPTIONAL {{
-    ?artist p:P166 ?awardStmt .
-    ?awardStmt ps:P166 ?grammyWin .
-    FILTER EXISTS {{
-      ?grammyWin rdfs:label ?lbl .
-      FILTER(LANG(?lbl) = "en")
-      FILTER(STRSTARTS(LCASE(STR(?lbl)), "grammy award for "))
-    }}
-  }}
-
-  # Grammy nominations (P1411) — FILTER EXISTS same pattern
-  OPTIONAL {{
-    ?artist wdt:P1411 ?grammyNom .
-    FILTER EXISTS {{
-      ?grammyNom rdfs:label ?nomLbl .
-      FILTER(LANG(?nomLbl) = "en")
-      FILTER(STRSTARTS(LCASE(STR(?nomLbl)), "grammy award for "))
-    }}
-  }}
 
   # Career start — inception (P571)
   OPTIONAL {{
@@ -1024,6 +997,53 @@ WHERE {{
 GROUP BY ?artist
 LIMIT 1
 """
+
+    # ── Grammy wins: separate simple query ──────────────────────────
+    # Run only when no grammy_wins_override is set on the event.
+    # Kept as a separate query so a slow Grammy lookup never blocks
+    # the career/language/genre data above.
+    grammy_wins = 0
+    grammy_noms = 0
+    override = event.get("grammy_wins_override")
+    if override is not None:
+        grammy_wins = int(override)
+    else:
+        grammy_sparql = f"""
+SELECT (COUNT(DISTINCT ?awardStmt) AS ?grammy_wins)
+       (COUNT(DISTINCT ?grammyNom) AS ?grammy_nominations)
+WHERE {{
+  {entity_clause}
+  OPTIONAL {{
+    ?artist p:P166 ?awardStmt .
+    ?awardStmt ps:P166 ?grammyWin .
+    ?grammyWin rdfs:label ?lbl .
+    FILTER(LANG(?lbl) = "en")
+    FILTER(STRSTARTS(LCASE(STR(?lbl)), "grammy award for "))
+  }}
+  OPTIONAL {{
+    ?artist wdt:P1411 ?grammyNom .
+    ?grammyNom rdfs:label ?nomLbl .
+    FILTER(LANG(?nomLbl) = "en")
+    FILTER(STRSTARTS(LCASE(STR(?nomLbl)), "grammy award for "))
+  }}
+}}
+"""
+        grammy_data = safe_get(
+            "https://query.wikidata.org/sparql",
+            params={"query": grammy_sparql, "format": "json"},
+            headers=headers,
+            label=f"Wikidata Grammy: {artist_name}",
+            timeout=10,
+        )
+        time.sleep(0.3)
+        if grammy_data:
+            gbindings = grammy_data.get("results", {}).get("bindings", [])
+            if gbindings:
+                def gint(key):
+                    v = gbindings[0].get(key, {}).get("value")
+                    return int(v) if v else 0
+                grammy_wins = gint("grammy_wins")
+                grammy_noms = gint("grammy_nominations")
 
     headers = {
         "User-Agent":  MB_USER_AGENT,   # reuse MusicBrainz user-agent constant
@@ -1051,8 +1071,6 @@ LIMIT 1
         v = row.get(key, {}).get("value")
         return int(v) if v else 0
 
-    grammy_wins  = int_val("grammy_wins")
-    grammy_noms  = int_val("grammy_nominations")
     wiki_langs   = int_val("wiki_languages")
     genres_count = int_val("genres_count")
 
@@ -1064,16 +1082,6 @@ LIMIT 1
             active_years = datetime.date.today().year - start_year
         except (ValueError, TypeError):
             pass
-
-    # Apply grammy_wins_override from the EVENTS entry when present.
-    # Wikidata's Grammy data is often incomplete — missing recent wins,
-    # miscategorised awards, or sparse P166 coverage. The override provides
-    # a verified count from official Grammy.com / Wikipedia for affected artists.
-    # Other Wikidata signals (wiki_langs, active_years, genres) are still
-    # fetched from SPARQL as normal — only Grammy wins use the override.
-    override = event.get("grammy_wins_override")
-    if override is not None:
-        grammy_wins = int(override)
 
     return {
         "wd_grammy_wins":         grammy_wins,
