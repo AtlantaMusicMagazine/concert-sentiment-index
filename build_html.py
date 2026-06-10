@@ -161,6 +161,13 @@ def build_signals_html(ev):
         signals.append(("high" if int(wd_langs) >= 31 else "medium",
                          "Wikipedia editions", str(int(wd_langs))))
 
+    deezer = raw.get("deezer_fans")
+    if deezer is not None and int(deezer) >= 100_000:
+        d = int(deezer)
+        lvl = "high" if d >= 10_000_000 else ("medium" if d >= 1_000_000 else "low")
+        signals.append((lvl, "Deezer fans",
+                        f"{d/1_000_000:.1f}M" if d >= 1_000_000 else f"{d:,}"))
+
     # Cap at 8 signals
     signals = signals[:8]
 
