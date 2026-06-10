@@ -969,25 +969,29 @@ SELECT ?artist
 WHERE {{
   {entity_clause}
 
-  # Grammy wins — use full reification (p:/ps:) to reach award statements,
-  # then filter by award label containing "Grammy" (case-insensitive).
-  # This is more reliable than subclass traversal (wdt:P279*) which
-  # fails when Grammy subclass items are stored as leaf nodes without
-  # explicit P279 links back to Q41612.
+  # Grammy wins (competitive Recording Academy awards only).
+  # Filter: label must START WITH "Grammy Award for " — this precisely
+  # matches all 86 competitive Grammy categories (e.g. "Grammy Award
+  # for Best Pop Vocal Album") while excluding:
+  #   - Latin Grammy Award (starts with "Latin Grammy")
+  #   - Grammy Hall of Fame (Q1378073, label "Grammy Hall of Fame Award")
+  #   - Grammy Lifetime Achievement Award (label "Grammy Lifetime ...")
+  #   - Grammy Legend Award, Grammy Trustees Award (non-competitive)
+  # STRSTARTS is more precise than CONTAINS which matched too broadly.
   OPTIONAL {{
     ?artist p:P166 ?awardStmt .
     ?awardStmt ps:P166 ?grammyWin .
     ?grammyWin rdfs:label ?awardName .
     FILTER(LANG(?awardName) = "en")
-    FILTER(CONTAINS(LCASE(?awardName), "grammy"))
+    FILTER(STRSTARTS(LCASE(STR(?awardName)), "grammy award for "))
   }}
 
-  # Grammy nominations — nominated for (P1411), same label filter approach
+  # Grammy nominations — nominated for (P1411), same precise filter
   OPTIONAL {{
     ?artist wdt:P1411 ?grammyNom .
     ?grammyNom rdfs:label ?nomName .
     FILTER(LANG(?nomName) = "en")
-    FILTER(CONTAINS(LCASE(?nomName), "grammy"))
+    FILTER(STRSTARTS(LCASE(STR(?nomName)), "grammy award for "))
   }}
 
   # Career start — inception (P571)
