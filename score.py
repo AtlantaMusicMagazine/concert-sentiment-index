@@ -93,6 +93,7 @@ API_SIGNAL_KEYS = [
     "eb_sell_through_pct", "eb_is_sold_out",
     "yt_view_velocity_7d", "yt_subscriber_count",
     "wd_grammy_wins", "wd_wikipedia_languages", "wd_active_years",
+    "itunes_album_count", "deezer_fans",
 ]
 TOTAL_API_SIGNALS = len(API_SIGNAL_KEYS)
 
@@ -400,6 +401,50 @@ def norm_genre_breadth(genres_count):
     return 0.40
 
 
+def norm_itunes_album_count(count):
+    """
+    iTunes album count — cross-validates MusicBrainz career depth
+    with Apple's catalog as a second source.
+    0:    no iTunes presence (0.20)
+    1–3:  emerging (0.45)
+    4–8:  established (0.65)
+    9–15: proven catalog (0.80)
+    16+:  deep legacy catalog (0.95)
+    """
+    if count is None:
+        return None
+    n = int(count)
+    if n == 0:
+        return 0.20
+    if n >= 16:
+        return 0.95
+    if n >= 9:
+        return 0.80
+    if n >= 4:
+        return 0.65
+    return 0.45
+
+
+def norm_deezer_fans(fans):
+    """
+    Deezer fan count — Europe-weighted listener breadth signal.
+    Complements Last.fm (UK-heavy) and Spotify (global).
+    Strong differentiator for international acts.
+    Log-scaled, same approach as Last.fm listeners.
+    <10K:    niche           (0.15)
+    10K–100K: regional       (0.35)
+    100K–1M:  international  (0.55)
+    1M–10M:   mainstream     (0.75)
+    10M+:     global star    (0.95)
+    """
+    if fans is None:
+        return None
+    if fans == 0:
+        return None   # 0 could mean API miss, not genuine 0 fans
+    fans = max(1, int(fans))
+    return min(0.95, round(math.log10(fans) / math.log10(20_000_000), 4))
+
+
 def norm_spotify_popularity(val):
     if val is None:
         return None
@@ -596,50 +641,38 @@ def score_ticket_demand(signals):
 def score_historical_sales(signals):
     """
     Pillar 2 — Historical Sales (25%)
-
-    Sources:
-      MusicBrainz release recency   [KEYLESS]
-      Wikipedia 7-day trend         [KEYLESS]
-      MusicBrainz career depth      [KEYLESS]
-      Wikidata Grammy wins          [KEYLESS]
-      Wikidata Wikipedia languages  [KEYLESS]
-      Wikidata active years         [KEYLESS]
-      Wikidata Grammy nominations   [KEYLESS]
-      Setlist.fm venue trajectory   [key required]
-      Spotify popularity            [key required]
-      Chartmetric stream trend      [key required]
-      Wikidata genre breadth        [KEYLESS]
-
-    Intra-pillar weights:
-      20% — MusicBrainz release recency     [KEYLESS]
-      15% — Wikidata Grammy wins            [KEYLESS]
-      15% — Wikidata Wikipedia languages    [KEYLESS]
-      12% — Wikipedia 7-day trend           [KEYLESS]
-      10% — Wikidata active years           [KEYLESS]
-      08% — MusicBrainz career depth        [KEYLESS]
-      06% — Wikidata Grammy nominations     [KEYLESS]
-      05% — Setlist.fm venue trajectory
+    Sources (all weights sum to 1.00 — handled by weighted_avg):
+      18% — MusicBrainz release recency  [KEYLESS]
+      14% — Wikidata Grammy wins         [KEYLESS]
+      13% — Wikidata Wikipedia languages [KEYLESS]
+      11% — Wikipedia 7-day trend        [KEYLESS]
+      09% — Wikidata active years        [KEYLESS]
+      08% — MusicBrainz career depth     [KEYLESS]
+      07% — iTunes album count           [KEYLESS]
+      06% — Wikidata Grammy nominations  [KEYLESS]
+      06% — Setlist.fm venue trajectory
       05% — Spotify popularity
-      03% — Chartmetric stream trend
-      01% — Wikidata genre breadth          [KEYLESS]
+      02% — Chartmetric stream trend
+      01% — Wikidata genre breadth       [KEYLESS]
     """
     venue       = signals.get("event_meta", {}).get("venue", "")
     current_cap = VENUE_CAPS.get(venue)
 
     components = [
-        (0.20, norm_mb_recent_album(
+        (0.18, norm_mb_recent_album(
                    signals.get("mb_has_recent_album"),
                    signals.get("mb_days_since_last_album"))),
-        (0.15, norm_grammy_wins(signals.get("wd_grammy_wins"))),
-        (0.15, norm_wikipedia_languages(signals.get("wd_wikipedia_languages"))),
-        (0.12, norm_wikipedia_trend(signals.get("wikipedia_7d_trend_pct"))),
-        (0.10, norm_active_years(signals.get("wd_active_years"))),
+        (0.14, norm_grammy_wins(signals.get("wd_grammy_wins"))),
+        (0.13, norm_wikipedia_languages(signals.get("wd_wikipedia_languages"))),
+        (0.11, norm_wikipedia_trend(signals.get("wikipedia_7d_trend_pct"))),
+        (0.09, norm_active_years(signals.get("wd_active_years"))),
         (0.08, norm_mb_career_depth(signals.get("mb_total_albums"))),
+        (0.07, norm_itunes_album_count(signals.get("itunes_album_count"))),
         (0.06, norm_grammy_nominations(signals.get("wd_grammy_nominations"))),
-        (0.05, norm_setlist_venue_trajectory(
+        (0.06, norm_setlist_venue_trajectory(
                    signals.get("setlist_avg_venue_cap"), current_cap)),
         (0.05, norm_spotify_popularity(signals.get("spotify_popularity"))),
-        (0.03, norm_chartmetric_trend(signals.get("cm_spotify_stream_trend"))),
+        (0.02, norm_chartmetric_trend(signals.get("cm_spotify_stream_trend"))),
         (0.01, norm_genre_breadth(signals.get("wd_genres_count"))),
     ]
     return weighted_avg(components, neutral=0.50)
@@ -648,36 +681,26 @@ def score_historical_sales(signals):
 def score_sentiment(signals):
     """
     Pillar 3 — Public Sentiment (25%)
-
-    Sources:
-      Genre-tier prior       [KEYLESS — always fires]
-      Spotify popularity     [key required]
-      Last.fm listeners      [key required]
-      Last.fm fan depth      [key required]
-      YouTube view velocity  [key required — velocity available from run 2+]
-      YouTube subscribers    [key required]
-      Chartmetric trend      [key required]
-      Last.fm peer tier      [key required]
-
-    Intra-pillar weights:
-      18% — Genre-tier prior         [KEYLESS]
-      18% — Spotify popularity
-      16% — Last.fm listener breadth
-      16% — YouTube view velocity    ← NEW
-      12% — Last.fm fan depth
-      10% — YouTube subscribers      ← NEW
-      06% — Chartmetric stream trend
+      16% — Genre-tier prior    [KEYLESS]
+      16% — Spotify popularity
+      14% — Last.fm listeners
+      14% — YouTube view velocity
+      11% — Last.fm fan depth
+      10% — Deezer fans         [KEYLESS]
+      09% — YouTube subscribers
+      06% — Chartmetric trend
       04% — Last.fm peer tier
     """
     genre = signals.get("event_meta", {}).get("genre", "")
 
     components = [
-        (0.18, norm_genre_prior(genre)),
-        (0.18, norm_spotify_popularity(signals.get("spotify_popularity"))),
-        (0.16, norm_lastfm_listeners(signals.get("lastfm_listeners"))),
-        (0.16, norm_youtube_velocity(signals.get("yt_view_velocity_7d"))),
-        (0.12, norm_lastfm_depth(signals.get("lastfm_plays_per_listener"))),
-        (0.10, norm_youtube_subscribers(signals.get("yt_subscriber_count"))),
+        (0.16, norm_genre_prior(genre)),
+        (0.16, norm_spotify_popularity(signals.get("spotify_popularity"))),
+        (0.14, norm_lastfm_listeners(signals.get("lastfm_listeners"))),
+        (0.14, norm_youtube_velocity(signals.get("yt_view_velocity_7d"))),
+        (0.11, norm_lastfm_depth(signals.get("lastfm_plays_per_listener"))),
+        (0.10, norm_deezer_fans(signals.get("deezer_fans"))),
+        (0.09, norm_youtube_subscribers(signals.get("yt_subscriber_count"))),
         (0.06, norm_chartmetric_trend(signals.get("cm_spotify_stream_trend"))),
         (0.04, norm_lastfm_peer_tier(signals.get("lastfm_similar_listeners"))),
     ]
@@ -866,6 +889,10 @@ def score_all():
                 "wd_active_years":              signals.get("wd_active_years"),
                 "wd_wikipedia_languages":       signals.get("wd_wikipedia_languages"),
                 "wd_genres_count":              signals.get("wd_genres_count"),
+                "itunes_album_count":           signals.get("itunes_album_count"),
+                "itunes_primary_genre":         signals.get("itunes_primary_genre"),
+                "deezer_fans":                  signals.get("deezer_fans"),
+                "deezer_album_count":           signals.get("deezer_album_count"),
                 "eb_has_listing":               signals.get("eb_has_listing"),
                 "eb_capacity":                  signals.get("eb_capacity"),
                 "eb_tickets_sold":              signals.get("eb_tickets_sold"),
