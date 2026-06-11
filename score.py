@@ -47,12 +47,18 @@ VENUE_CAPS = {
     "Mercedes-Benz Stadium":                             71000,
     "Ameris Bank Amphitheatre":                          12000,
     "Synovus Bank Amphitheater at Chastain Park":         6900,
-    "Lakewood Amphitheatre":                             19000,
+    "Lakewood Amphitheatre":                             18920,   # 7K seated + 12K lawn
     "Coca-Cola Roxy":                                     3600,
-    "Truist Park":                                       41084,
     "The Eastern":                                         500,
     "Vinyl at Center Stage":                               200,
     "Truist Park":                                       41084,   # Noah Kahan sold-out stadium show
+    "Bobby Dodd Stadium":                              55000,
+    "Gas South Arena":                                 13100,
+    "Fabulous Fox Theatre":                            4665,
+    "Cobb Energy Performing Arts Centre":              2750,
+    "The Tabernacle":                                  2600,
+    "Variety Playhouse":                               1000,
+    "Terminal West":                                   900,
     "Piedmont Park":                                     40000,   # Shaky Knees festival grounds
 }
 
