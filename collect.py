@@ -49,7 +49,7 @@ EVENTS = [
     # ── TOP 20 ──────────────────────────────────────────────────────────────
     {
         "id": "ariana-grande-2026",
-        "grammy_wins_override": 2,
+        "grammy_wins_override": 3,
         "seed_score": 97,
         "name": "Ariana Grande — The Eternal Sunshine Tour",
         "artist": "Ariana Grande",
