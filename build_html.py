@@ -628,8 +628,23 @@ def build():
     for ev in events:
         ev["score"] = int(ev.get("score") or 0)
 
-    top_events    = events[:TOP_N]
-    bottom_events = sorted(events, key=lambda e: int(e["score"]))[:BOTTOM_N]
+    # Filter to only future in-window events for the main panels
+    # Past events (date < today) are removed regardless of score
+    today_date = datetime.date.today()
+    def in_window(ev):
+        try:
+            d = datetime.date.fromisoformat(ev.get("date", ""))
+            return d >= today_date and d <= WINDOW_END
+        except (ValueError, TypeError):
+            return False
+
+    future_events = [ev for ev in events if in_window(ev)]
+    past_count    = len(events) - len(future_events)
+    if past_count:
+        print(f"[build] Filtered {past_count} past/out-of-window events from main panels")
+
+    top_events    = future_events[:TOP_N]
+    bottom_events = sorted(future_events, key=lambda e: int(e["score"]))[:BOTTOM_N]
 
     # Build card blocks
     top_html_parts = []
