@@ -778,11 +778,28 @@ def compute_final_score(signals):
         model_score = model_score_raw * 100   # 0–100 scale
 
         # Seed prior (Rec 4)
+        # The seed_score is a hand-researched baseline. Its weight decays
+        # as API signals fill in. For acts where the seed is high (85+),
+        # we decay more aggressively because we have more confidence that
+        # the model score will converge toward the true demand.
         seed_score = float(
             signals.get("event_meta", {}).get("seed_score", 50) or 50
         )
         available     = count_available_signals(signals)
-        seed_weight   = max(0.05, 0.75 - (available / TOTAL_API_SIGNALS) * 0.70)
+        api_coverage  = available / TOTAL_API_SIGNALS
+
+        # Base decay: 0.75 → 0.05 as signals fill in
+        base_weight   = max(0.05, 0.75 - api_coverage * 0.70)
+
+        # High-seed bonus decay: for seed >= 80, reduce weight by up to 0.08
+        # so the model score contributes more for top-tier acts where we
+        # have strong prior knowledge AND real signal confirmation
+        if seed_score >= 80 and api_coverage >= 0.30:
+            seed_adj  = min(0.08, (seed_score - 80) / 100 * api_coverage * 2)
+            seed_weight = max(0.05, base_weight - seed_adj)
+        else:
+            seed_weight = base_weight
+
         model_weight  = 1.0 - seed_weight
 
         final = max(0, min(100, round(
