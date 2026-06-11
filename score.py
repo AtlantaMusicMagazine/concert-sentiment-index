@@ -198,15 +198,15 @@ def norm_venue_tier(venue, event_date_str):
     cap = VENUE_CAPS.get(venue, 0)
 
     if cap >= 50000:
-        base = 0.80
+        base = 0.88   # stadium: booking requires superstar demand
     elif cap >= 18000:
-        base = 0.65
+        base = 0.75   # arena: strong expected demand
     elif cap >= 10000:
-        base = 0.55
+        base = 0.60   # amphitheatre
     elif cap >= 5000:
-        base = 0.48
+        base = 0.48   # mid-size
     elif cap > 0:
-        base = 0.35
+        base = 0.32   # small venue / club
     else:
         return 0.50   # unknown venue → neutral
 
@@ -295,21 +295,28 @@ def norm_grammy_wins(wins):
     """
     Grammy wins — institutional recognition signal.
     Strongest predictor of 35-65 demographic ticket demand.
-    No win:            None  (signal absent — excluded from weighted avg)
-    1–2 wins:  0.75   (Grammy winner — trust signal active)
-    3–5 wins:  0.90   (multiple winner — major commercial tier)
-    6+ wins:   1.0    (superstar tier — Beyoncé, Ariana Grande range)
+    Wider spread to differentiate tiers more clearly:
+    0 wins:    0.25  (confirmed no Grammys — negative signal)
+    1 win:     0.70  (Grammy winner — trust signal active)
+    2 wins:    0.80  (two-time winner)
+    3–4 wins:  0.88  (multiple winner — major commercial tier)
+    5–7 wins:  0.95  (dominant winner)
+    8+ wins:   1.0   (superstar tier — Usher, Santana range)
     """
     if wins is None:
         return None
     wins = int(wins)
     if wins == 0:
-        return 0.30    # explicitly confirmed no Grammys — negative signal
-    if wins >= 6:
+        return 0.25
+    if wins >= 8:
         return 1.0
+    if wins >= 5:
+        return 0.95
     if wins >= 3:
-        return 0.90
-    return 0.75
+        return 0.88
+    if wins >= 2:
+        return 0.80
+    return 0.70
 
 
 def norm_grammy_nominations(noms):
@@ -335,27 +342,29 @@ def norm_grammy_nominations(noms):
 def norm_active_years(years):
     """
     Career longevity — nostalgia premium proxy.
-    Longer careers = deeper catalog = stronger nostalgia-driven demand
-    for heritage acts; also signals sustained commercial relevance.
-    <2 years:   emerging artist (0.35)
-    2–5 years:  developing     (0.50)
-    6–12 years: established    (0.65)
-    13–25 years: legacy draw   (0.80)
-    25+ years:  heritage act   (0.90)
+    Steeper scaling at the high end to better reward true heritage acts.
+    <2 years:   emerging artist (0.30)
+    2–5 years:  developing     (0.45)
+    6–12 years: established    (0.60)
+    13–20 years: legacy draw   (0.75)
+    20–29 years: heritage act  (0.88)
+    30+ years:  institution    (0.96)
     None:       signal absent
     """
     if years is None:
         return None
     y = int(years)
-    if y >= 25:
-        return 0.90
+    if y >= 30:
+        return 0.96
+    if y >= 20:
+        return 0.88
     if y >= 13:
-        return 0.80
+        return 0.75
     if y >= 6:
-        return 0.65
+        return 0.60
     if y >= 2:
-        return 0.50
-    return 0.35
+        return 0.45
+    return 0.30
 
 
 def norm_wikipedia_languages(lang_count):
@@ -773,7 +782,7 @@ def compute_final_score(signals):
             signals.get("event_meta", {}).get("seed_score", 50) or 50
         )
         available     = count_available_signals(signals)
-        seed_weight   = max(0.10, 0.75 - (available / TOTAL_API_SIGNALS) * 0.65)
+        seed_weight   = max(0.05, 0.75 - (available / TOTAL_API_SIGNALS) * 0.70)
         model_weight  = 1.0 - seed_weight
 
         final = max(0, min(100, round(
