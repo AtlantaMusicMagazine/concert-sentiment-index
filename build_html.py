@@ -183,100 +183,144 @@ def build_signals_html(ev):
 
 
 def build_insight(ev):
-    """Generate a one-line insight string from available signal data."""
+    """
+    Build the insight line shown on each card.
+    Signals are selected in priority order — most editorially compelling first.
+    Capped at 5 fragments joined by middot separators.
+
+    Priority order:
+      1. Album cycle context (touring on new album / latest album title)
+      2. Grammy wins (high trust signal for casual buyers)
+      3. Grammy nominations (for non-winners with nomination history)
+      4. Waitlist / sold-out status (clearest demand signal)
+      5. Career longevity (10+ years — nostalgia premium)
+      6. Tour scale (setlist tour show count)
+      7. YouTube velocity (current cultural acceleration)
+      8. Eventbrite sell-through %
+      9. Last.fm depth (plays/listener ratio)
+     10. ATL market history
+     11. Bands in Town RSVPs
+     12. Spotify top track popularity
+     13. Secondary market floor price
+     14. Wikipedia trend
+    """
     raw   = ev["raw_signals"]
     parts = []
 
-    # Wikidata career facts — Grammy wins surface prominently
+    # ── 1. Album cycle context ─────────────────────────────────────────
+    mb_title = raw.get("mb_latest_album_title")
+    mb_days  = raw.get("mb_days_since_last_album")
+    mb_rec   = raw.get("mb_has_recent_album")
+    mb_total = raw.get("mb_total_albums")
+
+    if mb_rec and mb_title:
+        if mb_days is not None and int(mb_days) <= 120:
+            parts.append(f"Touring on new album \u201c{mb_title}\u201d")
+        else:
+            parts.append(f"New album \u201c{mb_title}\u201d in past year")
+    elif mb_title and mb_days is not None and int(mb_days) <= 730:
+        parts.append(f"Latest: \u201c{mb_title}\u201d")
+    elif mb_total is not None and int(mb_total) >= 10:
+        parts.append(f"{int(mb_total)}-album catalog")
+
+    # ── 2. Grammy wins ─────────────────────────────────────────────────
     wd_wins = raw.get("wd_grammy_wins")
     if wd_wins is not None and int(wd_wins) > 0:
         n = int(wd_wins)
         parts.append(f"{n}-time Grammy winner" if n > 1 else "Grammy winner")
 
-    wd_years = raw.get("wd_active_years")
-    if wd_years is not None and int(wd_years) >= 20:
-        parts.append(f"{wd_years} years active")
+    # ── 3. Grammy nominations (non-winners only) ───────────────────────
+    wd_noms = raw.get("wd_grammy_nominations")
+    if (wd_wins is None or int(wd_wins or 0) == 0) and wd_noms is not None and int(wd_noms) >= 3:
+        parts.append(f"{int(wd_noms)}\u00d7 Grammy nominated")
 
-    # YouTube velocity — highest-impact forward signal when available
+    # ── 4. Waitlist / sold-out ─────────────────────────────────────────
+    if raw.get("eb_is_sold_out") and raw.get("eb_has_waitlist"):
+        parts.append("Sold out \u00b7 waitlist active")
+    elif raw.get("eb_is_sold_out"):
+        parts.append("Sold out")
+    elif raw.get("eb_has_waitlist"):
+        parts.append("Waitlist active")
+
+    # ── 5. Career longevity (10+ years) ───────────────────────────────
+    wd_years = raw.get("wd_active_years")
+    if wd_years is not None:
+        y = int(wd_years)
+        if y >= 10:
+            parts.append(f"Touring for {y} years")
+
+    # ── 6. Tour scale ──────────────────────────────────────────────────
+    tour_shows = raw.get("setlist_tour_shows_total")
+    if tour_shows is not None and int(tour_shows) >= 20:
+        parts.append(f"{int(tour_shows)}-date world tour")
+
+    # ── 7. YouTube velocity ────────────────────────────────────────────
     yt_vel = raw.get("yt_view_velocity_7d")
-    if yt_vel is not None and int(yt_vel) > 0:
+    if yt_vel is not None and int(yt_vel) >= 100_000:
         yt_vel = int(yt_vel)
         vel_str = (f"{yt_vel/1_000_000:.1f}M views/week"
-                   if yt_vel >= 1_000_000 else f"{yt_vel:,} views/week")
+                   if yt_vel >= 1_000_000 else f"{yt_vel/1_000:.0f}K views/week")
         parts.append(f"YouTube: {vel_str}")
 
-    # MusicBrainz release context
-    if raw.get("mb_has_recent_album") and raw.get("mb_latest_album_title"):
-        days = raw.get("mb_days_since_last_album")
-        if days is not None and int(days) <= 90:
-            parts.append(f"Touring on new album &ldquo;{raw['mb_latest_album_title']}&rdquo; ({days} days old)")
-        else:
-            parts.append(f"New album &ldquo;{raw['mb_latest_album_title']}&rdquo; within past year")
-    else:
-        total_albums = raw.get("mb_total_albums")
-        if total_albums is not None and int(total_albums) >= 10:
-            parts.append(f"Deep catalog — {total_albums} studio albums")
+    # ── 8. Eventbrite sell-through ─────────────────────────────────────
+    pct = raw.get("eb_sell_through_pct")
+    if pct is not None and not raw.get("eb_is_sold_out"):
+        pct = float(pct)
+        if pct >= 80:
+            parts.append(f"Eventbrite: {pct:.0f}% sold")
+        elif pct >= 50:
+            parts.append(f"Eventbrite: {pct:.0f}% sold")
 
-    # Eventbrite demand signals
-    if raw.get("eb_is_sold_out") and raw.get("eb_has_waitlist"):
-        parts.append("Eventbrite: sold out &middot; waitlist active")
-    elif raw.get("eb_is_sold_out"):
-        parts.append("Eventbrite: sold out")
-    else:
-        pct = raw.get("eb_sell_through_pct")
-        if pct is not None:
-            pct = float(pct)
-            if pct >= 50:
-                parts.append(f"Eventbrite: {pct:.0f}% sold")
-
-    # Last.fm fan depth
+    # ── 9. Last.fm depth ───────────────────────────────────────────────
     ppl       = raw.get("lastfm_plays_per_listener")
     listeners = raw.get("lastfm_listeners")
     if ppl is not None and listeners is not None:
         ppl       = float(ppl)
         listeners = int(listeners)
-        if ppl >= 200 and listeners > 0:
-            parts.append(f"Last.fm: {listeners/1_000_000:.1f}M listeners &middot; {ppl:.0f} plays/fan")
+        if ppl >= 200 and listeners >= 500_000:
+            parts.append(f"Last.fm: {listeners/1_000_000:.1f}M listeners \u00b7 {ppl:.0f} plays/fan")
         elif listeners >= 1_000_000:
-            parts.append(f"Last.fm: {listeners/1_000_000:.1f}M weekly listeners")
+            parts.append(f"Last.fm: {listeners/1_000_000:.1f}M listeners")
     elif listeners is not None and int(listeners) >= 1_000_000:
-        parts.append(f"Last.fm: {int(listeners)/1_000_000:.1f}M weekly listeners")
+        parts.append(f"Last.fm: {int(listeners)/1_000_000:.1f}M listeners")
 
-    # Setlist.fm ATL market strength
+    # ── 10. ATL market history ─────────────────────────────────────────
     atl_shows = raw.get("setlist_atl_shows_5y")
     if atl_shows is not None:
-        atl_shows = int(atl_shows)
-        if atl_shows == 0:
-            parts.append("First ATL appearance in 5+ years")
-        elif atl_shows >= 4:
-            parts.append(f"Strong ATL market — {atl_shows} shows in past 5 years")
+        n = int(atl_shows)
+        if n == 0:
+            parts.append("First ATL show in 5+ years")
+        elif n >= 6:
+            parts.append(f"{n} ATL shows in past 5 years")
     if raw.get("setlist_sold_out_flag"):
         parts.append("Prior ATL show sold out")
 
-    # Ticket demand signals
-    sg_floor = raw.get("seatgeek_floor")
-    if sg_floor is not None:
-        parts.append(f"Secondary floor ${float(sg_floor):.0f}")
-    sg_deal = raw.get("seatgeek_deal_score")
-    if sg_deal is not None:
-        parts.append(f"SeatGeek Deal Score {sg_deal}/100")
-
-    # Local intent
-    gtrends = raw.get("google_trends_atl")
-    if gtrends is not None:
-        parts.append(f"ATL Trends index {gtrends}")
+    # ── 11. Bands in Town RSVPs ────────────────────────────────────────
     bit = raw.get("bandsintown_rsvps")
-    if bit is not None:
-        parts.append(f"Bands in Town: {int(bit):,} ATL intents")
+    if bit is not None and int(bit) >= 500:
+        parts.append(f"{int(bit):,} ATL fans tracking")
 
-    # Wikipedia trend
+    # ── 12. Spotify top track popularity ──────────────────────────────
+    sp_top = raw.get("spotify_top_track_popularity")
+    if sp_top is not None and int(sp_top) >= 80:
+        parts.append(f"Spotify top track: {sp_top}/100")
+
+    # ── 13. Secondary market floor ────────────────────────────────────
+    sg_floor = raw.get("seatgeek_floor")
+    if sg_floor is not None and float(sg_floor) >= 50:
+        parts.append(f"Secondary floor ${float(sg_floor):.0f}")
+
+    # ── 14. Wikipedia trend ────────────────────────────────────────────
     trend = raw.get("wikipedia_7d_trend_pct")
     if trend is not None:
-        trend     = float(trend)
-        direction = "+" if trend >= 0 else ""
-        parts.append(f"Wikipedia 7-day trend: {direction}{trend:.0f}%")
+        trend = float(trend)
+        if abs(trend) >= 15:   # only show meaningful movements
+            direction = "+" if trend >= 0 else ""
+            parts.append(f"Wikipedia {direction}{trend:.0f}% this week")
 
-    return " &middot; ".join(parts[:5]) if parts else f"Score {ev['score']} — updated {datetime.date.today().strftime('%b %d, %Y')}"
+    return (" \u00b7 ".join(parts[:5])
+            if parts
+            else f"Score {ev['score']} \u2014 updated {datetime.date.today().strftime('%b %-d, %Y')}")
 
 
 # ── Risk flag (bottom panel) ──────────────────────────────────────────────
