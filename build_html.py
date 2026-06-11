@@ -396,7 +396,7 @@ def build_card(ev, rank, is_bottom=False):
 
 # ── Window constants ──────────────────────────────────────────────────────
 WINDOW_START = datetime.date(2026, 6, 8)
-WINDOW_END   = datetime.date(2026, 9, 20)   # extended to include Shaky Knees Sep 18-20
+WINDOW_END   = datetime.date(2026, 9, 21)   # extended to include Shaky Knees Sep 18-20 and Slayyyter Sep 21
 
 GENRE_POOL_START_MARKER = "  var GENRE_POOL_TOP = ["
 GENRE_POOL_END_MARKER   = "  var GENRE_POOL_BOTTOM = GENRE_POOL_TOP.slice();"
@@ -687,8 +687,33 @@ def build():
     if past_count:
         print(f"[build] Filtered {past_count} past/out-of-window events from main panels")
 
-    top_events    = future_events[:TOP_N]
-    bottom_events = sorted(future_events, key=lambda e: int(e["score"]))[:BOTTOM_N]
+    # ── Top panel: highest-scoring future in-window events ───────────────
+    # Top 20 by score descending, excluding events reserved for bottom panel
+    BOTTOM_PANEL_IDS = {
+        "slayyyter-2026", "isley-ojays-2026", "justine-skye-2026",
+        "wynonna-melissa-2026", "guess-who-2026", "john-mellencamp-2026",
+        "ne-yo-akon-2026", "styx-chicago-2026", "kali-uchis-bottom-2026",
+        "madison-beer-2026", "motionless-2026", "hayley-williams-2026",
+        "muse-2026", "evanescence-2026", "motley-crue-2026",
+        "ella-mai-2026", "train-bnl-2026", "hilary-duff-2026",
+        "parker-mccollum-2026", "jack-johnson-2026",
+    }
+
+    top_candidates  = [ev for ev in future_events if ev.get("id") not in BOTTOM_PANEL_IDS]
+    top_events      = top_candidates[:TOP_N]
+
+    # ── Bottom panel: curated soft-demand events, sorted score ascending ──
+    # Fixed set of events editorially designated as the "softest demand"
+    # tier — not simply the lowest scorers from all events, which would
+    # bleed top-panel events into the bottom ranking.
+    bot_candidates  = [ev for ev in future_events if ev.get("id") in BOTTOM_PANEL_IDS]
+    bottom_events   = sorted(bot_candidates, key=lambda e: int(e["score"]))[:BOTTOM_N]
+
+    print(f"[build] Top panel: {len(top_events)} events  "
+          f"(score range {top_events[-1]['score']}–{top_events[0]['score']})")
+    print(f"[build] Bottom panel: {len(bottom_events)} events  "
+          f"(score range {bottom_events[0]['score']}–{bottom_events[-1]['score']})"
+          if bottom_events else "[build] Bottom panel: 0 events")
 
     # Build card blocks
     top_html_parts = []
