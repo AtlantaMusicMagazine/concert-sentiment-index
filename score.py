@@ -678,16 +678,16 @@ def score_historical_sales(signals):
         (0.18, norm_mb_recent_album(
                    signals.get("mb_has_recent_album"),
                    signals.get("mb_days_since_last_album"))),
-        (0.14, norm_grammy_wins(signals.get("wd_grammy_wins"))),
-        (0.13, norm_wikipedia_languages(signals.get("wd_wikipedia_languages"))),
+        (0.18, norm_grammy_wins(signals.get("wd_grammy_wins"))),           # +4% — best active differentiator
+        (0.16, norm_wikipedia_languages(signals.get("wd_wikipedia_languages"))),  # +3% — best active differentiator
         (0.11, norm_wikipedia_trend(signals.get("wikipedia_7d_trend_pct"))),
         (0.09, norm_active_years(signals.get("wd_active_years"))),
         (0.08, norm_mb_career_depth(signals.get("mb_total_albums"))),
-        (0.07, norm_itunes_album_count(signals.get("itunes_album_count"))),
         (0.06, norm_grammy_nominations(signals.get("wd_grammy_nominations"))),
-        (0.06, norm_setlist_venue_trajectory(
-                   signals.get("setlist_avg_venue_cap"), current_cap)),
-        (0.05, norm_spotify_popularity(signals.get("spotify_popularity"))),
+        (0.05, norm_itunes_album_count(signals.get("itunes_album_count"))),  # -2%
+        (0.03, norm_setlist_venue_trajectory(
+                   signals.get("setlist_avg_venue_cap"), current_cap)),     # -3%
+        (0.03, norm_spotify_popularity(signals.get("spotify_popularity"))), # -2%
         (0.02, norm_chartmetric_trend(signals.get("cm_spotify_stream_trend"))),
         (0.01, norm_genre_breadth(signals.get("wd_genres_count"))),
     ]
@@ -748,7 +748,17 @@ def score_local_intent(signals):
         (0.25, norm_bandsintown_rsvps(signals.get("bandsintown_rsvps"), venue_cap)),
         (0.12, norm_setlist_sold_out(signals.get("setlist_sold_out_flag"))),
     ]
-    return weighted_avg(components, neutral=0.50)
+    # Seed-informed neutral: when all local signals are None, infer local
+    # demand from the artist's hand-researched seed tier rather than
+    # defaulting every act to an identical 0.50.
+    #   seed=97 → local_neutral=0.78  (strong local demand expected)
+    #   seed=72 → local_neutral=0.62  (moderate)
+    #   seed=49 → local_neutral=0.47  (below average)
+    #   seed=18 → local_neutral=0.27  (weak)
+    # When real local signals are present they override this inference.
+    seed_score    = float(signals.get("event_meta", {}).get("seed_score", 50) or 50)
+    local_neutral = seed_score / 100 * 0.65 + 0.15
+    return weighted_avg(components, neutral=local_neutral)
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -795,8 +805,8 @@ def compute_final_score(signals):
         available     = count_available_signals(signals)
         api_coverage  = available / TOTAL_API_SIGNALS
 
-        # Base decay: 0.75 → 0.05 as signals fill in
-        base_weight   = max(0.05, 0.75 - api_coverage * 0.70)
+        # Base decay: 0.78 → 0.04 as signals fill in (steeper than before)
+        base_weight   = max(0.04, 0.78 - api_coverage * 0.74)
 
         # High-seed bonus decay: for seed >= 80, reduce weight by up to 0.08
         # so the model score contributes more for top-tier acts where we
