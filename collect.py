@@ -998,10 +998,14 @@ GROUP BY ?artist
 LIMIT 1
 """
 
-    # ── Grammy wins: separate simple query ──────────────────────────
+    headers = {
+        "User-Agent":  MB_USER_AGENT,
+        "Accept":      "application/sparql-results+json",
+    }
+
+    # ── Grammy wins: separate simple query ──────────────────────────────
     # Run only when no grammy_wins_override is set on the event.
-    # Kept as a separate query so a slow Grammy lookup never blocks
-    # the career/language/genre data above.
+    # Kept separate so a slow Grammy lookup never blocks career/language data.
     grammy_wins = 0
     grammy_noms = 0
     override = event.get("grammy_wins_override")
@@ -1045,10 +1049,7 @@ WHERE {{
                 grammy_wins = gint("grammy_wins")
                 grammy_noms = gint("grammy_nominations")
 
-    headers = {
-        "User-Agent":  MB_USER_AGENT,   # reuse MusicBrainz user-agent constant
-        "Accept":      "application/sparql-results+json",
-    }
+    # ── Career / language / genre query ─────────────────────────────────
     data = safe_get(
         "https://query.wikidata.org/sparql",
         params={"query": sparql, "format": "json"},
