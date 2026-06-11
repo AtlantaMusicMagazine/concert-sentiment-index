@@ -347,13 +347,38 @@ def build_risk(ev):
     return " &middot; ".join(flags[:3]) if flags else ""
 
 
+# ── Bottom panel display multiplier ──────────────────────────────────────
+# Applied at display time only — underlying score in scored_events.json
+# is unchanged. Scales bottom panel scores by 0.65 to push them into a
+# visually distinct 20–33 range vs the top panel's 53–88 range.
+BOTTOM_DISPLAY_MULTIPLIER = 0.65
+
+# Curated bottom panel event IDs — fixed editorial set of "soft demand" events.
+# These events are excluded from the top panel and appear only in the bottom panel.
+BOTTOM_PANEL_IDS = {
+    "slayyyter-2026", "isley-ojays-2026", "justine-skye-2026",
+    "wynonna-melissa-2026", "guess-who-2026", "john-mellencamp-2026",
+    "ne-yo-akon-2026", "styx-chicago-2026", "kali-uchis-bottom-2026",
+    "madison-beer-2026", "motionless-2026", "hayley-williams-2026",
+    "muse-2026", "evanescence-2026", "motley-crue-2026",
+    "ella-mai-2026", "train-bnl-2026", "hilary-duff-2026",
+    "parker-mccollum-2026", "jack-johnson-2026",
+}
+
+
 # ── Card HTML builder ─────────────────────────────────────────────────────
 def build_card(ev, rank, is_bottom=False):
     accent  = "#2a58a0" if is_bottom else "#5a50d4"
     bar_bg  = "#c0d0ed" if is_bottom else "#d8d6f8"
     bc      = " bottom" if is_bottom else ""
     score   = ev["score"]
-    meta    = ev
+
+    # Display score: bottom panel events are scaled down visually to
+    # create clear separation from the top panel range.
+    display_score = (max(1, round(score * BOTTOM_DISPLAY_MULTIPLIER))
+                     if is_bottom else score)
+
+    meta         = ev
     date_display = fmt_date(meta.get("date", ""))
     date_iso     = meta.get("date", "")
     rank_label   = f"Ranked {ordinal(rank)}" + (" least popular" if is_bottom else "") + ", updated tonight"
@@ -384,11 +409,11 @@ def build_card(ev, rank, is_bottom=False):
       {signals_html}
       <p class="card-insight" itemprop="description">{insight}</p>{risk_html}
     </div>
-    <div class="card-score" aria-label="Popularity score: {score} out of 100">
+    <div class="card-score" aria-label="Popularity score: {display_score} out of 100">
       <span class="score-label" aria-hidden="true">Score</span>
-      <span class="score-value" style="color:{accent};" aria-hidden="true">{score}</span>
-      <div class="score-bar-track" style="background:{bar_bg};" role="progressbar" aria-valuenow="{score}" aria-valuemin="0" aria-valuemax="100" aria-label="Score {score} out of 100">
-        <div class="score-bar-fill" style="width:{score}%;background:{accent};"></div>
+      <span class="score-value" style="color:{accent};" aria-hidden="true">{display_score}</span>
+      <div class="score-bar-track" style="background:{bar_bg};" role="progressbar" aria-valuenow="{display_score}" aria-valuemin="0" aria-valuemax="100" aria-label="Score {display_score} out of 100">
+        <div class="score-bar-fill" style="width:{display_score}%;background:{accent};"></div>
       </div>
     </div>
   </article>"""
@@ -473,6 +498,10 @@ def build_genre_pool_js(events):
         genre    = ev.get("genre", "")
         score    = int(ev.get("score") or 0)
         seed     = int(ev.get("seed_score") or score)
+
+        # Apply bottom panel multiplier for genre pool display scores
+        is_bot_panel  = eid in BOTTOM_PANEL_IDS
+        display_score = max(1, round(score * BOTTOM_DISPLAY_MULTIPLIER)) if is_bot_panel else score
 
         # Skip if outside window
         try:
@@ -586,13 +615,14 @@ def build_genre_pool_js(events):
             date_display = date_str
 
         pool_entries.append({
-            "name":     ev.get("name", ""),
-            "date":     date_display,
-            "venue":    ev.get("venue", ""),
-            "genre":    genre,
-            "score":    score,
-            "signals":  signals,
-            "insight":  insight,
+            "name":          ev.get("name", ""),
+            "date":          date_display,
+            "venue":         ev.get("venue", ""),
+            "genre":         genre,
+            "score":         score,
+            "display_score": display_score,
+            "signals":       signals,
+            "insight":       insight,
         })
 
     # Build JS string
@@ -605,7 +635,7 @@ def build_genre_pool_js(events):
         entry_strs.append(
             f'    {{name:"{_js_escape(e["name"])}",date:"{_js_escape(e["date"])}",'
             f'venue:"{_js_escape(e["venue"])}",genre:"{_js_escape(e["genre"])}",'
-            f'score:{e["score"]},signals:[{sigs_js}],'
+            f'score:{e["display_score"]},signals:[{sigs_js}],'
             f'insight:"{_js_escape(e["insight"])}"}}'
         )
 
@@ -689,16 +719,6 @@ def build():
 
     # ── Top panel: highest-scoring future in-window events ───────────────
     # Top 20 by score descending, excluding events reserved for bottom panel
-    BOTTOM_PANEL_IDS = {
-        "slayyyter-2026", "isley-ojays-2026", "justine-skye-2026",
-        "wynonna-melissa-2026", "guess-who-2026", "john-mellencamp-2026",
-        "ne-yo-akon-2026", "styx-chicago-2026", "kali-uchis-bottom-2026",
-        "madison-beer-2026", "motionless-2026", "hayley-williams-2026",
-        "muse-2026", "evanescence-2026", "motley-crue-2026",
-        "ella-mai-2026", "train-bnl-2026", "hilary-duff-2026",
-        "parker-mccollum-2026", "jack-johnson-2026",
-    }
-
     top_candidates  = [ev for ev in future_events if ev.get("id") not in BOTTOM_PANEL_IDS]
     top_events      = top_candidates[:TOP_N]
 
