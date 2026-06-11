@@ -1059,39 +1059,42 @@ WHERE {{
     )
     time.sleep(0.5)   # be polite to shared service
 
-    if not data:
-        return {}
+    wiki_langs   = 0
+    genres_count = 0
+    active_years = None
 
-    bindings = data.get("results", {}).get("bindings", [])
-    if not bindings:
-        return {}
+    if data:
+        bindings = data.get("results", {}).get("bindings", [])
+        if bindings:
+            row = bindings[0]
 
-    row = bindings[0]
+            def int_val(key):
+                v = row.get(key, {}).get("value")
+                return int(v) if v else 0
 
-    def int_val(key):
-        v = row.get(key, {}).get("value")
-        return int(v) if v else 0
+            wiki_langs   = int_val("wiki_languages")
+            genres_count = int_val("genres_count")
 
-    wiki_langs   = int_val("wiki_languages")
-    genres_count = int_val("genres_count")
+            career_start_raw = row.get("career_start", {}).get("value")
+            if career_start_raw:
+                try:
+                    start_year   = int(career_start_raw)
+                    active_years = datetime.date.today().year - start_year
+                except (ValueError, TypeError):
+                    pass
 
-    career_start_raw = row.get("career_start", {}).get("value")
-    active_years     = None
-    if career_start_raw:
-        try:
-            start_year   = int(career_start_raw)
-            active_years = datetime.date.today().year - start_year
-        except (ValueError, TypeError):
-            pass
-
+    # Always return — even if career query failed, we have Grammy data
+    # (override or SPARQL result) and should not discard it
     return {
         "wd_grammy_wins":         grammy_wins,
         "wd_grammy_nominations":  grammy_noms,
         "wd_active_years":        active_years,
-        "wd_wikipedia_languages": wiki_langs,
-        "wd_genres_count":        genres_count,
+        "wd_wikipedia_languages": wiki_langs if wiki_langs else None,
+        "wd_genres_count":        genres_count if genres_count else None,
     }
 
+
+def fetch_wikipedia_pageviews(event):
     title = event.get("wikipedia_title", "")
     if not title:
         return {}
