@@ -63,6 +63,7 @@ VENUE_CAPS = {
     "Truist Park":                                       41084,
     "The Eastern":                                         500,
     "Vinyl at Center Stage":                               200,
+    "Truist Park":                                       41084,   # Noah Kahan sold-out stadium show
     "Piedmont Park":                                     40000,   # Shaky Knees festival grounds
 }
 
