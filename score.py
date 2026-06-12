@@ -936,6 +936,10 @@ def score_all():
                 "itunes_primary_genre":         signals.get("itunes_primary_genre"),
                 "deezer_fans":                  signals.get("deezer_fans"),
                 "deezer_album_count":           signals.get("deezer_album_count"),
+                # AMM coverage — stored in event_meta by collect.py
+                "amm_article_title":            signals.get("event_meta", {}).get("amm_article_title", ""),
+                "amm_article_url":              signals.get("event_meta", {}).get("amm_article_url", ""),
+                "amm_article_date":             signals.get("event_meta", {}).get("amm_article_date", ""),
                 "eb_has_listing":               signals.get("eb_has_listing"),
                 "eb_capacity":                  signals.get("eb_capacity"),
                 "eb_tickets_sold":              signals.get("eb_tickets_sold"),
