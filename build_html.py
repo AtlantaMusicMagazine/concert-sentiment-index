@@ -574,6 +574,13 @@ def build_genre_pool_js(events):
     skipped_window = []
     skipped_dup    = []
 
+    # Debug: log first few event dates to diagnose window filter issues
+    if events:
+        sample = [(ev.get("id","?"), ev.get("date","?")) for ev in events[:5]]
+        print(f"[build] Genre pool received {len(events)} events. Sample dates: {sample}")
+    else:
+        print("[build] Genre pool received EMPTY events list")
+
     for ev in events:
         eid      = ev.get("id", "")
         date_str = ev.get("date", "")
