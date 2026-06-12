@@ -38,6 +38,7 @@ jobs:
           path: |
             data/youtube_cache.json
             data/rank_history.json
+            data/amm_coverage.json
           key: pipeline-cache-${{ github.run_number }}
           restore-keys: |
             pipeline-cache-
@@ -102,6 +103,7 @@ jobs:
           path: |
             data/youtube_cache.json
             data/rank_history.json
+            data/amm_coverage.json
           key: pipeline-cache-${{ github.run_number }}
 
       # 7. Upload dashboard HTML artifact
