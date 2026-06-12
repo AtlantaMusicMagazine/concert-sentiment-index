@@ -1294,23 +1294,19 @@ AMM_CACHE_PATH = "data/amm_coverage.json"
 
 def fetch_amm_catalog():
     """
-    Crawl atlantamusicmagazine.com via the WordPress REST API to build
-    a complete index of published article titles and URLs.
+    Crawl atlantamusicmagazine.com via the WordPress.COM REST API.
 
-    Uses wp-json/wp/v2/posts with pagination (100 posts per page) to
-    reliably retrieve all posts — unlike year archive pages which can
-    truncate or present articles inconsistently.
+    atlantamusicmagazine.com is hosted on WordPress.com, which uses a
+    different REST API than self-hosted WordPress:
+      https://public-api.wordpress.com/rest/v1.1/sites/{site}/posts/
+    The standard /wp-json/wp/v2/posts endpoint returns 404 on .com-hosted
+    sites — this was the root cause of AMM strips not appearing.
 
-    Only retains articles whose link is on the atlantamusicmagazine.com
-    domain (excludes myglobalmind.com and allmusicmagazine.com links
-    which appear in older year archive pages).
+    No authentication required for publicly published posts.
+    Paginates using `offset` parameter (number=100 posts per page).
 
     Returns:
       list of dicts: [{title: str, link: str, date: str, slug: str}]
-
-    Cache: results are saved to data/amm_coverage.json and refreshed
-    weekly (Mondays) to avoid hitting the API nightly. A weekly refresh
-    is sufficient since historical articles don't change.
     """
     today = datetime.date.today()
 
@@ -1321,8 +1317,7 @@ def fetch_amm_catalog():
         cached_posts = cached.get("posts", [])
         cached_date  = datetime.date.fromisoformat(cached.get("fetched_on", "2000-01-01"))
         days_old     = (today - cached_date).days
-        # Refresh weekly (Mondays) or if cache is >7 days old
-        # Never use a cache with 0 posts — always re-fetch if empty
+        # Never use empty cache — always re-fetch
         if cached_posts and days_old < 7 and today.weekday() != 0:
             print(f"[amm] Using cached catalog ({len(cached_posts)} posts, {days_old}d old)")
             return cached_posts
@@ -1331,54 +1326,63 @@ def fetch_amm_catalog():
     except (FileNotFoundError, json.JSONDecodeError, ValueError):
         cached = {}
 
-    print("[amm] Fetching full article catalog via WordPress REST API...")
+    print("[amm] Fetching full article catalog via WordPress.com REST API...")
     all_posts = []
-    page      = 1
+    offset    = 0
+    site      = "atlantamusicmagazine.com"
 
     while True:
         data = safe_get(
-            f"{AMM_BASE_URL}/wp-json/wp/v2/posts",
+            f"https://public-api.wordpress.com/rest/v1.1/sites/{site}/posts/",
             params={
-                "per_page": 100,
-                "page":     page,
-                "_fields":  "title,link,date,slug",
+                "number":  100,
+                "offset":  offset,
+                "fields":  "title,URL,date,slug",
+                "status":  "publish",
             },
             headers={"User-Agent": MB_USER_AGENT},
-            label=f"AMM catalog page {page}",
-            timeout=15,
+            label=f"AMM catalog offset={offset}",
+            timeout=20,
         )
         time.sleep(0.5)
 
-        if not data or not isinstance(data, list) or len(data) == 0:
+        if not data or not isinstance(data, dict):
+            print(f"[amm] Unexpected response at offset={offset}: {type(data)}")
+            break
+
+        posts = data.get("posts", [])
+        if not posts:
             break   # no more pages
 
-        for post in data:
-            link = post.get("link", "")
+        for post in posts:
+            link = post.get("URL", "")
             # Strict domain filter — atlantamusicmagazine.com only
             if "atlantamusicmagazine.com" not in link:
                 continue
-            title_raw = post.get("title", {})
-            title = (title_raw.get("rendered", "") if isinstance(title_raw, dict)
-                     else str(title_raw))
-            # Strip HTML entities from title
+            title = post.get("title", "")
+            # Strip HTML entities
             title = (title.replace("&#8211;", "—").replace("&#8217;", "'")
                          .replace("&amp;", "&").replace("&#038;", "&")
-                         .replace("&#8220;", "\u201c").replace("&#8221;", "\u201d"))
+                         .replace("&#8220;", "\u201c").replace("&#8221;", "\u201d")
+                         .replace("&quot;", '"'))
+            # Date: WordPress.com returns ISO 8601 with timezone
+            raw_date = post.get("date", "")[:10]   # YYYY-MM-DD
+            slug = post.get("slug", "")
+
             all_posts.append({
                 "title": title,
                 "link":  link,
-                "date":  post.get("date", "")[:10],   # YYYY-MM-DD only
-                "slug":  post.get("slug", ""),
+                "date":  raw_date,
+                "slug":  slug,
             })
 
-        if len(data) < 100:
-            break   # last page
-        page += 1
+        found = data.get("found", 0)
+        offset += len(posts)
+        if offset >= found or len(posts) < 100:
+            break   # fetched all
 
     print(f"[amm] Catalog fetched: {len(all_posts)} atlantamusicmagazine.com articles")
 
-    # Only save to cache if we got real results — never cache an empty result
-    # which would block re-fetching for 7 days
     if all_posts:
         with open(AMM_CACHE_PATH, "w") as f:
             json.dump({"fetched_on": today.isoformat(), "posts": all_posts}, f, indent=2)
