@@ -24,7 +24,63 @@ Path("output").mkdir(exist_ok=True)
 
 TEMPLATE_PATH = "templates/artist_card_module_wp_ready.html"
 OUTPUT_PATH   = "output/artist_card_module_wp_ready.html"
-SCORES_PATH   = "data/scored_events.json"
+SCORES_PATH      = "data/scored_events.json"
+RANK_CACHE_PATH  = "data/rank_history.json"
+
+
+def load_rank_cache():
+    """
+    Load yesterday's rank positions and first-seen dates from disk.
+    Schema: {event_id: {"rank": int, "panel": "top"|"bottom",
+                         "first_seen": "YYYY-MM-DD"}}
+    Persisted between runs via GitHub Actions cache@v4.
+    """
+    try:
+        with open(RANK_CACHE_PATH) as f:
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return {}
+
+
+def save_rank_cache(cache):
+    """Write updated rank cache to disk for tomorrow's delta calculation."""
+    with open(RANK_CACHE_PATH, "w") as f:
+        json.dump(cache, f, indent=2)
+
+
+def compute_delta(event_id, new_rank, panel, cache):
+    """
+    Compute rank delta vs yesterday and detect new entries.
+    Returns (delta_class, delta_label, aria_label).
+      delta_class : "up" | "down" | "flat" | "new"
+      delta_label : "↑3" | "↓1" | "—" | "NEW"
+      aria_label  : screen-reader description
+    """
+    prior = cache.get(event_id)
+
+    if prior is None or prior.get("panel") != panel:
+        return "new", "NEW", "New entry"
+
+    prior_rank = prior.get("rank")
+    if prior_rank is None:
+        return "flat", "\u2014", "Unchanged"
+
+    delta = prior_rank - new_rank   # positive = moved up
+    if delta > 0:
+        return "up",   f"\u2191{delta}", f"Up {delta} spot{'s' if delta != 1 else ''}"
+    if delta < 0:
+        return "down", f"\u2193{abs(delta)}", f"Down {abs(delta)} spot{'s' if abs(delta) != 1 else ''}"
+    return "flat", "\u2014", "Unchanged"
+
+
+def update_rank_cache(event_id, new_rank, panel, cache, today_str):
+    """Update cache entry with tonight's rank. Always call after compute_delta."""
+    prior = cache.get(event_id, {})
+    cache[event_id] = {
+        "rank":       new_rank,
+        "panel":      panel,
+        "first_seen": prior.get("first_seen", today_str),
+    }
 
 TOP_N    = 20   # number of events in each panel
 BOTTOM_N = 20
@@ -374,7 +430,7 @@ BOTTOM_PANEL_IDS = {
 
 
 # ── Card HTML builder ─────────────────────────────────────────────────────
-def build_card(ev, rank, is_bottom=False):
+def build_card(ev, rank, is_bottom=False, delta_class="flat", delta_label="\u2014", delta_aria="Unchanged"):
     accent  = "#2a58a0" if is_bottom else "#5a50d4"
     bar_bg  = "#c0d0ed" if is_bottom else "#d8d6f8"
     bc      = " bottom" if is_bottom else ""
@@ -388,7 +444,9 @@ def build_card(ev, rank, is_bottom=False):
     meta         = ev
     date_display = fmt_date(meta.get("date", ""))
     date_iso     = meta.get("date", "")
-    rank_label   = f"Ranked {ordinal(rank)}" + (" least popular" if is_bottom else "") + ", updated tonight"
+    rank_label   = (f"Ranked {ordinal(rank)}" +
+                    (" least popular" if is_bottom else "") +
+                    f", updated tonight. {delta_aria}.")
     signals_html = build_signals_html(ev)
     insight      = build_insight(ev)
     risk_html    = ""
@@ -405,7 +463,7 @@ def build_card(ev, rank, is_bottom=False):
     <meta itemprop="startDate" content="{date_iso}">
     <div class="card-rank-wrap" aria-label="{rank_label}">
       <span class="rank-num" aria-hidden="true">{rank}</span>
-      <span class="rank-delta delta-flat" aria-hidden="true">&#8212;</span>
+      <span class="rank-delta delta-{delta_class}" aria-hidden="true">{delta_label}</span>
     </div>
     <div class="card-body">
       <h3 class="card-title" id="{card_id}-title" itemprop="name">{meta['name']}</h3>
@@ -628,6 +686,8 @@ def build_genre_pool_js(events):
             "genre":         genre,
             "score":         score,
             "display_score": display_score,
+            "delta_class":   ev.get("_delta_class", "flat"),
+            "delta_label":   ev.get("_delta_label", "\u2014"),
             "signals":       signals,
             "insight":       insight,
         })
@@ -642,7 +702,10 @@ def build_genre_pool_js(events):
         entry_strs.append(
             f'    {{name:"{_js_escape(e["name"])}",date:"{_js_escape(e["date"])}",'
             f'venue:"{_js_escape(e["venue"])}",genre:"{_js_escape(e["genre"])}",'
-            f'score:{e["display_score"]},signals:[{sigs_js}],'
+            f'score:{e["display_score"]},'
+            f'deltaClass:"{_js_escape(e["delta_class"])}",'
+            f'deltaLabel:"{_js_escape(e["delta_label"])}",'
+            f'signals:[{sigs_js}],'
             f'insight:"{_js_escape(e["insight"])}"}}'
         )
 
@@ -742,22 +805,42 @@ def build():
           f"(score range {bottom_events[0]['score']}–{bottom_events[-1]['score']})"
           if bottom_events else "[build] Bottom panel: 0 events")
 
+    # Load yesterday's rank cache for delta computation
+    rank_cache = load_rank_cache()
+    today_str  = datetime.date.today().isoformat()
+
     # Build card blocks
     top_html_parts = []
     for i, ev in enumerate(top_events):
+        rank = i + 1
+        dc, dl, da = compute_delta(ev["id"], rank, "top", rank_cache)
+        update_rank_cache(ev["id"], rank, "top", rank_cache, today_str)
+        ev["_delta_class"] = dc
+        ev["_delta_label"] = dl
         try:
-            top_html_parts.append(build_card(ev, i+1, False))
+            top_html_parts.append(build_card(ev, rank, False, dc, dl, da))
         except Exception as e:
             print(f"  [WARN] top card {i+1} failed ({ev.get('id','?')}): {e}")
             top_html_parts.append(f"  <!-- card {i+1} failed: {e} -->")
 
     bottom_html_parts = []
     for i, ev in enumerate(bottom_events):
+        rank = i + 1
+        dc, dl, da = compute_delta(ev["id"], rank, "bottom", rank_cache)
+        update_rank_cache(ev["id"], rank, "bottom", rank_cache, today_str)
+        ev["_delta_class"] = dc
+        ev["_delta_label"] = dl
         try:
-            bottom_html_parts.append(build_card(ev, i+1, True))
+            bottom_html_parts.append(build_card(ev, rank, True, dc, dl, da))
         except Exception as e:
-            print(f"  [WARN] bottom card {i+1} failed ({ev.get('id','?')}): {e}")
-            bottom_html_parts.append(f"  <!-- card {i+1} failed: {e} -->")
+            print(f"  [WARN] bottom card {rank} failed ({ev.get('id','?')}): {e}")
+            bottom_html_parts.append(f"  <!-- card {rank} failed: {e} -->")
+
+    # Persist updated rank cache for tomorrow's delta calculation
+    save_rank_cache(rank_cache)
+    new_count = sum(1 for ev in list(top_events)+list(bottom_events)
+                    if ev.get("_delta_class") == "new")
+    print(f"[build] Rank cache saved. New entries tonight: {new_count}")
 
     top_html    = "\n".join(top_html_parts)
     bottom_html = "\n".join(bottom_html_parts)
