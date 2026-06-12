@@ -1616,14 +1616,24 @@ def fetch_setlist(event):
     venue_caps       = []
 
     VENUE_CAPS_SF = {
+        # ── Atlanta market ────────────────────────────────────────────
         "State Farm Arena":                    21000,
         "Mercedes-Benz Stadium":               71000,
+        "Truist Park":                         41084,
+        "Lakewood Amphitheatre":               18920,
         "Ameris Bank Amphitheatre":            12000,
-        "Lakewood Amphitheatre":               19000,
-        "Chastain Park Amphitheatre":           6900,
+        "Chastain Park Amphitheatre":           6900,   # Setlist.fm uses this name
+        "Synovus Bank Amphitheater at Chastain Park": 6900,
         "Coca-Cola Roxy":                       3600,
+        "Gas South Arena":                     13100,
+        "Fabulous Fox Theatre":                 4665,
+        "The Tabernacle":                       2600,
+        "The Eastern":                           500,
+        "Variety Playhouse":                    1000,
+        # ── Major US venues for trajectory comparison ─────────────────
         "Madison Square Garden":               20789,
-        "Staples Center":                      20000,
+        "Kia Forum":                           17500,
+        "Hollywood Bowl":                      17376,
         "United Center":                       20491,
         "Barclays Center":                     19000,
         "TD Garden":                           19156,
@@ -1631,9 +1641,11 @@ def fetch_setlist(event):
         "Rogers Centre":                       53506,
         "Wembley Stadium":                     90000,
         "The O2":                              20000,
-        "Forum":                               17500,
-        "Hollywood Bowl":                      17376,
         "Red Rocks Amphitheatre":               9525,
+        "Bridgestone Arena":                   20000,
+        "Crypto.com Arena":                    21000,
+        "Chase Center":                        18064,
+        "Climate Pledge Arena":                18100,
     }
 
     for sl in all_setlists:
