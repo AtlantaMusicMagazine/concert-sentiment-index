@@ -455,6 +455,23 @@ def build_card(ev, rank, is_bottom=False, delta_class="flat", delta_label="\u201
         if risk_text:
             risk_html = f'\n      <p class="card-risk">{risk_text}</p>'
 
+    amm_title = meta.get("amm_article_title", "")
+    amm_url   = meta.get("amm_article_url", "")
+    amm_date  = meta.get("amm_article_date", "")
+    if amm_title and amm_url:
+        amm_strip = (
+            f'\n  <div class="amm-strip">'
+            f'<div class="amm-icon"><i class="ti ti-camera" aria-hidden="true"></i></div>'
+            f'<div class="amm-text">'
+            f'<div class="amm-eyebrow">Prior Atlanta Music Magazine coverage</div>'
+            f'<div class="amm-headline"><a href="{amm_url}" target="_blank" rel="noopener">{amm_title}</a></div>'
+            f'</div>'
+            f'<div class="amm-date">{amm_date}</div>'
+            f'</div>'
+        )
+    else:
+        amm_strip = ""
+
     safe_id = re.sub(r"[^a-z0-9]", "-", ev["id"].lower())
     card_id = f"event-{'b' if is_bottom else ''}{rank}-{safe_id}"
 
@@ -473,9 +490,8 @@ def build_card(ev, rank, is_bottom=False, delta_class="flat", delta_label="\u201
       </div>
       {signals_html}
       <p class="card-insight" itemprop="description">{insight}</p>{risk_html}
-    </div>
-    <div class="card-score" aria-label="Popularity score: {display_score} out of 100">
-      <span class="score-label" aria-hidden="true">Score</span>
+    </div>{amm_strip}
+    <div class="card-score" aria-label="Popularity score: {display_score} out of 100">      <span class="score-label" aria-hidden="true">Score</span>
       <span class="score-value" style="color:{accent};" aria-hidden="true">{display_score}</span>
       <div class="score-bar-track" style="background:{bar_bg};" role="progressbar" aria-valuenow="{display_score}" aria-valuemin="0" aria-valuemax="100" aria-label="Score {display_score} out of 100">
         <div class="score-bar-fill" style="width:{display_score}%;background:{accent};"></div>
