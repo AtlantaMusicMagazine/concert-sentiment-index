@@ -1449,38 +1449,47 @@ def match_amm_article(artist_name, catalog):
     """
     Find the most recent atlantamusicmagazine.com article for a given artist.
 
-    Matching logic:
-      1. Normalize artist name — strip tour suffixes, featured artists,
-         special characters: "Santana & The Doobie Brothers" → "santana"
-      2. Check if any word from the normalized artist name appears in
-         the article slug (URL) — slugs are reliable, title HTML varies
-      3. Among matches, return the most recent by date
+    Matching requires ALL significant artist name words to appear in
+    the article slug — not just any one word. This prevents false matches
+    like "summer" matching "Bret Michaels Summer tour" for Summer Walker,
+    or "john" matching "John Corabi" for John Mellencamp.
 
-    Returns:
-      dict {title, link, date, display_date} or None
+    Single-word artists (e.g. "Usher", "Santana") match on that one word.
+    Multi-word artists (e.g. "John Mellencamp") require ALL words to match.
+
+    Returns: dict {title, link, date, display_date} or None
     """
     if not catalog or not artist_name:
         return None
 
-    # Normalize: lowercase, strip punctuation, split to words
-    import re as _re
-    def norm(s):
+    def norm_words(s):
         s = s.lower()
-        s = _re.sub(r"[^a-z0-9\s]", " ", s)
-        return set(w for w in s.split() if len(w) > 2 and w not in
-                   {"and", "the", "with", "feat", "from", "live", "tour",
-                    "band", "featuring", "presents", "world", "2026", "2025",
-                    "2024", "2023", "2022", "2021"})
+        s = re.sub(r"[^a-z0-9\s]", " ", s)
+        # Broader stopword list to avoid false matches on common words
+        stopwords = {
+            "and", "the", "with", "feat", "from", "live", "tour", "band",
+            "featuring", "presents", "world", "2026", "2025", "2024",
+            "2023", "2022", "2021", "music", "festival", "show", "concert",
+            "summer", "spring", "fall", "winter", "night", "day", "big",
+            "new", "old", "all", "one", "two", "rock", "pop", "hip", "hop",
+        }
+        return [w for w in s.split() if len(w) > 2 and w not in stopwords]
 
-    artist_words = norm(artist_name)
+    # Primary artist name: strip everything after " — " or " - " (tour names)
+    primary = re.split(r'\s+[—\-]\s+', artist_name)[0].strip()
+    # Also strip " & " partners: "Santana & The Doobie Brothers" → "Santana"
+    # Keep only the first artist for matching
+    primary = re.split(r'\s+&\s+|\s+and\s+', primary, flags=re.IGNORECASE)[0].strip()
+
+    artist_words = norm_words(primary)
     if not artist_words:
         return None
 
     matches = []
     for post in catalog:
-        slug_words = norm(post["slug"])
-        # At least one meaningful artist word must appear in the slug
-        if artist_words & slug_words:
+        slug_words = norm_words(post["slug"])
+        # ALL artist words must appear in the slug (not just any one)
+        if all(w in slug_words for w in artist_words):
             matches.append(post)
 
     if not matches:
@@ -1489,15 +1498,37 @@ def match_amm_article(artist_name, catalog):
     # Return most recent
     best = sorted(matches, key=lambda p: p["date"], reverse=True)[0]
 
-    # Format display date: "Feb 2023"
+    # Format display date
     try:
         d = datetime.date.fromisoformat(best["date"])
         display = d.strftime("%b %Y")
     except (ValueError, TypeError):
         display = best["date"][:7]
 
+    # Use real title if available, otherwise clean up slug
+    title = best.get("title", "")
+    if not title or title == best["slug"].replace("-", " ").title():
+        # Slug-derived title — fetch the real title from the article page
+        try:
+            r = requests.get(
+                best["link"],
+                headers={"User-Agent": MB_USER_AGENT},
+                timeout=10,
+            )
+            if r.status_code == 200:
+                og_title = re.search(
+                    r'<meta[^>]+property="og:title"[^>]+content="([^"]+)"',
+                    r.text
+                )
+                if og_title:
+                    raw = og_title.group(1)
+                    # Strip site name suffix " - Covering Southeast Concerts" etc.
+                    title = re.split(r'\s+[-|–—]\s+(?:Covering|Atlanta)', raw)[0].strip()
+        except Exception:
+            pass   # fall back to slug-derived title
+
     return {
-        "title":        best["title"],
+        "title":        title or best["slug"].replace("-", " ").title(),
         "link":         best["link"],
         "date":         best["date"],
         "display_date": display,
