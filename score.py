@@ -565,18 +565,25 @@ def norm_bandsintown_rsvps(val, venue_cap):
 
 
 def norm_setlist_atl_market(atl_shows_5y):
+    """
+    ATL market history from Setlist.fm.
+    0 shows is treated as None (signal absent) rather than a confirmed
+    negative — Setlist.fm's coverage of pop/Latin artists is incomplete
+    and 0 likely reflects a data gap, not genuine unfamiliarity with the
+    ATL market. Only positive counts (1+) carry signal weight.
+    """
     if atl_shows_5y is None:
         return None
     n = int(atl_shows_5y)
+    if n == 0:
+        return None    # data gap — exclude from weighted average
     if n >= 7:
         return 1.0
     if n >= 4:
         return 0.85
     if n >= 2:
         return 0.70
-    if n == 1:
-        return 0.55
-    return 0.35   # 0 ATL shows in 5 years → unfamiliar market
+    return 0.55        # 1 show — some ATL market presence
 
 
 def norm_setlist_sold_out(sold_out_flag):
