@@ -1318,12 +1318,16 @@ def fetch_amm_catalog():
     try:
         with open(AMM_CACHE_PATH) as f:
             cached = json.load(f)
-        cached_date = datetime.date.fromisoformat(cached.get("fetched_on", "2000-01-01"))
-        days_old    = (today - cached_date).days
+        cached_posts = cached.get("posts", [])
+        cached_date  = datetime.date.fromisoformat(cached.get("fetched_on", "2000-01-01"))
+        days_old     = (today - cached_date).days
         # Refresh weekly (Mondays) or if cache is >7 days old
-        if days_old < 7 and today.weekday() != 0:
-            print(f"[amm] Using cached catalog ({len(cached.get('posts', []))} posts, {days_old}d old)")
-            return cached.get("posts", [])
+        # Never use a cache with 0 posts — always re-fetch if empty
+        if cached_posts and days_old < 7 and today.weekday() != 0:
+            print(f"[amm] Using cached catalog ({len(cached_posts)} posts, {days_old}d old)")
+            return cached_posts
+        if not cached_posts:
+            print("[amm] Cache is empty — forcing re-fetch")
     except (FileNotFoundError, json.JSONDecodeError, ValueError):
         cached = {}
 
@@ -1373,9 +1377,13 @@ def fetch_amm_catalog():
 
     print(f"[amm] Catalog fetched: {len(all_posts)} atlantamusicmagazine.com articles")
 
-    # Save to cache
-    with open(AMM_CACHE_PATH, "w") as f:
-        json.dump({"fetched_on": today.isoformat(), "posts": all_posts}, f, indent=2)
+    # Only save to cache if we got real results — never cache an empty result
+    # which would block re-fetching for 7 days
+    if all_posts:
+        with open(AMM_CACHE_PATH, "w") as f:
+            json.dump({"fetched_on": today.isoformat(), "posts": all_posts}, f, indent=2)
+    else:
+        print("[amm] WARN: 0 articles fetched — not caching, will retry next run")
 
     return all_posts
 
