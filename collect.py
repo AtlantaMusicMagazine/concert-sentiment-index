@@ -1319,11 +1319,24 @@ def fetch_amm_catalog():
         cached_posts = cached.get("posts", [])
         cached_date  = datetime.date.fromisoformat(cached.get("fetched_on", "2000-01-01"))
         days_old     = (today - cached_date).days
-        if cached_posts and days_old < 7 and today.weekday() != 0:
+
+        # Detect stale cache with lastmod-style dates (all posts share the same date)
+        # which indicates the cache was built before the date_from_slug fix.
+        # A healthy cache has varied dates across articles; a stale one has all
+        # dates collapsing to the same month (e.g. all "2025-02-xx").
+        if cached_posts and len(cached_posts) > 3:
+            post_months = set(p.get("date", "")[:7] for p in cached_posts)
+            dates_look_stale = len(post_months) <= 2  # all in 1-2 months = lastmod batch
+        else:
+            dates_look_stale = False
+
+        if cached_posts and days_old < 7 and today.weekday() != 0 and not dates_look_stale:
             print(f"[amm] Using cached catalog ({len(cached_posts)} posts, {days_old}d old)")
             return cached_posts
         if not cached_posts:
             print("[amm] Cache empty — forcing re-fetch")
+        elif dates_look_stale:
+            print(f"[amm] Cache dates look stale (lastmod batch) — forcing re-fetch")
     except (FileNotFoundError, json.JSONDecodeError, ValueError):
         pass
 
