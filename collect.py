@@ -1478,20 +1478,24 @@ def match_amm_article(artist_name, catalog):
 
     # Primary artist name: strip everything after " — " or " - " (tour names)
     primary = re.split(r'\s+[—\-]\s+', artist_name)[0].strip()
-    # Also strip " & " partners: "Santana & The Doobie Brothers" → "Santana"
-    # Keep only the first artist for matching
-    primary = re.split(r'\s+&\s+|\s+and\s+', primary, flags=re.IGNORECASE)[0].strip()
 
-    artist_words = norm_words(primary)
-    if not artist_words:
-        return None
+    # Split on " & " or " and " — may have multiple co-headliners.
+    # Try EACH partner independently so "Lynyrd Skynyrd & Foreigner"
+    # tries both "Lynyrd Skynyrd" and "Foreigner" against the slug.
+    partners = re.split(r'\s+&\s+|\s+and\s+', primary, flags=re.IGNORECASE)
+    partners = [p.strip() for p in partners if p.strip()]
 
     matches = []
-    for post in catalog:
-        slug_words = norm_words(post["slug"])
-        # ALL artist words must appear in the slug (not just any one)
-        if all(w in slug_words for w in artist_words):
-            matches.append(post)
+    for partner in partners:
+        artist_words = norm_words(partner)
+        if not artist_words:
+            continue
+        for post in catalog:
+            slug_words = norm_words(post["slug"])
+            # ALL words of this partner must appear in the slug
+            if all(w in slug_words for w in artist_words):
+                if post not in matches:
+                    matches.append(post)
 
     if not matches:
         return None
