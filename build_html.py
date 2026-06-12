@@ -349,14 +349,24 @@ def build_insight(ev):
 
     # ── 10. ATL market history ─────────────────────────────────────────
     atl_shows = raw.get("setlist_atl_shows_5y")
-    seed      = ev.get("seed_score", 50) or 50
+    genre     = (ev.get("genre") or "").lower()
+    amm_date  = raw.get("amm_article_date", "") or ""
+
+    # Genres where Setlist.fm coverage is unreliable — 0 ATL shows likely
+    # reflects a data gap, not a genuine first appearance
+    SETLIST_UNRELIABLE_GENRES = {
+        "pop", "latin", "r&b", "hip-hop", "hip hop",
+        "country", "electronic", "dance",
+    }
+    setlist_unreliable = any(g in genre for g in SETLIST_UNRELIABLE_GENRES)
+
     if atl_shows is not None:
         n = int(atl_shows)
         if n == 0:
-            # Only surface "First ATL show" for lower-tier acts (seed < 65)
-            # For high-demand artists (seed >= 65), 0 ATL shows almost certainly
-            # reflects incomplete Setlist.fm data, not a genuine first appearance
-            if int(seed) < 65:
+            # Suppress "First ATL show" when:
+            #   a) Genre is one where Setlist.fm undercounts (pop/latin/R&B etc.)
+            #   b) An AMM article exists — it proves a recent Atlanta show occurred
+            if not setlist_unreliable and not amm_date:
                 parts.append("First ATL show in 5+ years")
         elif n >= 6:
             parts.append(f"{n} ATL shows in past 5 years")
@@ -386,9 +396,9 @@ def build_insight(ev):
             direction = "+" if trend >= 0 else ""
             parts.append(f"Wikipedia {direction}{trend:.0f}% this week")
 
-    return (" \u00b7 ".join(parts[:5])
-            if parts
-            else f"Score {ev['score']} \u2014 updated {datetime.date.today().strftime('%b %-d, %Y')}")
+    # Return joined parts; empty string when no signals fire
+    # (Score fallback removed — it surfaced debug data in production cards)
+    return " \u00b7 ".join(parts[:5])
 
 
 # ── Risk flag (bottom panel) ──────────────────────────────────────────────
