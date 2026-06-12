@@ -1294,103 +1294,156 @@ AMM_CACHE_PATH = "data/amm_coverage.json"
 
 def fetch_amm_catalog():
     """
-    Crawl atlantamusicmagazine.com via the WordPress.COM REST API.
+    Build the AMM article catalog by parsing the atlantamusicmagazine.com
+    XML sitemap. Jetpack (which the site uses) generates the sitemap at:
+      https://atlantamusicmagazine.com/sitemap.xml
 
-    atlantamusicmagazine.com is hosted on WordPress.com, which uses a
-    different REST API than self-hosted WordPress:
-      https://public-api.wordpress.com/rest/v1.1/sites/{site}/posts/
-    The standard /wp-json/wp/v2/posts endpoint returns 404 on .com-hosted
-    sites — this was the root cause of AMM strips not appearing.
+    The sitemap is an XML document listing every published URL. WordPress
+    sites with Jetpack typically also expose a sitemap index at /sitemap.xml
+    that references child sitemaps (posts, pages, etc.).
 
-    No authentication required for publicly published posts.
-    Paginates using `offset` parameter (number=100 posts per page).
+    Domain filter: atlantamusicmagazine.com ONLY.
+    No scraping — pure XML parsing of a standards-compliant sitemap.
 
-    Returns:
-      list of dicts: [{title: str, link: str, date: str, slug: str}]
+    Cache: refreshed weekly (Mondays) or when empty.
+    Returns: list of dicts [{title, link, date, slug}]
     """
+    import xml.etree.ElementTree as ET
+
     today = datetime.date.today()
 
-    # Load existing cache
     try:
         with open(AMM_CACHE_PATH) as f:
             cached = json.load(f)
         cached_posts = cached.get("posts", [])
         cached_date  = datetime.date.fromisoformat(cached.get("fetched_on", "2000-01-01"))
         days_old     = (today - cached_date).days
-        # Never use empty cache — always re-fetch
         if cached_posts and days_old < 7 and today.weekday() != 0:
             print(f"[amm] Using cached catalog ({len(cached_posts)} posts, {days_old}d old)")
             return cached_posts
         if not cached_posts:
-            print("[amm] Cache is empty — forcing re-fetch")
+            print("[amm] Cache empty — forcing re-fetch")
     except (FileNotFoundError, json.JSONDecodeError, ValueError):
-        cached = {}
+        pass
 
-    print("[amm] Fetching full article catalog via WordPress.com REST API...")
+    print("[amm] Fetching sitemap from atlantamusicmagazine.com...")
+
+    SITEMAP_URLS = [
+        "https://atlantamusicmagazine.com/sitemap.xml",
+        "https://atlantamusicmagazine.com/sitemap_index.xml",
+        "https://atlantamusicmagazine.com/wp-sitemap.xml",
+    ]
+
+    # Sitemap XML namespaces
+    NS = {
+        "sm":    "http://www.sitemaps.org/schemas/sitemap/0.9",
+        "news":  "http://www.google.com/schemas/sitemap-news/0.9",
+        "image": "http://www.google.com/schemas/sitemap-image/1.1",
+    }
+
+    EXCLUDE_PATHS = (
+        "/category/", "/tag/", "/author/", "/page/", "/feed/",
+        "wp-content", "wp-admin", "wp-includes",
+        "concert-calendar", "features", "about", "contact",
+        "placemark", "2021-reviews", "2022-reviews", "2023-reviews",
+        "2024-reviews", "2025-reviews", "2026-reviews",
+    )
+
+    def fetch_xml(url):
+        try:
+            r = requests.get(
+                url,
+                headers={"User-Agent": MB_USER_AGENT},
+                timeout=20,
+            )
+            if r.status_code == 200:
+                return r.text
+            print(f"[amm]   {url}: HTTP {r.status_code}")
+        except Exception as e:
+            print(f"[amm]   {url}: {e}")
+        return None
+
+    def parse_sitemap(xml_text, collected, seen):
+        """Recursively parse sitemap or sitemap index XML."""
+        try:
+            root = ET.fromstring(xml_text)
+        except ET.ParseError as e:
+            print(f"[amm]   XML parse error: {e}")
+            return
+
+        tag = root.tag.split('}')[-1] if '}' in root.tag else root.tag
+
+        if tag == "sitemapindex":
+            # Sitemap index — recurse into each child sitemap
+            for sitemap in root.findall(".//{http://www.sitemaps.org/schemas/sitemap/0.9}loc"):
+                child_url = sitemap.text.strip()
+                # Only follow post sitemaps, skip image/page sitemaps
+                if "post" in child_url or "sitemap" in child_url:
+                    child_xml = fetch_xml(child_url)
+                    time.sleep(0.3)
+                    if child_xml:
+                        parse_sitemap(child_xml, collected, seen)
+
+        elif tag == "urlset":
+            # Regular sitemap — extract URLs
+            for url_el in root.findall(".//{http://www.sitemaps.org/schemas/sitemap/0.9}url"):
+                loc = url_el.find("{http://www.sitemaps.org/schemas/sitemap/0.9}loc")
+                lastmod = url_el.find("{http://www.sitemaps.org/schemas/sitemap/0.9}lastmod")
+                news_title = url_el.find(".//{http://www.google.com/schemas/sitemap-news/0.9}title")
+
+                if loc is None:
+                    continue
+                link = loc.text.strip().rstrip("/")
+
+                # Domain filter — atlantamusicmagazine.com only
+                if "atlantamusicmagazine.com" not in link:
+                    continue
+                if link in seen:
+                    continue
+                if any(x in link for x in EXCLUDE_PATHS):
+                    continue
+
+                path_parts = link.split("/", 3)
+                if len(path_parts) < 4 or not path_parts[3]:
+                    continue
+
+                slug     = path_parts[3].rstrip("/")
+                date_str = (lastmod.text.strip()[:10]
+                            if lastmod is not None and lastmod.text else "2024-01-01")
+                title    = (news_title.text.strip()
+                            if news_title is not None and news_title.text
+                            else slug.replace("-", " ").title())
+
+                seen.add(link)
+                collected.append({
+                    "title": title,
+                    "link":  link + "/",
+                    "date":  date_str,
+                    "slug":  slug,
+                })
+
     all_posts = []
-    offset    = 0
-    site      = "atlantamusicmagazine.com"
+    seen_links = set()
 
-    while True:
-        data = safe_get(
-            f"https://public-api.wordpress.com/rest/v1.1/sites/{site}/posts/",
-            params={
-                "number":  100,
-                "offset":  offset,
-                "fields":  "title,URL,date,slug",
-                "status":  "publish",
-            },
-            headers={"User-Agent": MB_USER_AGENT},
-            label=f"AMM catalog offset={offset}",
-            timeout=20,
-        )
+    # Try each sitemap URL until one works
+    for sitemap_url in SITEMAP_URLS:
+        xml_text = fetch_xml(sitemap_url)
         time.sleep(0.5)
+        if xml_text:
+            parse_sitemap(xml_text, all_posts, seen_links)
+            if all_posts:
+                print(f"[amm] Sitemap parsed: {len(all_posts)} articles on atlantamusicmagazine.com")
+                break
+            print(f"[amm]   {sitemap_url}: parsed but 0 matching URLs")
 
-        if not data or not isinstance(data, dict):
-            print(f"[amm] Unexpected response at offset={offset}: {type(data)}")
-            break
+    if not all_posts:
+        print("[amm] WARN: 0 articles from sitemap — not caching, will retry next run")
+        return []
 
-        posts = data.get("posts", [])
-        if not posts:
-            break   # no more pages
-
-        for post in posts:
-            link = post.get("URL", "")
-            # Strict domain filter — atlantamusicmagazine.com only
-            if "atlantamusicmagazine.com" not in link:
-                continue
-            title = post.get("title", "")
-            # Strip HTML entities
-            title = (title.replace("&#8211;", "—").replace("&#8217;", "'")
-                         .replace("&amp;", "&").replace("&#038;", "&")
-                         .replace("&#8220;", "\u201c").replace("&#8221;", "\u201d")
-                         .replace("&quot;", '"'))
-            # Date: WordPress.com returns ISO 8601 with timezone
-            raw_date = post.get("date", "")[:10]   # YYYY-MM-DD
-            slug = post.get("slug", "")
-
-            all_posts.append({
-                "title": title,
-                "link":  link,
-                "date":  raw_date,
-                "slug":  slug,
-            })
-
-        found = data.get("found", 0)
-        offset += len(posts)
-        if offset >= found or len(posts) < 100:
-            break   # fetched all
-
-    print(f"[amm] Catalog fetched: {len(all_posts)} atlantamusicmagazine.com articles")
-
-    if all_posts:
-        with open(AMM_CACHE_PATH, "w") as f:
-            json.dump({"fetched_on": today.isoformat(), "posts": all_posts}, f, indent=2)
-    else:
-        print("[amm] WARN: 0 articles fetched — not caching, will retry next run")
+    with open(AMM_CACHE_PATH, "w") as f:
+        json.dump({"fetched_on": today.isoformat(), "posts": all_posts}, f, indent=2)
 
     return all_posts
-
 
 def match_amm_article(artist_name, catalog):
     """
