@@ -1288,6 +1288,157 @@ def fetch_eventbrite(event):
     }
 
 
+AMM_BASE_URL   = "https://atlantamusicmagazine.com"
+AMM_CACHE_PATH = "data/amm_coverage.json"
+
+
+def fetch_amm_catalog():
+    """
+    Crawl atlantamusicmagazine.com via the WordPress REST API to build
+    a complete index of published article titles and URLs.
+
+    Uses wp-json/wp/v2/posts with pagination (100 posts per page) to
+    reliably retrieve all posts — unlike year archive pages which can
+    truncate or present articles inconsistently.
+
+    Only retains articles whose link is on the atlantamusicmagazine.com
+    domain (excludes myglobalmind.com and allmusicmagazine.com links
+    which appear in older year archive pages).
+
+    Returns:
+      list of dicts: [{title: str, link: str, date: str, slug: str}]
+
+    Cache: results are saved to data/amm_coverage.json and refreshed
+    weekly (Mondays) to avoid hitting the API nightly. A weekly refresh
+    is sufficient since historical articles don't change.
+    """
+    today = datetime.date.today()
+
+    # Load existing cache
+    try:
+        with open(AMM_CACHE_PATH) as f:
+            cached = json.load(f)
+        cached_date = datetime.date.fromisoformat(cached.get("fetched_on", "2000-01-01"))
+        days_old    = (today - cached_date).days
+        # Refresh weekly (Mondays) or if cache is >7 days old
+        if days_old < 7 and today.weekday() != 0:
+            print(f"[amm] Using cached catalog ({len(cached.get('posts', []))} posts, {days_old}d old)")
+            return cached.get("posts", [])
+    except (FileNotFoundError, json.JSONDecodeError, ValueError):
+        cached = {}
+
+    print("[amm] Fetching full article catalog via WordPress REST API...")
+    all_posts = []
+    page      = 1
+
+    while True:
+        data = safe_get(
+            f"{AMM_BASE_URL}/wp-json/wp/v2/posts",
+            params={
+                "per_page": 100,
+                "page":     page,
+                "_fields":  "title,link,date,slug",
+            },
+            headers={"User-Agent": MB_USER_AGENT},
+            label=f"AMM catalog page {page}",
+            timeout=15,
+        )
+        time.sleep(0.5)
+
+        if not data or not isinstance(data, list) or len(data) == 0:
+            break   # no more pages
+
+        for post in data:
+            link = post.get("link", "")
+            # Strict domain filter — atlantamusicmagazine.com only
+            if "atlantamusicmagazine.com" not in link:
+                continue
+            title_raw = post.get("title", {})
+            title = (title_raw.get("rendered", "") if isinstance(title_raw, dict)
+                     else str(title_raw))
+            # Strip HTML entities from title
+            title = (title.replace("&#8211;", "—").replace("&#8217;", "'")
+                         .replace("&amp;", "&").replace("&#038;", "&")
+                         .replace("&#8220;", "\u201c").replace("&#8221;", "\u201d"))
+            all_posts.append({
+                "title": title,
+                "link":  link,
+                "date":  post.get("date", "")[:10],   # YYYY-MM-DD only
+                "slug":  post.get("slug", ""),
+            })
+
+        if len(data) < 100:
+            break   # last page
+        page += 1
+
+    print(f"[amm] Catalog fetched: {len(all_posts)} atlantamusicmagazine.com articles")
+
+    # Save to cache
+    with open(AMM_CACHE_PATH, "w") as f:
+        json.dump({"fetched_on": today.isoformat(), "posts": all_posts}, f, indent=2)
+
+    return all_posts
+
+
+def match_amm_article(artist_name, catalog):
+    """
+    Find the most recent atlantamusicmagazine.com article for a given artist.
+
+    Matching logic:
+      1. Normalize artist name — strip tour suffixes, featured artists,
+         special characters: "Santana & The Doobie Brothers" → "santana"
+      2. Check if any word from the normalized artist name appears in
+         the article slug (URL) — slugs are reliable, title HTML varies
+      3. Among matches, return the most recent by date
+
+    Returns:
+      dict {title, link, date, display_date} or None
+    """
+    if not catalog or not artist_name:
+        return None
+
+    # Normalize: lowercase, strip punctuation, split to words
+    import re as _re
+    def norm(s):
+        s = s.lower()
+        s = _re.sub(r"[^a-z0-9\s]", " ", s)
+        return set(w for w in s.split() if len(w) > 2 and w not in
+                   {"and", "the", "with", "feat", "from", "live", "tour",
+                    "band", "featuring", "presents", "world", "2026", "2025",
+                    "2024", "2023", "2022", "2021"})
+
+    artist_words = norm(artist_name)
+    if not artist_words:
+        return None
+
+    matches = []
+    for post in catalog:
+        slug_words = norm(post["slug"])
+        # At least one meaningful artist word must appear in the slug
+        if artist_words & slug_words:
+            matches.append(post)
+
+    if not matches:
+        return None
+
+    # Return most recent
+    best = sorted(matches, key=lambda p: p["date"], reverse=True)[0]
+
+    # Format display date: "Feb 2023"
+    try:
+        d = datetime.date.fromisoformat(best["date"])
+        display = d.strftime("%b %Y")
+    except (ValueError, TypeError):
+        display = best["date"][:7]
+
+    return {
+        "title":        best["title"],
+        "link":         best["link"],
+        "date":         best["date"],
+        "display_date": display,
+    }
+
+
 YOUTUBE_CACHE_PATH = "data/youtube_cache.json"
 
 
@@ -1844,11 +1995,22 @@ def collect_all():
     yt_cache = load_youtube_cache()
     print(f"[collect] YouTube cache loaded: {len(yt_cache)} cached entries")
 
+    # Fetch AMM article catalog once (weekly refresh via local cache)
+    amm_catalog = fetch_amm_catalog()
+
     results = {}
     for idx, event in enumerate(EVENTS):
         eid = event["id"]
         print(f"  [{idx+1}/{len(EVENTS)}] {event['name'][:55]}")
         signals = {"event_meta": event}
+
+        # AMM coverage — match against full catalog, store in event_meta
+        amm = match_amm_article(event.get("artist", ""), amm_catalog)
+        if amm:
+            event["amm_article_title"]   = amm["title"]
+            event["amm_article_url"]     = amm["link"]
+            event["amm_article_date"]    = amm["display_date"]
+            print(f"    [AMM] Matched: {amm['title'][:60]}")
 
         try:
             # 30% — Ticket Demand
