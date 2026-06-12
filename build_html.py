@@ -491,13 +491,13 @@ def build_card(ev, rank, is_bottom=False, delta_class="flat", delta_label="\u201
       </div>
       {signals_html}
       <p class="card-insight" itemprop="description">{insight}</p>{risk_html}
-    </div>{amm_strip}
+    </div>
     <div class="card-score" aria-label="Popularity score: {display_score} out of 100">      <span class="score-label" aria-hidden="true">Score</span>
       <span class="score-value" style="color:{accent};" aria-hidden="true">{display_score}</span>
       <div class="score-bar-track" style="background:{bar_bg};" role="progressbar" aria-valuenow="{display_score}" aria-valuemin="0" aria-valuemax="100" aria-label="Score {display_score} out of 100">
         <div class="score-bar-fill" style="width:{display_score}%;background:{accent};"></div>
       </div>
-    </div>
+    </div>{amm_strip}
   </article>"""
 
 
