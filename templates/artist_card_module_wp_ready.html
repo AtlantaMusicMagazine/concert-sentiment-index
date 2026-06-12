@@ -122,6 +122,7 @@
 .csi-embed .delta-up   { color: #1a6e2a; }
 .csi-embed .delta-down { color: #a80000; }
 .csi-embed .delta-flat { color: #767686; }
+.csi-embed .delta-new  { color: #5a50d4; font-size: 8px; letter-spacing: .03em; }
 
 /* ── Card body ──────────────────────────────────────── */
 .csi-embed .card-body {
@@ -1622,7 +1623,7 @@ scheduleMidnight();
       ' aria-labelledby="gv-' + rank + '-title" itemscope itemtype="https://schema.org/MusicEvent">\n' +
       '    <div class="card-rank-wrap" aria-label="Ranked ' + rank + ' in genre view">\n' +
       '      <span class="rank-num" aria-hidden="true">' + rank + '</span>\n' +
-      '      <span class="rank-delta delta-flat" aria-hidden="true">\u2014</span>\n' +
+      '      <span class="rank-delta delta-' + (ev.deltaClass||"flat") + '" aria-hidden="true">' + (ev.deltaLabel||"\u2014") + '</span>\n' +
       '    </div>\n' +
       '    <div class="card-body">\n' +
       '      <h3 class="card-title" id="gv-' + rank + '-title" itemprop="name">' + ev.name + '</h3>\n' +
