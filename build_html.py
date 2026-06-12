@@ -349,10 +349,15 @@ def build_insight(ev):
 
     # ── 10. ATL market history ─────────────────────────────────────────
     atl_shows = raw.get("setlist_atl_shows_5y")
+    seed      = ev.get("seed_score", 50) or 50
     if atl_shows is not None:
         n = int(atl_shows)
         if n == 0:
-            parts.append("First ATL show in 5+ years")
+            # Only surface "First ATL show" for lower-tier acts (seed < 65)
+            # For high-demand artists (seed >= 65), 0 ATL shows almost certainly
+            # reflects incomplete Setlist.fm data, not a genuine first appearance
+            if int(seed) < 65:
+                parts.append("First ATL show in 5+ years")
         elif n >= 6:
             parts.append(f"{n} ATL shows in past 5 years")
     if raw.get("setlist_sold_out_flag"):
