@@ -474,6 +474,30 @@ def build_card(ev, rank, is_bottom=False, delta_class="flat", delta_label="\u201
     amm_title = raw.get("amm_article_title", "") or ""
     amm_url   = raw.get("amm_article_url", "") or ""
     amm_date  = raw.get("amm_article_date", "") or ""
+
+    # Derive display date from the article URL slug — more reliable than the
+    # stored amm_article_date which may reflect a WordPress re-index date
+    # rather than the original publish date (e.g. all showing "Feb 2025").
+    # AMM slugs encode the real date: "...august-24-2022" → "Aug 2022"
+    if amm_url:
+        _slug_months = {
+            "january":"01","february":"02","march":"03","april":"04",
+            "may":"05","june":"06","july":"07","august":"08",
+            "september":"09","october":"10","november":"11","december":"12",
+        }
+        _dm = re.search(
+            r"(january|february|march|april|may|june|july|august"
+            r"|september|october|november|december)-(\d{1,2})-(20\d{2})(?:-|/|$)",
+            amm_url,
+        )
+        if _dm:
+            try:
+                _d = datetime.date(int(_dm.group(3)),
+                                   int(_slug_months[_dm.group(1)]),
+                                   int(_dm.group(2)))
+                amm_date = _d.strftime("%b %Y")
+            except (ValueError, KeyError):
+                pass   # keep stored amm_date as fallback
     if amm_title and amm_url:
         amm_strip = (
             f'\n  <div class="amm-strip">'
