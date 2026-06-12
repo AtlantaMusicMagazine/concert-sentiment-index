@@ -28,30 +28,31 @@ jobs:
       - name: Install Python dependencies
         run: pip install -r requirements.txt
 
-      # 4. Restore YouTube view-count cache from previous run
-      #    Key rotates weekly (YYYY-Www) so stale view counts never
-      #    accumulate beyond 7 days. Falls back to prior week's cache
-      #    if the current week's cache doesn't exist yet (new week).
-      #    The cache is stored at data/youtube_cache.json and read
-      #    by collect.py to compute 24-hour view deltas.
+      # 4. Restore YouTube view-count cache + rank history cache from previous run
+      #    Key rotates by run_number so each run writes a fresh entry.
+      #    restore-keys fallback finds the most recent prior cache automatically.
       - name: Restore YouTube cache
         id: yt-cache-restore
         uses: actions/cache@v4
         with:
-          path: data/youtube_cache.json
-          key: youtube-cache-${{ github.run_number }}
+          path: |
+            data/youtube_cache.json
+            data/rank_history.json
+          key: pipeline-cache-${{ github.run_number }}
           restore-keys: |
-            youtube-cache-
+            pipeline-cache-
 
-      - name: Report YouTube cache status
+      - name: Report cache status
         run: |
           if [ "${{ steps.yt-cache-restore.outputs.cache-hit }}" == "true" ]; then
-            echo "[cache] YouTube cache restored from previous run"
-            python3 -c "import json; c=json.load(open('data/youtube_cache.json')); print(f'[cache] {len(c)} events cached')" 2>/dev/null || echo "[cache] Cache file present"
+            echo "[cache] Pipeline cache restored from previous run"
+            python3 -c "import json; c=json.load(open('data/youtube_cache.json')); print(f'[cache] YouTube: {len(c)} events cached')" 2>/dev/null || true
+            python3 -c "import json; c=json.load(open('data/rank_history.json')); print(f'[cache] Rank history: {len(c)} events cached')" 2>/dev/null || true
           else
-            echo "[cache] No prior YouTube cache found — first run or expired"
+            echo "[cache] No prior cache found — first run or expired"
             mkdir -p data
             echo '{}' > data/youtube_cache.json
+            echo '{}' > data/rank_history.json
           fi
 
       # 5. Run the full pipeline
@@ -94,12 +95,14 @@ jobs:
       #    Runs even if the pipeline step fails so a partial cache
       #    is never lost. The cache@v4 action uses the key set in
       #    step 4 — same key = this run's cache overwrites last run's.
-      - name: Save YouTube cache
+      - name: Save pipeline cache
         if: always()
         uses: actions/cache@v4
         with:
-          path: data/youtube_cache.json
-          key: youtube-cache-${{ github.run_number }}
+          path: |
+            data/youtube_cache.json
+            data/rank_history.json
+          key: pipeline-cache-${{ github.run_number }}
 
       # 7. Upload dashboard HTML artifact
       - name: Upload dashboard artifact
