@@ -450,6 +450,29 @@
 }
 
 /* ── Mobile ─────────────────────────────────────────── */
+@media (max-width: 640px) {
+  /* Segmented control: smaller buttons, prevent overflow */
+  .csi-embed .seg-btn {
+    font-size: 10px;
+    padding: 5px 8px;
+  }
+  .csi-embed .seg-more {
+    font-size: 10px;
+    padding: 6px 8px;
+  }
+  /* Popover: clamp to viewport so it never bleeds off-screen */
+  .csi-embed .seg-popover {
+    right: 0;
+    left: auto;
+    max-width: calc(100vw - 24px);
+    width: max-content;
+  }
+  /* Genre card list in filtered view */
+  .csi-embed .genre-card-list .event-card {
+    grid-template-columns: 28px 1fr 64px;
+    padding: 10px 12px 10px 10px;
+  }
+}
 @media (max-width: 480px) {
   .csi-embed { padding: 16px 12px 32px; }
   .csi-embed .event-card {
@@ -458,6 +481,33 @@
   }
   .csi-embed .score-value { font-size: 26px; }
   .csi-embed .card-title  { font-size: 13px !important; }
+  /* Genre pill on card: smaller on mobile */
+  .csi-embed .genre-pill {
+    font-size: 10px;
+    padding: 2px 7px;
+  }
+  /* Seg track: allow horizontal scroll as absolute last resort */
+  .csi-embed .seg-track {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .csi-embed .seg-track::-webkit-scrollbar { display: none; }
+  /* Seg wrap: ensure More button doesn't get cut */
+  .csi-embed .seg-wrap {
+    gap: 4px;
+  }
+  /* AMM strip: tighter on mobile */
+  .csi-embed .amm-strip {
+    gap: 7px;
+    padding: .55rem 12px;
+    margin: 6px -12px -10px;
+  }
+  .csi-embed .amm-eyebrow { display: none; }
+  .csi-embed .amm-icon { width: 24px; height: 24px; }
+  .csi-embed .amm-icon i { font-size: 12px; }
+  .csi-embed .amm-headline { font-size: 11px; }
+  .csi-embed .amm-date { display: none; }
 }
 </style>
 
@@ -1715,7 +1765,15 @@ scheduleMidnight();
     /* Decide split: top 4 genres → primary segments; rest → overflow popover
        "All" always occupies the first segment slot.
        Max primary genre segments = 4 (so 5 total including All). */
-    var MAX_PRIMARY = 4;
+    /* Responsive MAX_PRIMARY: fewer primary tabs on narrow screens */
+    function getMaxPrimary() {
+      var w = window.innerWidth || document.documentElement.clientWidth;
+      if (w <= 400) return 1;   /* phone portrait: All + 1 genre max */
+      if (w <= 540) return 2;   /* phone landscape / small phone */
+      if (w <= 680) return 3;   /* large phone / small tablet */
+      return 4;                  /* desktop default */
+    }
+    var MAX_PRIMARY    = getMaxPrimary();
     var primaryGenres  = genreOrder.slice(0, MAX_PRIMARY);
     var overflowGenres = genreOrder.slice(MAX_PRIMARY).sort();
 
