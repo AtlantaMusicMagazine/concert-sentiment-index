@@ -455,9 +455,10 @@ def build_card(ev, rank, is_bottom=False, delta_class="flat", delta_label="\u201
         if risk_text:
             risk_html = f'\n      <p class="card-risk">{risk_text}</p>'
 
-    amm_title = meta.get("amm_article_title", "")
-    amm_url   = meta.get("amm_article_url", "")
-    amm_date  = meta.get("amm_article_date", "")
+    raw       = ev.get("raw_signals", {})
+    amm_title = raw.get("amm_article_title", "") or ""
+    amm_url   = raw.get("amm_article_url", "") or ""
+    amm_date  = raw.get("amm_article_date", "") or ""
     if amm_title and amm_url:
         amm_strip = (
             f'\n  <div class="amm-strip">'
