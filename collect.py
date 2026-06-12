@@ -2105,8 +2105,14 @@ def collect_all():
         print(f"  [{idx+1}/{len(EVENTS)}] {event['name'][:55]}")
         signals = {"event_meta": event}
 
-        # AMM coverage — match against full catalog, store in event_meta
-        amm = match_amm_article(event.get("artist", ""), amm_catalog)
+        # AMM coverage — try artist field first, fall back to full name
+        # which may contain co-headliners (e.g. "Lynyrd Skynyrd & Foreigner")
+        amm_artist = event.get("artist") or event.get("name", "")
+        amm = match_amm_article(amm_artist, amm_catalog)
+        # If primary artist didn't match, try the full event name
+        # (catches co-headliner billing like "Lynyrd Skynyrd & Foreigner")
+        if not amm and event.get("name") != amm_artist:
+            amm = match_amm_article(event.get("name", ""), amm_catalog)
         if amm:
             event["amm_article_title"]   = amm["title"]
             event["amm_article_url"]     = amm["link"]
