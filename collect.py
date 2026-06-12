@@ -1350,6 +1350,30 @@ def fetch_amm_catalog():
         "2024-reviews", "2025-reviews", "2026-reviews",
     )
 
+    _SLUG_MONTHS = {
+        "january":"01","february":"02","march":"03","april":"04",
+        "may":"05","june":"06","july":"07","august":"08",
+        "september":"09","october":"10","november":"11","december":"12",
+    }
+
+    def date_from_slug(slug):
+        """
+        Extract real article date from the URL slug.
+        AMM slugs follow the pattern: ...month-DD-YYYY
+        e.g. "...on-wednesday-august-24-2022" → "2022-08-24"
+        More reliable than sitemap <lastmod> which reflects the last time
+        WordPress re-indexed the post (can be a site migration date).
+        """
+        m = re.search(
+            r"(january|february|march|april|may|june|july|august"
+            r"|september|october|november|december)-(\d{1,2})-(20\d{2})(?:-|$)",
+            slug,
+        )
+        if m:
+            return f"{m.group(3)}-{_SLUG_MONTHS[m.group(1)]}-{m.group(2).zfill(2)}"
+        yr = re.search(r"-(20\d{2})(?:-|$)", slug)
+        return f"{yr.group(1)}-01-01" if yr else "2024-01-01"
+
     def fetch_xml(url):
         try:
             r = requests.get(
@@ -1409,8 +1433,7 @@ def fetch_amm_catalog():
                     continue
 
                 slug     = path_parts[3].rstrip("/")
-                date_str = (lastmod.text.strip()[:10]
-                            if lastmod is not None and lastmod.text else "2024-01-01")
+                date_str = date_from_slug(slug)   # slug date > lastmod (lastmod = re-index date)
                 title    = (news_title.text.strip()
                             if news_title is not None and news_title.text
                             else slug.replace("-", " ").title())
