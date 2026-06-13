@@ -184,30 +184,38 @@ def upload_as_page_content(html_content):
         except Exception as we:
             print(f"[upload]   WordPress.com API purge failed: {we}")
 
-        # XML-RPC editorial touch — fires save_post hooks and busts
-        # WordPress.com's edge cache, identical to clicking Save in the editor.
-        # Uses basic auth (same credentials as REST API). xmlrpc.client is
-        # Python stdlib — no extra dependency needed.
+        # Nonce-based editorial save — mirrors what the block editor does.
+        # Fetches a fresh nonce from the WP REST API, then uses it to POST
+        # a save that fires wp_after_insert_post, which is the hook
+        # WordPress.com uses for edge cache invalidation.
         try:
-            import xmlrpc.client
-            rpc = xmlrpc.client.ServerProxy(
-                f"{WP_SITE_URL.rstrip('/')}/xmlrpc.php",
-                allow_none=True,
+            # Step 1: get a fresh nonce
+            nonce_r = requests.get(
+                f"{WP_SITE_URL.rstrip('/')}/wp-json/",
+                headers=wp_auth_header(),
+                timeout=10,
             )
-            rpc.wp.editPage(
-                0,               # blog_id (0 = default)
-                int(WP_PAGE_ID),
-                WP_USERNAME,
-                WP_APP_PASSWORD,
-                {
-                    "post_content": gutenberg_content,
-                    "post_status":  "publish",
-                    "post_title":   "Concert Sentiment Index",
+            nonce = None
+            if nonce_r.status_code == 200:
+                nonce = nonce_r.json().get("_nonce") or nonce_r.headers.get("X-WP-Nonce")
+
+            # Step 2: POST with nonce (same endpoint, triggers full save hooks)
+            save_headers = {**wp_auth_header(), "Content-Type": "application/json"}
+            if nonce:
+                save_headers["X-WP-Nonce"] = nonce
+            save_r = requests.post(
+                f"{WP_SITE_URL.rstrip('/')}/wp-json/wp/v2/pages/{WP_PAGE_ID}",
+                headers=save_headers,
+                json={
+                    "content": gutenberg_content,
+                    "status":  "publish",
+                    "title":   "Concert Sentiment Index",
                 },
+                timeout=30,
             )
-            print("[upload]   XML-RPC editorial touch: ✓")
-        except Exception as xe:
-            print(f"[upload]   XML-RPC editorial touch failed: {xe}")
+            print(f"[upload]   Nonce-based save: HTTP {save_r.status_code} (nonce={'yes' if nonce else 'no'})")
+        except Exception as ne:
+            print(f"[upload]   Nonce-based save failed: {ne}")
 
         return True
     except requests.exceptions.HTTPError as e:
