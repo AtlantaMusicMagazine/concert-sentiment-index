@@ -177,6 +177,31 @@ def upload_as_page_content(html_content):
         except Exception as we:
             print(f"[upload]   WordPress.com API purge failed: {we}")
 
+        # XML-RPC editorial touch — fires save_post hooks and busts
+        # WordPress.com's edge cache, identical to clicking Save in the editor.
+        # Uses basic auth (same credentials as REST API). xmlrpc.client is
+        # Python stdlib — no extra dependency needed.
+        try:
+            import xmlrpc.client
+            rpc = xmlrpc.client.ServerProxy(
+                f"{WP_SITE_URL.rstrip('/')}/xmlrpc.php",
+                allow_none=True,
+            )
+            rpc.wp.editPage(
+                0,               # blog_id (0 = default)
+                int(WP_PAGE_ID),
+                WP_USERNAME,
+                WP_APP_PASSWORD,
+                {
+                    "post_content": gutenberg_content,
+                    "post_status":  "publish",
+                    "post_title":   "Concert Sentiment Index",
+                },
+            )
+            print("[upload]   XML-RPC editorial touch: ✓")
+        except Exception as xe:
+            print(f"[upload]   XML-RPC editorial touch failed: {xe}")
+
         return True
     except requests.exceptions.HTTPError as e:
         print(f"[upload] ✗ HTTP error: {e} — {r.text[:300]}")
