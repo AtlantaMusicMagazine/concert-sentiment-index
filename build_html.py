@@ -952,9 +952,9 @@ def build():
 
         # Inject <script type="application/json"> just before TOP_CARDS_START
         json_tag = (
-            '<script type="application/json" id="csi-pool-data">\n'
+            '<template id="csi-pool-data">\n'
             + pool_array + '\n'
-            + '</script>\n'
+            + '</template>\n'
         )
         TOP_CARDS_SENTINEL = "<!-- TOP_CARDS_START -->"
         if TOP_CARDS_SENTINEL in html:
