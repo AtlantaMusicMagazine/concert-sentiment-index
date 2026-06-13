@@ -78,6 +78,13 @@ def upload_as_page_content(html_content):
         if b.strip()
     )
 
+    # Append a hidden timestamp comment so WordPress.com always detects
+    # a real content change and invalidates its edge cache. Without this,
+    # WP.com skips cache busting when it detects no diff in the content.
+    import datetime as _dt
+    cache_bust = f"\n<!-- csi-updated: {_dt.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')} -->"
+    gutenberg_content = gutenberg_content + cache_bust
+
     url = f"{WP_SITE_URL.rstrip('/')}/wp-json/wp/v2/pages/{WP_PAGE_ID}"
     headers = {
         **wp_auth_header(),
