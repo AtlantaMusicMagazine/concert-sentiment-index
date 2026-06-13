@@ -1539,6 +1539,24 @@ function getETOffsetMs() {
   var isDST = (Date.now() >= dstStart.getTime() && Date.now() < dstEnd.getTime());
   return isDST ? -4 * 3600000 : -5 * 3600000;
 }
+function scheduleMidnight() {
+  var etMs = Date.now() + getETOffsetMs();
+  var ms   = Math.ceil(etMs / 86400000) * 86400000 - etMs;
+  if (ms <= 0) ms += 86400000;
+  setTimeout(function() {
+    location.reload();
+    setInterval(function() { location.reload(); }, 86400000);
+  }, ms);
+}
+function setWindowRange() {
+  var now = new Date();
+  var end = new Date(now); end.setDate(end.getDate() + 90);
+  var fmt = function(d) {
+    return d.toLocaleDateString("en-US", {month:"short", day:"numeric", year:"numeric"});
+  };
+  var el = document.getElementById("window-range");
+  if (el) el.textContent = fmt(now) + " \u2013 " + fmt(end);
+}
 setInterval(tick,1000);
 setWindowRange();
 scheduleMidnight();
