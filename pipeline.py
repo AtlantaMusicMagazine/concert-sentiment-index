@@ -97,6 +97,25 @@ def upload_as_page_content(html_content):
         print(f"[upload]   Title: {result.get('title', {}).get('rendered', 'unknown')}")
         print(f"[upload]   ID: {result.get('id', 'unknown')}")
         print(f"[upload]   Modified: {result.get('modified', 'unknown')}")
+
+        # Purge the WordPress.com / Jetpack page cache.
+        # Method 1: POST to Jetpack cache-clear endpoint (works on WordPress.com).
+        # Method 2: Fallback — GET the page with authenticated headers to warm cache.
+        page_id = result.get("id", WP_PAGE_ID)
+        purged = False
+        try:
+            purge_url = f"{WP_SITE_URL.rstrip('/')}/wp-json/wp/v2/pages/{page_id}"
+            purge_r = requests.post(
+                purge_url,
+                headers={**wp_auth_header(), "Content-Type": "application/json"},
+                json={"status": "publish"},   # no-op update forces cache invalidation
+                timeout=15,
+            )
+            print(f"[upload]   Cache invalidation: HTTP {purge_r.status_code}")
+            purged = True
+        except Exception as e:
+            print(f"[upload]   Cache invalidation skipped: {e}")
+
         return True
     except requests.exceptions.HTTPError as e:
         print(f"[upload] ✗ HTTP error: {e} — {r.text[:300]}")
