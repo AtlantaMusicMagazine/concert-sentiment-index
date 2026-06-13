@@ -939,17 +939,36 @@ def build():
     print(f"[build] BOTTOM_CARDS_START present: {BOT_START in html}")
 
     # ── Step 3: Regenerate genre pool JS ──────────────────────────────────
-    # Rebuild GENRE_POOL_TOP from current scored data so genre filter pills
-    # always reflect tonight's scores, not stale hardcoded values.
+    # Rebuild GENRE_POOL_TOP as a <script type="application/json"> element.
+    # This avoids WordPress HTML-encoding the large JS object literal when it
+    # is inlined inside the main <script> block, which breaks the genre filter.
+    # Block 4's main script reads it back via JSON.parse on the element ID.
     try:
         new_pool_js = build_genre_pool_js(events)
-        ps = html.find(GENRE_POOL_START_MARKER)
-        pe = html.find(GENRE_POOL_END_MARKER)
-        if ps != -1 and pe != -1 and pe > ps:
-            html = html[:ps] + new_pool_js + html[pe + len(GENRE_POOL_END_MARKER):]
-            print("[build] Genre pool JS updated")
+        # Extract the JS array literal (between [ and ])
+        arr_s = new_pool_js.find("[")
+        arr_e = new_pool_js.rfind("]") + 1
+        pool_array = new_pool_js[arr_s:arr_e] if arr_s != -1 else "[]"
+
+        # Inject <script type="application/json"> just before TOP_CARDS_START
+        json_tag = (
+            '<script type="application/json" id="csi-pool-data">\n'
+            + pool_array + '\n'
+            + '</script>\n'
+        )
+        TOP_CARDS_SENTINEL = "<!-- TOP_CARDS_START -->"
+        if TOP_CARDS_SENTINEL in html:
+            html = html.replace(TOP_CARDS_SENTINEL, json_tag + TOP_CARDS_SENTINEL, 1)
+            print(f"[build] Pool data injected as JSON element ({len(pool_array):,} chars)")
         else:
-            print("[build] WARN: Genre pool markers not found — pool not updated")
+            # Fallback: inline JS approach using sentinel markers
+            ps = html.find(GENRE_POOL_START_MARKER)
+            pe = html.find(GENRE_POOL_END_MARKER)
+            if ps != -1 and pe != -1 and pe > ps:
+                html = html[:ps] + new_pool_js + html[pe + len(GENRE_POOL_END_MARKER):]
+                print("[build] Genre pool JS updated (inline fallback)")
+            else:
+                print("[build] WARN: Genre pool markers not found — pool not updated")
     except Exception as e:
         print(f"[build] WARN: Genre pool update failed: {e} — keeping existing pool")
 
