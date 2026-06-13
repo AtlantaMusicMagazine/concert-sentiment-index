@@ -951,24 +951,26 @@ def build():
         pool_array = new_pool_js[arr_s:arr_e] if arr_s != -1 else "[]"
 
         # Inject <script type="application/json"> just before TOP_CARDS_START
-        json_tag = (
-            '<template id="csi-pool-data">\n'
-            + pool_array + '\n'
-            + '</template>\n'
-        )
-        TOP_CARDS_SENTINEL = "<!-- TOP_CARDS_START -->"
-        if TOP_CARDS_SENTINEL in html:
-            html = html.replace(TOP_CARDS_SENTINEL, json_tag + TOP_CARDS_SENTINEL, 1)
-            print(f"[build] Pool data injected as JSON element ({len(pool_array):,} chars)")
+        # Embed pool JSON directly in the <script> block using a sentinel.
+        # WordPress.com strips/caches away <template> and <script type=json>
+        # elements, but the main <script> block content survives intact.
+        # Using JSON.parse(string) is safe — WordPress cannot corrupt a JSON
+        # string inside a JS assignment.
+        POOL_INLINE_MARKER = "/*CSI_POOL_DATA_START*/"
+        POOL_INLINE_END    = "/*CSI_POOL_DATA_END*/"
+        if POOL_INLINE_MARKER in html:
+            # Replace existing pool marker in script block
+            ps = html.find(POOL_INLINE_MARKER)
+            pe = html.find(POOL_INLINE_END) + len(POOL_INLINE_END)
+            new_pool_inline = (
+                POOL_INLINE_MARKER
+                + pool_array
+                + POOL_INLINE_END
+            )
+            html = html[:ps] + new_pool_inline + html[pe:]
+            print(f"[build] Pool data embedded in script block ({len(pool_array):,} chars)")
         else:
-            # Fallback: inline JS approach using sentinel markers
-            ps = html.find(GENRE_POOL_START_MARKER)
-            pe = html.find(GENRE_POOL_END_MARKER)
-            if ps != -1 and pe != -1 and pe > ps:
-                html = html[:ps] + new_pool_js + html[pe + len(GENRE_POOL_END_MARKER):]
-                print("[build] Genre pool JS updated (inline fallback)")
-            else:
-                print("[build] WARN: Genre pool markers not found — pool not updated")
+            print("[build] WARN: Pool inline marker not found — pool not updated")
     except Exception as e:
         print(f"[build] WARN: Genre pool update failed: {e} — keeping existing pool")
 
