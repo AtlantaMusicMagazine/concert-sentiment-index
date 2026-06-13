@@ -93,8 +93,26 @@ def upload_as_page_content(html_content):
     # Sending content as a plain string goes through wp_kses but DOES save.
 
     print(f"[upload] Updating WordPress page ID {WP_PAGE_ID} ({len(blocks)} blocks, {len(gutenberg_content):,} chars) …")
+    print(f"[upload] URL: {url}")
+    print(f"[upload] Auth user: {WP_USERNAME}")
+
+    # Test with a minimal payload first to confirm write access
+    test_payload = {"title": f"Concert Sentiment Index"}
+    try:
+        test_r = requests.put(url, headers=headers, json=test_payload, timeout=15)
+        print(f"[upload] Title-only test: HTTP {test_r.status_code}")
+        if test_r.status_code == 200:
+            test_result = test_r.json()
+            print(f"[upload] Test modified: {test_result.get('modified', 'unknown')}")
+        else:
+            print(f"[upload] Test response: {test_r.text[:300]}")
+    except Exception as te:
+        print(f"[upload] Test failed: {te}")
+
     try:
         r = requests.put(url, headers=headers, json=payload, timeout=30)
+        print(f"[upload] Response status: {r.status_code}")
+        print(f"[upload] Response body (first 800 chars): {r.text[:800]}")
         r.raise_for_status()
         result = r.json()
         print(f"[upload] ✓ Page updated: {result.get('link', '')}")
