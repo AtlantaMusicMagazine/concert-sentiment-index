@@ -1937,9 +1937,12 @@ scheduleMidnight();
 
   /* Pool data injected by pipeline as <script type="application/json" id="csi-pool-data">
      Reads from that element to avoid WordPress encoding the large JS object literal. */
-  /* Pool data embedded inline — WordPress.com strips external script/template
-     elements but never modifies content inside the main script block. */
-  var GENRE_POOL_TOP    = JSON.parse('/*CSI_POOL_DATA_START*/[]/*CSI_POOL_DATA_END*/');
+  /* Pool data embedded inline — markers are stripped before JSON.parse */
+  var GENRE_POOL_TOP = (function() {
+    var _s = '/*CSI_POOL_DATA_START*/[]/*CSI_POOL_DATA_END*/';
+    var _a = _s.indexOf('['), _b = _s.lastIndexOf(']') + 1;
+    try { return JSON.parse(_s.slice(_a, _b)); } catch(e) { return []; }
+  })();
   var GENRE_POOL_BOTTOM = GENRE_POOL_TOP.slice();
 
   /* ── Boot ─────────────────────────────────────────────────────── */
