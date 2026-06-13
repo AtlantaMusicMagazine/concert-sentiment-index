@@ -283,9 +283,7 @@
 }
 .csi-embed .refresh-track-label { font-size: 10px; color: #767686; white-space: nowrap; }
 .csi-embed .refresh-sources-row {
-  padding: 8px 18px; background: #f8f8fb;
-  border-top: 1px solid #e4e4e8; font-size: 10px;
-  display: flex; align-items: center; gap: 5px; flex-wrap: wrap;
+  display: none !important;
 }
 .csi-embed .refresh-sources-label {
   font-size: 10px; font-weight: 700; letter-spacing: 0.08em;
@@ -1493,77 +1491,53 @@
       <span class="refresh-track-label">Day progress to midnight ET</span>
     </div>
   </div>
-  <div class="refresh-sources-row" aria-label="Data sources used in scoring">
-    <span class="refresh-sources-label">Sources</span>
-    <span class="source-chip">Ticketmaster API</span>
-    <span class="source-chip">SeatGeek Deal Score</span>
-    <span class="source-chip">Eventbrite</span>  <span class="source-chip">iTunes Search API</span>  <span class="source-chip">Deezer</span>
-    <span class="source-chip">StubHub sell-through</span>
-    <span class="source-chip">Vivid Seats</span>
-    <span class="source-chip">Spotify for Artists</span>
-    <span class="source-chip">Last.fm</span>
-    <span class="source-chip">Chartmetric</span>
-    <span class="source-chip">MusicBrainz</span>
-    <span class="source-chip">Setlist.fm</span>
-    <span class="source-chip">Bands in Town</span>
-    <span class="source-chip">Google Trends ATL DMA</span>
-    <span class="source-chip">Wikipedia Pageviews</span>  <span class="source-chip">Wikidata</span>
-    <span class="source-chip">YouTube Trending</span>
-    <span class="source-chip">X/Twitter API v2</span>
-    <span class="source-chip">Reddit API</span>
-    <span class="source-chip">TikTok Sound API</span>
-    <span class="source-chip">Facebook Events</span>
-    <span class="source-chip">AJC NewsAPI</span>
-    <span class="source-chip">Airbnb / STR pricing</span>
-    <span class="source-chip">Pollstar Box Office</span>
-    <span class="source-chip">Billboard Boxscore</span>
-  </div>
+  <!-- sources-row hidden -->
 </aside>
 
 
 <footer role="contentinfo" style="max-width:680px;margin:24px auto 0;font-size:11px;color:#767686;line-height:1.7;">
   <p>Scores are composite model estimates updated nightly at midnight ET. Not financial or ticket purchasing advice. Events within 100 miles of Atlanta, GA metropolitan DMA only.
   <a href="https://atlantamusicmagazine.com/" style="color:#2a58a0;">Atlanta Music Magazine</a> &#183;
-  <a href="https://atlantamusicmagazine.com/concert-calendar/" style="color:#2a58a0;">Concert Calendar</a> &#183;
   <time datetime="2026-06-09">Last updated June 9, 2026</time></p>
 </footer>
 
 <script>
-function isDST(d) {
-  var jan = new Date(d.getFullYear(),0,1).getTimezoneOffset();
-  var jul = new Date(d.getFullYear(),6,1).getTimezoneOffset();
-  return d.getTimezoneOffset() < Math.max(jan,jul);
-}
 function tick() {
-  var now = new Date();
-  var off = isDST(now) ? -4 : -5;
-  var et = new Date(now.getTime() + off*3600000);
-  var mn = new Date(et); mn.setHours(24,0,0,0);
-  var diff = mn - et;
-  var h = Math.floor(diff/3600000);
-  var m = Math.floor((diff%3600000)/60000);
-  var s = Math.floor((diff%60000)/1000);
+  /* All math in UTC to avoid browser-timezone contamination.
+     ET = UTC-5 standard, UTC-4 DST (Mar 2nd Sun → Nov 1st Sun). */
+  var nowUTC = Date.now();                          // ms since epoch, always UTC
+  var etOff  = getETOffsetMs();                     // negative ms to subtract
+  var etMs   = nowUTC + etOff;                      // epoch ms expressed as ET wall time
+
+  /* Midnight ET tonight = next round 24h boundary in ET */
+  var etMidnightMs = Math.ceil(etMs / 86400000) * 86400000;
+  var diff = etMidnightMs - etMs;
+  if (diff <= 0) diff += 86400000;                  // edge case: exactly midnight
+
+  var h = Math.floor(diff / 3600000);
+  var m = Math.floor((diff % 3600000) / 60000);
+  var s = Math.floor((diff % 60000) / 1000);
   document.getElementById("next-update-clock").textContent =
     String(h).padStart(2,"0")+":"+String(m).padStart(2,"0")+":"+String(s).padStart(2,"0")+" ET";
-  var pct = Math.round((86400000-diff)/86400000*100);
+  var pct = Math.round((86400000 - diff) / 86400000 * 100);
   var fill = document.getElementById("prog-fill");
   fill.style.width = pct + "%";
   fill.setAttribute("aria-valuenow", pct);
 }
-function setWindowRange() {
+function getETOffsetMs() {
+  /* Returns the UTC offset for US Eastern Time in milliseconds.
+     DST: second Sunday of March → first Sunday of November. */
   var now = new Date();
-  var end = new Date(now); end.setDate(end.getDate()+90);
-  var fmt = function(d) { return d.toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}); };
-  document.getElementById("window-range").textContent = fmt(now)+" – "+fmt(end);
+  var yr  = now.getUTCFullYear();
+  /* Second Sunday of March */
+  var dstStart = new Date(Date.UTC(yr, 2, 1));
+  dstStart.setUTCDate(1 + (7 - dstStart.getUTCDay()) % 7 + 7);
+  /* First Sunday of November */
+  var dstEnd = new Date(Date.UTC(yr, 10, 1));
+  dstEnd.setUTCDate(1 + (7 - dstEnd.getUTCDay()) % 7);
+  var isDST = (Date.now() >= dstStart.getTime() && Date.now() < dstEnd.getTime());
+  return isDST ? -4 * 3600000 : -5 * 3600000;
 }
-function scheduleMidnight() {
-  var now = new Date();
-  var off = isDST(now) ? -4 : -5;
-  var et = new Date(now.getTime()+off*3600000);
-  var mn = new Date(et); mn.setHours(24,0,0,0);
-  setTimeout(function(){ location.reload(); setInterval(function(){ location.reload(); },86400000); }, mn-et);
-}
-tick();
 setInterval(tick,1000);
 setWindowRange();
 scheduleMidnight();
