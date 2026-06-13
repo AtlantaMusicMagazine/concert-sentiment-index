@@ -39,25 +39,43 @@ def upload_as_page_content(html_content):
     """
     Update the content of an existing WordPress page via REST API.
 
-    Wraps content in a Gutenberg <!-- wp:html --> raw HTML block so
-    WordPress stores and renders it exactly as-is without re-processing,
-    escaping, or adding paragraph/block wrappers around it.
+    Splits the full HTML output into 4 separate <!-- wp:html --> blocks
+    matching the manual block structure:
+      Block 1: <style> block (scoped CSS + CDN imports)
+      Block 2: Top panel section + pool JSON data element
+      Block 3: Bottom panel section + footer
+      Block 4: <script> block (JS)
 
-    The page must already exist — create it once manually, note its ID,
-    and add it as the WP_PAGE_ID secret.
+    Using 4 separate blocks matches what was manually committed and avoids
+    WordPress's content sanitizer corrupting the large script/pool data
+    when it's all in a single block.
     """
     if not all([WP_SITE_URL, WP_USERNAME, WP_APP_PASSWORD, WP_PAGE_ID]):
         print("[upload] Missing WordPress credentials — skipping upload.")
         print("         Set WP_SITE_URL, WP_USERNAME, WP_APP_PASSWORD, WP_PAGE_ID")
         return False
 
-    # Wrap in Gutenberg raw HTML block comment markers.
-    # This tells the block editor to treat the content as a Custom HTML
-    # block verbatim — no auto-paragraph, no escaping, no block conversion.
-    gutenberg_wrapped = (
-        "<!-- wp:html -->\n"
-        + html_content.strip()
-        + "\n<!-- /wp:html -->"
+    # ── Split into 4 blocks ───────────────────────────────────────────────
+    style_end    = html_content.find("</style>") + len("</style>")
+    embed_start  = html_content.find('<div class="csi-embed">')
+    top_sec_end  = html_content.find("</section>") + len("</section>")
+    script_start = html_content.find("<script>")
+
+    if any(x == -1 for x in [embed_start, top_sec_end, script_start]):
+        print("[upload] WARN: Could not split HTML into 4 blocks — uploading as single block")
+        block1, block2, block3, block4 = html_content, "", "", ""
+        blocks = [block1]
+    else:
+        block1 = html_content[:style_end].strip()
+        block2 = html_content[embed_start:top_sec_end].strip()
+        block3 = html_content[top_sec_end:script_start].strip()
+        block4 = html_content[script_start:].strip()
+        blocks = [block1, block2, block3, block4]
+
+    gutenberg_content = "\n\n".join(
+        f"<!-- wp:html -->\n{b}\n<!-- /wp:html -->"
+        for b in blocks
+        if b.strip()
     )
 
     url = f"{WP_SITE_URL.rstrip('/')}/wp-json/wp/v2/pages/{WP_PAGE_ID}"
@@ -65,17 +83,12 @@ def upload_as_page_content(html_content):
         **wp_auth_header(),
         "Content-Type": "application/json",
     }
-
-    # Send only 'raw' — omitting 'rendered' prevents WordPress from
-    # double-processing the content through its content filter hooks.
     payload = {
-        "content": {
-            "raw": gutenberg_wrapped,
-        },
+        "content": {"raw": gutenberg_content},
         "status": "publish",
     }
 
-    print(f"[upload] Updating WordPress page ID {WP_PAGE_ID} …")
+    print(f"[upload] Updating WordPress page ID {WP_PAGE_ID} ({len(blocks)} blocks, {len(gutenberg_content):,} chars) …")
     try:
         r = requests.put(url, headers=headers, json=payload, timeout=30)
         r.raise_for_status()
