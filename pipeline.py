@@ -94,6 +94,9 @@ def upload_as_page_content(html_content):
         r.raise_for_status()
         result = r.json()
         print(f"[upload] ✓ Page updated: {result.get('link', '')}")
+        print(f"[upload]   Title: {result.get('title', {}).get('rendered', 'unknown')}")
+        print(f"[upload]   ID: {result.get('id', 'unknown')}")
+        print(f"[upload]   Modified: {result.get('modified', 'unknown')}")
         return True
     except requests.exceptions.HTTPError as e:
         print(f"[upload] ✗ HTTP error: {e} — {r.text[:300]}")
