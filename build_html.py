@@ -756,21 +756,21 @@ def build_genre_pool_js(events):
         })
 
     # Build JS string
+    import json as _json
     entry_strs = []
     for e in pool_entries:
-        sigs_js = ",".join(
-            f'["{_js_escape(s[0])}","{_js_escape(s[1])}","{_js_escape(str(s[2]))}"]'
-            for s in e["signals"]
-        )
-        entry_strs.append(
-            f'    {{name:"{_js_escape(e["name"])}",date:"{_js_escape(e["date"])}",'
-            f'venue:"{_js_escape(e["venue"])}",genre:"{_js_escape(e["genre"])}",'
-            f'score:{e["display_score"]},'
-            f'deltaClass:"{_js_escape(e["delta_class"])}",'
-            f'deltaLabel:"{_js_escape(e["delta_label"])}",'
-            f'signals:[{sigs_js}],'
-            f'insight:"{_js_escape(e["insight"])}"}}'
-        )
+        obj = {
+            "name":       e["name"],
+            "date":       e["date"],
+            "venue":      e["venue"],
+            "genre":      e["genre"],
+            "score":      e["display_score"],
+            "deltaClass": e["delta_class"],
+            "deltaLabel": e["delta_label"],
+            "signals":    e["signals"],
+            "insight":    e["insight"],
+        }
+        entry_strs.append("    " + _json.dumps(obj, ensure_ascii=False))
 
     pool_js = (
         "  var GENRE_POOL_TOP = [\n"
