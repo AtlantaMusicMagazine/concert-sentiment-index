@@ -1939,7 +1939,7 @@ scheduleMidnight();
   var GENRE_POOL_TOP    = (function() {
     try {
       var el = document.getElementById("csi-pool-data");
-      return el ? JSON.parse(el.textContent) : [];
+      return el ? JSON.parse(el.innerHTML) : [];
     } catch(e) { return []; }
   })();
   var GENRE_POOL_BOTTOM = GENRE_POOL_TOP.slice();
