@@ -97,6 +97,8 @@ jobs:
           WP_APP_PASSWORD:     ${{ secrets.WP_APP_PASSWORD }}
           WP_PAGE_ID:          ${{ secrets.WP_PAGE_ID }}
           WP_UPLOAD_MODE:      "page"
+          CF_ZONE_ID:          ${{ secrets.CF_ZONE_ID }}
+          CF_API_TOKEN:        ${{ secrets.CF_API_TOKEN }}
 
         run: python pipeline.py
 
