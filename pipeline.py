@@ -84,9 +84,13 @@ def upload_as_page_content(html_content):
         "Content-Type": "application/json",
     }
     payload = {
-        "content": {"raw": gutenberg_content},
-        "status": "publish",
+        "content": gutenberg_content,   # plain string, not {"raw":...}
+        "status":  "publish",
     }
+    # Note: {"content": {"raw": ...}} requires 'unfiltered_html' capability
+    # which Application Passwords don't grant by default. WordPress silently
+    # ignores the raw field and returns 200 OK without saving anything.
+    # Sending content as a plain string goes through wp_kses but DOES save.
 
     print(f"[upload] Updating WordPress page ID {WP_PAGE_ID} ({len(blocks)} blocks, {len(gutenberg_content):,} chars) …")
     try:
@@ -98,23 +102,48 @@ def upload_as_page_content(html_content):
         print(f"[upload]   ID: {result.get('id', 'unknown')}")
         print(f"[upload]   Modified: {result.get('modified', 'unknown')}")
 
-        # Purge WordPress.com / Jetpack CDN cache.
-        # The wp-json REST API update writes to the DB but does NOT purge
-        # Jetpack's full-page CDN cache on WordPress.com-hosted sites.
-        # The WordPress.com REST v1.1 API has a dedicated cache-clear endpoint
-        # that does trigger CDN invalidation.
-        page_id  = result.get("id", WP_PAGE_ID)
-        site     = WP_SITE_URL.rstrip("/").replace("https://", "").replace("http://", "")
-        purge_url = f"https://public-api.wordpress.com/rest/v1.1/sites/{site}/posts/{page_id}/cache-clear"
-        try:
-            purge_r = requests.post(
-                purge_url,
-                headers=wp_auth_header(),
-                timeout=15,
-            )
-            print(f"[upload]   CDN cache purge: HTTP {purge_r.status_code}")
-        except Exception as e:
-            print(f"[upload]   CDN cache purge skipped: {e}")
+        # Purge LiteSpeed Cache after updating the page.
+        site_url = WP_SITE_URL.rstrip("/")
+        page_url = result.get("link", "").rstrip("/") + "/"
+
+        for purge_url, label in [
+            (f"{site_url}/wp-json/litespeed/v1/purge_url?url={page_url}", "purge_url"),
+            (f"{site_url}/wp-json/litespeed/v1/purge/all",                "purge_all"),
+        ]:
+            try:
+                pr = requests.get(
+                    purge_url,
+                    headers=wp_auth_header(),
+                    timeout=10,
+                )
+                print(f"[upload]   LiteSpeed {label}: HTTP {pr.status_code}")
+                if pr.status_code < 300:
+                    break
+            except Exception as ce:
+                print(f"[upload]   LiteSpeed {label} failed: {ce}")
+
+        # Purge Cloudflare edge cache (if CF_ZONE_ID and CF_API_TOKEN are set).
+        # Cloudflare sits in front of LiteSpeed and must also be purged, otherwise
+        # visitors continue to see the cached June 12 snapshot regardless of
+        # LiteSpeed being cleared.
+        CF_ZONE_ID  = os.environ.get("CF_ZONE_ID", "")
+        CF_API_TOKEN = os.environ.get("CF_API_TOKEN", "")
+        if CF_ZONE_ID and CF_API_TOKEN:
+            try:
+                cf_r = requests.post(
+                    f"https://api.cloudflare.com/client/v4/zones/{CF_ZONE_ID}/purge_cache",
+                    headers={
+                        "Authorization": f"Bearer {CF_API_TOKEN}",
+                        "Content-Type":  "application/json",
+                    },
+                    json={"files": [page_url]},
+                    timeout=15,
+                )
+                print(f"[upload]   Cloudflare purge: HTTP {cf_r.status_code}")
+            except Exception as cfe:
+                print(f"[upload]   Cloudflare purge failed: {cfe}")
+        else:
+            print("[upload]   Cloudflare purge skipped (CF_ZONE_ID/CF_API_TOKEN not set)")
 
         return True
     except requests.exceptions.HTTPError as e:
