@@ -949,6 +949,9 @@ def build():
         arr_s = new_pool_js.find("[")
         arr_e = new_pool_js.rfind("]") + 1
         pool_array = new_pool_js[arr_s:arr_e] if arr_s != -1 else "[]"
+        # Strip newlines — the pool is embedded inside a single-quoted JS
+        # string literal, which cannot contain unescaped line breaks.
+        pool_array = pool_array.replace("\n", "").replace("\r", "")
 
         # Inject <script type="application/json"> just before TOP_CARDS_START
         # Embed pool JSON directly in the <script> block using a sentinel.
