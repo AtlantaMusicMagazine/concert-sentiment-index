@@ -87,10 +87,6 @@ def upload_as_page_content(html_content):
         "content": gutenberg_content,   # plain string, not {"raw":...}
         "status":  "publish",
     }
-    # Note: {"content": {"raw": ...}} requires 'unfiltered_html' capability
-    # which Application Passwords don't grant by default. WordPress silently
-    # ignores the raw field and returns 200 OK without saving anything.
-    # Sending content as a plain string goes through wp_kses but DOES save.
 
     print(f"[upload] Updating WordPress page ID {WP_PAGE_ID} ({len(blocks)} blocks, {len(gutenberg_content):,} chars) …")
     print(f"[upload] URL: {url}")
@@ -162,6 +158,24 @@ def upload_as_page_content(html_content):
                 print(f"[upload]   Cloudflare purge failed: {cfe}")
         else:
             print("[upload]   Cloudflare purge skipped (CF_ZONE_ID/CF_API_TOKEN not set)")
+
+        # WordPress.com public API cache purge.
+        # Unlike wp-json, the WordPress.com REST v1.1 API fires the same
+        # internal hooks as an editorial save, busting WordPress.com's
+        # own CDN cache for the page. Auth is the same app password.
+        site    = WP_SITE_URL.rstrip("/").replace("https://","").replace("http://","")
+        page_id = result.get("id", WP_PAGE_ID)
+        wpcom_url = f"https://public-api.wordpress.com/rest/v1.1/sites/{site}/posts/{page_id}"
+        try:
+            wc = requests.post(
+                wpcom_url,
+                headers={**wp_auth_header(), "Content-Type": "application/json"},
+                json={"content": gutenberg_content, "status": "publish"},
+                timeout=30,
+            )
+            print(f"[upload]   WordPress.com API purge: HTTP {wc.status_code}")
+        except Exception as we:
+            print(f"[upload]   WordPress.com API purge failed: {we}")
 
         return True
     except requests.exceptions.HTTPError as e:
