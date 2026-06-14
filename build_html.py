@@ -631,10 +631,12 @@ def build_genre_pool_js(events):
         is_bot_panel  = eid in BOTTOM_PANEL_IDS
         display_score = max(1, round(score * BOTTOM_DISPLAY_MULTIPLIER)) if is_bot_panel else score
 
-        # Skip if outside window
+        # Skip if outside window — use today as the start so past events
+        # are excluded from the genre filter pool just like the card panels.
         try:
             show_date = datetime.date.fromisoformat(date_str)
-            if not (WINDOW_START <= show_date <= WINDOW_END):
+            pool_start = datetime.date.today()
+            if not (pool_start <= show_date <= WINDOW_END):
                 skipped_window.append(f"{eid} ({date_str})")
                 continue
         except (ValueError, TypeError):
