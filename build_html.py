@@ -126,6 +126,7 @@ VENUE_CAPS = {
     "The Tabernacle":                                  2600,
     "Variety Playhouse":                               1000,
     "Terminal West":                                   900,
+    "Buckhead Theatre":                               1800,   # Live Nation venue, Atlanta
     "Piedmont Park":                                     40000,   # Shaky Knees festival grounds
 }
 
@@ -437,7 +438,8 @@ BOTTOM_PANEL_IDS = {
     "slayyyter-2026", "isley-ojays-2026", "justine-skye-2026",
     "wynonna-melissa-2026", "guess-who-2026", "john-mellencamp-2026",
     "ne-yo-akon-2026", "styx-chicago-2026", "5sos-2026",
-    "madison-beer-2026", "motionless-2026", "hayley-williams-2026",
+    "madison-beer-2026", "motionless-2026",
+    "jinjer-2026", "hayley-williams-2026",
     "muse-2026", "evanescence-2026", "motley-crue-2026",
     "ella-mai-2026", "train-bnl-2026", "hilary-duff-2026",
     "parker-mccollum-2026", "jack-johnson-2026",
