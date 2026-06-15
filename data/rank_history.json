@@ -1,10 +1,10 @@
 {
-  "ariana-grande-2026": {
+  "shaky-knees-2026": {
     "rank": 1,
     "panel": "top",
     "first_seen": "2026-06-15"
   },
-  "shaky-knees-2026": {
+  "ariana-grande-2026": {
     "rank": 2,
     "panel": "top",
     "first_seen": "2026-06-15"
@@ -64,32 +64,32 @@
     "panel": "top",
     "first_seen": "2026-06-15"
   },
-  "alex-warren-2026": {
+  "brooks-dunn-2026": {
     "rank": 14,
     "panel": "top",
     "first_seen": "2026-06-15"
   },
-  "buju-banton-2026": {
+  "alex-warren-2026": {
     "rank": 15,
     "panel": "top",
     "first_seen": "2026-06-15"
   },
-  "santana-doobie-2026": {
+  "buju-banton-2026": {
     "rank": 16,
     "panel": "top",
     "first_seen": "2026-06-15"
   },
-  "brooks-dunn-2026": {
+  "santana-doobie-2026": {
     "rank": 17,
     "panel": "top",
     "first_seen": "2026-06-15"
   },
-  "empire-of-the-sun-2026": {
+  "hot1079-2026": {
     "rank": 18,
     "panel": "top",
     "first_seen": "2026-06-15"
   },
-  "hot1079-2026": {
+  "empire-of-the-sun-2026": {
     "rank": 19,
     "panel": "top",
     "first_seen": "2026-06-15"
@@ -139,12 +139,12 @@
     "panel": "bottom",
     "first_seen": "2026-06-15"
   },
-  "madison-beer-2026": {
+  "john-mellencamp-2026": {
     "rank": 10,
     "panel": "bottom",
     "first_seen": "2026-06-15"
   },
-  "john-mellencamp-2026": {
+  "madison-beer-2026": {
     "rank": 11,
     "panel": "bottom",
     "first_seen": "2026-06-15"
@@ -169,23 +169,28 @@
     "panel": "bottom",
     "first_seen": "2026-06-15"
   },
-  "muse-2026": {
+  "jinjer-2026": {
     "rank": 16,
     "panel": "bottom",
     "first_seen": "2026-06-15"
   },
-  "motley-crue-2026": {
+  "muse-2026": {
     "rank": 17,
     "panel": "bottom",
     "first_seen": "2026-06-15"
   },
-  "ella-mai-2026": {
+  "motley-crue-2026": {
     "rank": 18,
     "panel": "bottom",
     "first_seen": "2026-06-15"
   },
-  "5sos-2026": {
+  "ella-mai-2026": {
     "rank": 19,
+    "panel": "bottom",
+    "first_seen": "2026-06-15"
+  },
+  "5sos-2026": {
+    "rank": 20,
     "panel": "bottom",
     "first_seen": "2026-06-15"
   }
