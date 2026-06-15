@@ -59,6 +59,7 @@ VENUE_CAPS = {
     "The Tabernacle":                                  2600,
     "Variety Playhouse":                               1000,
     "Terminal West":                                   900,
+    "Buckhead Theatre":                               1800,   # Live Nation venue, Atlanta
     "Piedmont Park":                                     40000,   # Shaky Knees festival grounds
 }
 
