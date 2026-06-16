@@ -54,19 +54,21 @@ jobs:
             echo "[cache] Pipeline cache restored from previous run"
             python3 -c "import json; c=json.load(open('data/youtube_cache.json')); print(f'[cache] YouTube: {len(c)} events cached')" 2>/dev/null || true
             python3 -c "import json; c=json.load(open('data/rank_history.json')); print(f'[cache] Rank history: {len(c)} events cached')" 2>/dev/null || true
-            # Delete stale AMM catalog cache so date_from_slug fix takes effect.
-            # The prior cache stored lastmod dates (all "2025-02-xx") instead of
-            # slug-derived dates. collect.py now detects this and re-fetches, but
-            # deleting it here ensures a clean slate regardless of detection logic.
             if [ -f data/amm_coverage.json ]; then
               rm data/amm_coverage.json
               echo "[cache] Deleted stale amm_coverage.json — will re-fetch from sitemap"
             fi
           else
-            echo "[cache] No prior cache found — first run or expired"
+            echo "[cache] No Actions cache — checking repo for rank_history.json"
             mkdir -p data
             echo '{}' > data/youtube_cache.json
-            echo '{}' > data/rank_history.json
+            # rank_history.json is committed to the repo — use it directly
+            if [ -f data/rank_history.json ]; then
+              python3 -c "import json; c=json.load(open('data/rank_history.json')); print(f'[cache] Rank history from repo: {len(c)} events')" 2>/dev/null || true
+            else
+              echo '{}' > data/rank_history.json
+              echo "[cache] No rank_history.json found — starting fresh"
+            fi
           fi
 
       # 5. Run the full pipeline
