@@ -1487,9 +1487,9 @@
     </div>
     <div class="refresh-center" aria-hidden="true">
       <div class="refresh-track">
-        <div class="refresh-fill" id="prog-fill" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Day progress towards midnight ET refresh"></div>
+        <div class="refresh-fill" id="prog-fill" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Day progress towards 3 AM ET refresh"></div>
       </div>
-      <span class="refresh-track-label">Day progress to midnight ET</span>
+      <span class="refresh-track-label">Day progress to 3 AM ET</span>
     </div>
   </div>
   <!-- sources-row hidden -->
@@ -1497,7 +1497,7 @@
 
 
 <footer role="contentinfo" style="max-width:680px;margin:24px auto 0;font-size:11px;color:#767686;line-height:1.7;">
-  <p>Scores are composite model estimates updated nightly at midnight ET. Not financial or ticket purchasing advice. Events within 100 miles of Atlanta, GA metropolitan DMA only.
+  <p>Scores are composite model estimates updated nightly at 3 AM ET. Not financial or ticket purchasing advice. Events within 100 miles of Atlanta, GA metropolitan DMA only.
   <a href="https://atlantamusicmagazine.com/" style="color:#2a58a0;">Atlanta Music Magazine</a> &#183;
   <time datetime="2026-06-09">Last updated June 9, 2026</time></p>
 </footer>
@@ -1510,10 +1510,10 @@ function tick() {
   var etOff  = getETOffsetMs();                     // negative ms to subtract
   var etMs   = nowUTC + etOff;                      // epoch ms expressed as ET wall time
 
-  /* Midnight ET tonight = next round 24h boundary in ET */
-  var etMidnightMs = Math.ceil(etMs / 86400000) * 86400000;
-  var diff = etMidnightMs - etMs;
-  if (diff <= 0) diff += 86400000;                  // edge case: exactly midnight
+  /* 3 AM ET tonight = next 3 AM boundary in ET-space */
+  var etThreeAm = Math.floor(etMs / 86400000) * 86400000 + 3 * 3600000;
+  if (etThreeAm <= etMs) etThreeAm += 86400000;    // already past 3 AM — target tomorrow
+  var diff = etThreeAm - etMs;
 
   var h = Math.floor(diff / 3600000);
   var m = Math.floor((diff % 3600000) / 60000);
@@ -1539,10 +1539,11 @@ function getETOffsetMs() {
   var isDST = (Date.now() >= dstStart.getTime() && Date.now() < dstEnd.getTime());
   return isDST ? -4 * 3600000 : -5 * 3600000;
 }
-function scheduleMidnight() {
-  var etMs = Date.now() + getETOffsetMs();
-  var ms   = Math.ceil(etMs / 86400000) * 86400000 - etMs;
-  if (ms <= 0) ms += 86400000;
+function scheduleRefresh() {
+  var etMs      = Date.now() + getETOffsetMs();
+  var et3am     = Math.floor(etMs / 86400000) * 86400000 + 3 * 3600000;
+  if (et3am <= etMs) et3am += 86400000;
+  var ms = et3am - etMs;
   setTimeout(function() {
     location.reload();
     setInterval(function() { location.reload(); }, 86400000);
@@ -1559,7 +1560,7 @@ function setWindowRange() {
 }
 setInterval(tick,1000);
 setWindowRange();
-scheduleMidnight();
+scheduleRefresh();
 
 /* ── iframe height reporter ─────────────────────────────────────
    When embedded as an iframe in WordPress, posts the document's
