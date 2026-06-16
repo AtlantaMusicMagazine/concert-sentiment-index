@@ -1561,6 +1561,22 @@ setInterval(tick,1000);
 setWindowRange();
 scheduleMidnight();
 
+/* ── iframe height reporter ─────────────────────────────────────
+   When embedded as an iframe in WordPress, posts the document's
+   scroll height to the parent so the iframe resizes to fit exactly,
+   eliminating empty space below the countdown clock module.      */
+function reportHeight() {
+  var h = document.documentElement.scrollHeight || document.body.scrollHeight;
+  window.parent.postMessage({ iframeHeight: h }, "*");
+}
+if (window.parent !== window) {
+  reportHeight();
+  window.addEventListener("resize", reportHeight);
+  /* Re-report after genre filter renders (may change height) */
+  setTimeout(reportHeight, 800);
+  setTimeout(reportHeight, 2000);
+}
+
 /* ═══════════════════════════════════════════════════════════════
    GENRE FILTER  —  pill-triggered view-swap with 10-result cap
    ═══════════════════════════════════════════════════════════════
