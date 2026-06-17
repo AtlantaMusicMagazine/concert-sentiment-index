@@ -2,7 +2,7 @@ name: Nightly Dashboard Refresh
 
 on:
   schedule:
-    - cron: "0 3 * * *"
+    - cron: "0 7 * * *"   # 3:00 AM EDT (UTC-4 summer) / 2:00 AM EST (UTC-5 winter)
   workflow_dispatch:
 
 permissions:
