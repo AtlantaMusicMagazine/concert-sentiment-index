@@ -55,42 +55,42 @@
     "first_seen": "2026-06-16"
   },
   "lynyrd-skynyrd-2026": {
-    "rank": 13,
-    "panel": "top",
-    "first_seen": "2026-06-16"
-  },
-  "joji-2026": {
     "rank": 12,
     "panel": "top",
     "first_seen": "2026-06-16"
   },
+  "joji-2026": {
+    "rank": 13,
+    "panel": "top",
+    "first_seen": "2026-06-16"
+  },
   "alex-warren-2026": {
-    "rank": 15,
-    "panel": "top",
-    "first_seen": "2026-06-16"
-  },
-  "santana-doobie-2026": {
-    "rank": 17,
-    "panel": "top",
-    "first_seen": "2026-06-16"
-  },
-  "buju-banton-2026": {
-    "rank": 16,
-    "panel": "top",
-    "first_seen": "2026-06-16"
-  },
-  "brooks-dunn-2026": {
     "rank": 14,
     "panel": "top",
     "first_seen": "2026-06-16"
   },
+  "santana-doobie-2026": {
+    "rank": 16,
+    "panel": "top",
+    "first_seen": "2026-06-16"
+  },
+  "buju-banton-2026": {
+    "rank": 15,
+    "panel": "top",
+    "first_seen": "2026-06-16"
+  },
+  "brooks-dunn-2026": {
+    "rank": 17,
+    "panel": "top",
+    "first_seen": "2026-06-16"
+  },
   "empire-of-the-sun-2026": {
-    "rank": 19,
+    "rank": 18,
     "panel": "top",
     "first_seen": "2026-06-16"
   },
   "hot1079-2026": {
-    "rank": 18,
+    "rank": 19,
     "panel": "top",
     "first_seen": "2026-06-16"
   },
@@ -140,12 +140,12 @@
     "first_seen": "2026-06-16"
   },
   "madison-beer-2026": {
-    "rank": 11,
+    "rank": 10,
     "panel": "bottom",
     "first_seen": "2026-06-16"
   },
   "john-mellencamp-2026": {
-    "rank": 10,
+    "rank": 11,
     "panel": "bottom",
     "first_seen": "2026-06-16"
   },
@@ -180,12 +180,12 @@
     "first_seen": "2026-06-16"
   },
   "motley-crue-2026": {
-    "rank": 18,
+    "rank": 17,
     "panel": "bottom",
     "first_seen": "2026-06-16"
   },
   "ella-mai-2026": {
-    "rank": 19,
+    "rank": 18,
     "panel": "bottom",
     "first_seen": "2026-06-16"
   },
