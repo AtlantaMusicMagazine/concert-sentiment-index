@@ -753,6 +753,142 @@ EVENTS = [
         "wikipedia_title": "Jack_Johnson_(musician)",
         "bandsintown_artist": "Jack Johnson",
     },
+    {
+        "id": "chance-rapper-2026",
+        "seed_score": 72,
+        "name": "Chance the Rapper",
+        "artist": "Chance the Rapper",
+        "venue": "Coca-Cola Roxy",
+        "date": "2026-09-03",
+        "genre": "Hip-Hop",
+        "spotify_artist_id": "1anyVhU62p31KFi8MEzkbf",
+        "musicbrainz_mbid": "3b56df7b-3e1f-4b59-b3a5-2e5ced4ccfa5",
+        "tm_attraction_id": "K8vZ9171oJV",
+        "seatgeek_performer_slug": "chance-the-rapper",
+        "wikipedia_title": "Chance_the_Rapper",
+        "bandsintown_artist": "Chance the Rapper",
+    },
+    {
+        "id": "yeat-2026",
+        "seed_score": 65,
+        "name": "Yeat",
+        "artist": "Yeat",
+        "venue": "Coca-Cola Roxy",
+        "date": "2026-07-30",
+        "genre": "Hip-Hop",
+        "spotify_artist_id": "6GQaJFCQsU0V6p3pzOcR3M",
+        "musicbrainz_mbid": "1d60df67-cda4-4c4b-8e12-11ea1f55b60e",
+        "tm_attraction_id": "K8vZ9178B17",
+        "seatgeek_performer_slug": "yeat",
+        "wikipedia_title": "Yeat_(rapper)",
+        "bandsintown_artist": "Yeat",
+    },
+    {
+        "id": "jack-harlow-2026",
+        "seed_score": 65,
+        "name": "Jack Harlow",
+        "artist": "Jack Harlow",
+        "venue": "Coca-Cola Roxy",
+        "date": "2026-09-04",
+        "genre": "Hip-Hop",
+        "spotify_artist_id": "2LIk90788K0zvyj2sVdS2H",
+        "musicbrainz_mbid": "aa4d5aba-5b4c-4a3e-a5e4-d7f3bb30b5f3",
+        "tm_attraction_id": "K8vZ9171oZV",
+        "seatgeek_performer_slug": "jack-harlow",
+        "wikipedia_title": "Jack_Harlow",
+        "bandsintown_artist": "Jack Harlow",
+    },
+    {
+        "id": "metric-2026",
+        "seed_score": 62,
+        "name": "Metric — All The Feelings Tour",
+        "artist": "Metric",
+        "venue": "The Tabernacle",
+        "date": "2026-08-03",
+        "genre": "Indie / Alt",
+        "spotify_artist_id": "1nNec9P0R1hKFRKCwnLHmS",
+        "musicbrainz_mbid": "3b516d5c-3f9d-4237-a99e-5e0f4c1a5c5d",
+        "tm_attraction_id": "K8vZ9171p57",
+        "seatgeek_performer_slug": "metric",
+        "wikipedia_title": "Metric_(band)",
+        "bandsintown_artist": "Metric",
+    },
+    {
+        "id": "juanes-2026",
+        "seed_score": 63,
+        "name": "Juanes",
+        "artist": "Juanes",
+        "venue": "Coca-Cola Roxy",
+        "date": "2026-09-09",
+        "genre": "Latin Pop",
+        "spotify_artist_id": "1eYsHm9GJlLdPqAIvHfKA1",
+        "musicbrainz_mbid": "d305c19c-4f35-4c13-b9d3-7a3f3b7e7e7e",
+        "tm_attraction_id": "K8vZ9171oAe",
+        "seatgeek_performer_slug": "juanes",
+        "wikipedia_title": "Juanes",
+        "bandsintown_artist": "Juanes",
+    },
+    {
+        "id": "lord-huron-2026",
+        "seed_score": 60,
+        "name": "Lord Huron",
+        "artist": "Lord Huron",
+        "venue": "Coca-Cola Roxy",
+        "date": "2026-08-01",
+        "genre": "Indie / Alt",
+        "spotify_artist_id": "4LpGkFMjB37AzoJbbJKSUW",
+        "musicbrainz_mbid": "c48bb7f8-2c15-4c0f-a8f4-4b4db5b7bc0e",
+        "tm_attraction_id": "K8vZ9171C-7",
+        "seatgeek_performer_slug": "lord-huron",
+        "wikipedia_title": "Lord_Huron",
+        "bandsintown_artist": "Lord Huron",
+    },
+    {
+        "id": "dominic-fike-2026",
+        "seed_score": 60,
+        "name": "Dominic Fike",
+        "artist": "Dominic Fike",
+        "venue": "Coca-Cola Roxy",
+        "date": "2026-08-16",
+        "genre": "Pop",
+        "spotify_artist_id": "56NM0N2KXNZUQ2BKGE8TJZ",
+        "musicbrainz_mbid": "4b4d7e5c-3b5f-4e2d-8c7e-1a2b3c4d5e6f",
+        "tm_attraction_id": "K8vZ9171oJf",
+        "seatgeek_performer_slug": "dominic-fike",
+        "wikipedia_title": "Dominic_Fike",
+        "bandsintown_artist": "Dominic Fike",
+    },
+    {
+        "id": "social-distortion-2026",
+        "seed_score": 58,
+        "name": "Social Distortion — with Descendents",
+        "artist": "Social Distortion",
+        "venue": "Coca-Cola Roxy",
+        "date": "2026-09-01",
+        "genre": "Rock",
+        "spotify_artist_id": "2SgrKCuMkYNzRjzAI3e2tA",
+        "musicbrainz_mbid": "e8f4f4d3-5b2c-4f3e-8c7e-1a2b3c4d5e6f",
+        "tm_attraction_id": "K8vZ91718I0",
+        "seatgeek_performer_slug": "social-distortion",
+        "wikipedia_title": "Social_Distortion",
+        "bandsintown_artist": "Social Distortion",
+    },
+    {
+        "id": "theory-deadman-sevendust-2026",
+        "seed_score": 60,
+        "name": "Theory of a Deadman & Sevendust",
+        "artist": "Theory of a Deadman",
+        "venue": "The Tabernacle",
+        "date": "2026-09-05",
+        "genre": "Rock",
+        "spotify_artist_id": "4BfBBl9MiNHHkZMVtDUMeZ",
+        "musicbrainz_mbid": "a3b4c5d6-e7f8-4a3b-8c7e-1a2b3c4d5e6f",
+        "tm_attraction_id": "K8vZ9171C97",
+        "seatgeek_performer_slug": "theory-of-a-deadman",
+        "wikipedia_title": "Theory_of_a_Deadman",
+        "bandsintown_artist": "Theory of a Deadman",
+    },
+
 ]
 
 
@@ -2183,9 +2319,123 @@ def fetch_deezer(event):
     }
 
 
+
+# ── Venue ID map for Ticketmaster Discovery API ─────────────────────────────
+# These are the Ticketmaster venue IDs for Atlanta tracked venues.
+# Used by discover_new_events() to find shows not yet in the EVENTS list.
+TM_VENUE_IDS = {
+    "KovZpaFEZe":  "The Tabernacle",
+    "KovZ917ACc7": "Coca-Cola Roxy",
+    "KovZpZA6AeJA":"State Farm Arena",
+    "KovZpZA7AAEA":"Ameris Bank Amphitheatre",
+    "KovZ917Ae10": "Buckhead Theatre",
+    "KovZpZA6AaJA":"Lakewood Amphitheatre",
+    "KovZ917lA37": "Variety Playhouse",
+    "KovZ917Aev7": "The Eastern",
+    "KovZpa3HNA":  "Synovus Bank Amphitheater at Chastain Park",
+}
+
+TRACKED_IDS = {e["id"] for e in EVENTS}
+
+def discover_new_events():
+    """
+    Query Ticketmaster Discovery API for all upcoming Atlanta music events
+    at tracked venues. Returns a list of discovered events not already in
+    the EVENTS list, sorted by date. Logged to stdout for editorial review.
+
+    This runs on every nightly pipeline execution and surfaces new shows
+    automatically so nothing like Flyleaf slips through again.
+    """
+    if not TICKETMASTER_KEY:
+        print("[discover] No TICKETMASTER_KEY — skipping discovery")
+        return []
+
+    import datetime as _dt
+    today     = _dt.date.today().isoformat()
+    win_end   = (datetime.date.today() + datetime.timedelta(days=95)).isoformat()
+    base_url  = "https://app.ticketmaster.com/discovery/v2/events.json"
+
+    discovered = []
+    seen_tm_ids = set()
+
+    for venue_id, venue_name in TM_VENUE_IDS.items():
+        try:
+            params = {
+                "apikey":              TICKETMASTER_KEY,
+                "venueId":            venue_id,
+                "classificationName": "Music",
+                "startDateTime":      f"{today}T00:00:00Z",
+                "endDateTime":        f"{win_end}T23:59:59Z",
+                "size":               50,
+                "sort":               "date,asc",
+            }
+            r = requests.get(base_url, params=params, timeout=10)
+            if r.status_code != 200:
+                continue
+            data = r.json()
+            events_found = data.get("_embedded", {}).get("events", [])
+
+            for ev in events_found:
+                tm_event_id = ev.get("id", "")
+                if tm_event_id in seen_tm_ids:
+                    continue
+                seen_tm_ids.add(tm_event_id)
+
+                # Extract headline artist name
+                attractions = ev.get("_embedded", {}).get("attractions", [])
+                artist_name = attractions[0]["name"] if attractions else ev.get("name", "")
+                tm_attr_id  = attractions[0].get("id", "") if attractions else ""
+
+                # Check if already tracked by name (case-insensitive)
+                artist_lower = artist_name.lower()
+                already = any(
+                    artist_lower in e.get("artist", "").lower() or
+                    artist_lower in e.get("name", "").lower()
+                    for e in EVENTS
+                )
+                if already:
+                    continue
+
+                # Get date
+                dates = ev.get("dates", {}).get("start", {})
+                date_str = dates.get("localDate", "")
+                if not date_str:
+                    continue
+
+                discovered.append({
+                    "name":         artist_name,
+                    "date":         date_str,
+                    "venue":        venue_name,
+                    "tm_event_id":  tm_event_id,
+                    "tm_attr_id":   tm_attr_id,
+                    "event_name":   ev.get("name", artist_name),
+                    "url":          ev.get("url", ""),
+                })
+        except Exception as e:
+            print(f"[discover] {venue_name}: {e}")
+            continue
+
+    discovered.sort(key=lambda x: x["date"])
+
+    if discovered:
+        print(f"\n[discover] ⚠ {len(discovered)} UNTRACKED events found in window:")
+        for d in discovered:
+            print(f"  {d['date']} | {d['name'][:40]:40} | {d['venue']}")
+        print("[discover] Add these to EVENTS list in collect.py to include on dashboard\n")
+    else:
+        print("[discover] ✓ All Atlanta music events in window are tracked")
+
+    return discovered
+
+
 def collect_all():
     print(f"[collect] Starting — {datetime.datetime.now().isoformat()}")
     print(f"[collect] Total events to collect: {len(EVENTS)}")
+
+    # Discover any Atlanta music events not yet in the EVENTS list.
+    # Runs on every nightly build and logs untracked shows for editorial review.
+    discover_new_events()
+
     spotify_token = get_spotify_token()
 
     # Load YouTube view-count cache from previous run
