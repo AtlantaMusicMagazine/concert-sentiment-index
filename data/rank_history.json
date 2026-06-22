@@ -65,22 +65,22 @@
     "first_seen": "2026-06-16"
   },
   "alex-warren-2026": {
-    "rank": 14,
-    "panel": "top",
-    "first_seen": "2026-06-16"
-  },
-  "santana-doobie-2026": {
-    "rank": 17,
-    "panel": "top",
-    "first_seen": "2026-06-16"
-  },
-  "buju-banton-2026": {
     "rank": 16,
     "panel": "top",
     "first_seen": "2026-06-16"
   },
+  "santana-doobie-2026": {
+    "rank": 18,
+    "panel": "top",
+    "first_seen": "2026-06-16"
+  },
+  "buju-banton-2026": {
+    "rank": 17,
+    "panel": "top",
+    "first_seen": "2026-06-16"
+  },
   "brooks-dunn-2026": {
-    "rank": 15,
+    "rank": 14,
     "panel": "top",
     "first_seen": "2026-06-16"
   },
@@ -90,7 +90,7 @@
     "first_seen": "2026-06-16"
   },
   "hot1079-2026": {
-    "rank": 19,
+    "rank": 20,
     "panel": "top",
     "first_seen": "2026-06-16"
   },
@@ -125,12 +125,12 @@
     "first_seen": "2026-06-16"
   },
   "jack-johnson-2026": {
-    "rank": 7,
+    "rank": 8,
     "panel": "bottom",
     "first_seen": "2026-06-16"
   },
   "hilary-duff-2026": {
-    "rank": 8,
+    "rank": 7,
     "panel": "bottom",
     "first_seen": "2026-06-16"
   },
@@ -195,8 +195,23 @@
     "first_seen": "2026-06-16"
   },
   "flyleaf-2026": {
-    "rank": 18,
+    "rank": 19,
     "panel": "top",
+    "first_seen": "2026-06-22"
+  },
+  "chance-rapper-2026": {
+    "rank": 15,
+    "panel": "top",
+    "first_seen": "2026-06-22"
+  },
+  "social-distortion-2026": {
+    "rank": 19,
+    "panel": "bottom",
+    "first_seen": "2026-06-22"
+  },
+  "theory-deadman-sevendust-2026": {
+    "rank": 20,
+    "panel": "bottom",
     "first_seen": "2026-06-22"
   }
 }
