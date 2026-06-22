@@ -143,7 +143,12 @@ jobs:
         run: |
           mkdir -p gh-pages-deploy
           cp output/artist_card_module_wp_ready.html gh-pages-deploy/index.html
-          cp output/widget.html gh-pages-deploy/widget.html 2>/dev/null || echo "[pages] No widget.html to deploy"
+          if [ -f output/widget.html ]; then
+            cp output/widget.html gh-pages-deploy/widget.html
+            echo "[pages] widget.html included in deploy"
+          else
+            echo "[pages] WARNING: widget.html not found — skipping"
+          fi
           cd gh-pages-deploy
           git init
           git config user.email "github-actions@github.com"
