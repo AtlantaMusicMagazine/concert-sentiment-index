@@ -882,7 +882,7 @@ def build_widget_html(top_event):
         signals_html_parts.append(
             f'<span class="sig">'
             f'<span class="dot" style="background:{color}"></span>'
-            f'{label}: {level.capitalize()}'
+            f'{label}: <strong>{level.capitalize()}</strong>'
             f'</span>'
         )
     signals_html = "\n".join(signals_html_parts[:4])
@@ -899,37 +899,38 @@ def build_widget_html(top_event):
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Most Popular Atlanta Event — Concert Sentiment Index</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <style>
 *{{box-sizing:border-box;margin:0;padding:0}}
-body{{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#fff;color:#1a1a2e}}
-.card{{border:0.5px solid #e4e4e8;border-radius:12px;overflow:hidden;width:100%;max-width:360px;margin:0 auto}}
-.eyebrow{{display:flex;align-items:center;gap:6px;padding:9px 13px;background:#f8f8fb;border-bottom:0.5px solid #e4e4e8;font-size:10px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:#767686}}
-.eyebrow-dot{{width:6px;height:6px;border-radius:50%;background:#5a50d4;flex-shrink:0}}
-.body{{padding:13px 13px 12px;display:flex;gap:12px;align-items:flex-start}}
-.rank{{display:flex;flex-direction:column;align-items:center;flex-shrink:0;padding-top:2px}}
-.rank-num{{font-size:26px;font-weight:500;color:#5a50d4;line-height:1}}
-.rank-lbl{{font-size:8px;color:#767686;letter-spacing:.06em;text-transform:uppercase;margin-top:2px}}
+body{{font-family:"Inter",-apple-system,BlinkMacSystemFont,sans-serif;background:transparent}}
+.card{{border:1px solid #e4e4e8;border-radius:12px;overflow:hidden;width:100%;background:#fff}}
+.eyebrow{{display:flex;align-items:center;gap:6px;padding:9px 14px;background:#f8f8fb;border-bottom:1px solid #e4e4e8;font-size:10px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:#767686}}
+.eyebrow-dot{{width:7px;height:7px;border-radius:50%;background:#5a50d4;flex-shrink:0}}
+.body{{padding:14px;display:flex;gap:14px;align-items:flex-start}}
+.rank{{display:flex;flex-direction:column;align-items:center;flex-shrink:0;min-width:36px}}
+.rank-num{{font-size:30px;font-weight:600;color:#5a50d4;line-height:1}}
+.rank-lbl{{font-size:8px;font-weight:500;color:#767686;letter-spacing:.07em;text-transform:uppercase;margin-top:2px}}
 .info{{flex:1;min-width:0}}
-.name{{font-size:14px;font-weight:500;color:#1a1a2e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}}
-.pill{{display:inline-block;font-size:9px;font-weight:500;padding:1px 7px;border-radius:20px;background:#eeedfb;color:#4038b0;margin-left:5px;vertical-align:middle}}
-.meta{{font-size:11px;color:#767686;margin-bottom:8px}}
-.sigs{{display:flex;flex-wrap:wrap;gap:4px 10px;margin-bottom:8px}}
-.sig{{display:flex;align-items:center;gap:3px;font-size:10px;color:#4a4a58}}
-.dot{{width:6px;height:6px;border-radius:50%;flex-shrink:0}}
-.insight{{font-size:10px;color:#767686;font-style:italic;border-left:2px solid #e4e4e8;padding-left:7px;margin-bottom:9px}}
+.name{{font-size:15px;font-weight:600;color:#1a1a2e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}}
+.pill{{display:inline-block;font-size:9px;font-weight:600;padding:2px 8px;border-radius:20px;background:#eeedfb;color:#4038b0;margin-left:6px;vertical-align:middle;letter-spacing:.02em}}
+.meta{{font-size:11px;color:#767686;margin-bottom:9px;font-weight:400}}
+.sigs{{display:flex;flex-wrap:wrap;gap:4px 14px;margin-bottom:9px}}
+.sig{{display:flex;align-items:center;gap:4px;font-size:11px;color:#4a4a58;font-weight:400}}
+.sig strong{{font-weight:500;color:#1a1a2e}}
+.dot{{width:7px;height:7px;border-radius:50%;flex-shrink:0}}
+.insight{{font-size:10px;color:#767686;font-style:italic;border-left:2px solid #e4e4e8;padding-left:7px;margin-bottom:10px;line-height:1.5}}
 .score-row{{display:flex;align-items:center;gap:10px}}
-.bar-wrap{{flex:1;height:3px;background:#f0f0f4;border-radius:2px;overflow:hidden}}
+.bar-wrap{{flex:1;height:4px;background:#f0f0f4;border-radius:2px;overflow:hidden}}
 .bar-fill{{height:100%;border-radius:2px;background:#5a50d4;width:{score_pct}%}}
-.score-num{{font-size:20px;font-weight:500;color:#5a50d4;line-height:1}}
-.score-sub{{font-size:8px;color:#767686;text-align:right}}
-.footer{{padding:7px 13px;border-top:0.5px solid #e4e4e8;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px}}
-.upd{{font-size:9px;color:#767686}}
-.cta{{font-size:9px;color:#5a50d4;text-decoration:none;font-weight:500;display:flex;align-items:center;gap:2px;white-space:nowrap}}
-@media(max-width:300px){{
-  .footer{{flex-direction:column;align-items:flex-start}}
-  .name{{font-size:13px}}
-}}
+.score-num{{font-size:22px;font-weight:600;color:#5a50d4;line-height:1}}
+.score-sub{{font-size:9px;color:#767686;text-align:right;margin-top:1px}}
+.footer{{padding:8px 14px;border-top:1px solid #e4e4e8;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px;background:#fff}}
+.upd{{font-size:9px;color:#a0a0b0;display:flex;align-items:center;gap:4px}}
+.cta{{font-size:10px;color:#5a50d4;text-decoration:none;font-weight:500;display:flex;align-items:center;gap:3px;white-space:nowrap}}
+.cta:hover{{text-decoration:underline}}
+@media(max-width:300px){{.footer{{flex-direction:column;align-items:flex-start}}.name{{font-size:13px}}}}
 </style>
 </head>
 <body>
@@ -960,9 +961,9 @@ body{{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgro
     </div>
   </div>
   <div class="footer">
-    <span class="upd"><i class="ti ti-refresh" style="font-size:10px;vertical-align:-1px"></i> Updated nightly &middot; rolling 90-day window</span>
+    <span class="upd"><i class="ti ti-refresh" style="font-size:11px"></i> Updated nightly &middot; rolling 90-day window</span>
     <a class="cta" href="https://atlantamusicmagazine.com/concert-sentiment-index/" target="_blank" rel="noopener">
-      Concert Sentiment Index <i class="ti ti-arrow-right" style="font-size:9px"></i>
+      Concert Sentiment Index <i class="ti ti-arrow-right" style="font-size:10px"></i>
     </a>
   </div>
 </div>
