@@ -924,7 +924,7 @@ body{{font-family:"Inter",-apple-system,BlinkMacSystemFont,sans-serif;background
 .bar-wrap{{flex:1;height:4px;background:#f0f0f4;border-radius:2px;overflow:hidden}}
 .bar-fill{{height:100%;border-radius:2px;background:#5a50d4;width:{score_pct}%}}
 .score-num{{font-size:22px;font-weight:600;color:#5a50d4;line-height:1}}
-.score-sub{{font-size:9px;color:#767686;text-align:right;margin-top:1px}}
+.score-sub{{font-size:10px;color:#a0a0b0;line-height:1}}
 .footer{{padding:8px 14px;border-top:1px solid #e4e4e8;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px;background:#fff}}
 .upd{{font-size:9px;color:#a0a0b0;display:flex;align-items:center;gap:4px}}
 .cta{{font-size:10px;color:#5a50d4;text-decoration:none;font-weight:500;display:flex;align-items:center;gap:3px;white-space:nowrap}}
@@ -936,7 +936,7 @@ body{{font-family:"Inter",-apple-system,BlinkMacSystemFont,sans-serif;background
 <div class="card">
   <div class="eyebrow">
     <span class="eyebrow-dot"></span>
-    Most Popular Atlanta Event
+    Top Trending Atlanta Event
   </div>
   <div class="body">
     <div class="rank">
@@ -952,16 +952,16 @@ body{{font-family:"Inter",-apple-system,BlinkMacSystemFont,sans-serif;background
 {insight_html}
       <div class="score-row">
         <div class="bar-wrap"><div class="bar-fill"></div></div>
-        <div>
-          <div class="score-num">{score}</div>
-          <div class="score-sub">/ 100</div>
+        <div style="display:flex;align-items:baseline;gap:3px">
+          <span class="score-num">{score}</span>
+          <span class="score-sub">/ 100</span>
         </div>
       </div>
     </div>
   </div>
   <div class="footer">
     <span class="upd"><i class="ti ti-refresh" style="font-size:11px"></i> Updated nightly &middot; rolling 90-day window</span>
-    <a class="cta" href="https://atlantamusicmagazine.com/concert-sentiment-index/" target="_blank" rel="noopener">
+    <a class="cta" href="https://atlantamusicmagazine.com/concert-sentiment-index/">
       Concert Sentiment Index <i class="ti ti-arrow-right" style="font-size:10px"></i>
     </a>
   </div>
