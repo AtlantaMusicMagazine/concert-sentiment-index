@@ -861,24 +861,23 @@ def build_widget_html(top_event):
             insight_text = build_insight(top_event)
     except Exception:
         pass
-
-    signals_raw  = top_event.get("raw_signals") or {}
     updated_date = _dt.date.today().strftime("%B %-d, %Y")
 
-    # Build up to 4 signal dots from raw scoring signals
+    # Signal levels live in ev["signal_levels"], not ev["raw_signals"]
+    signal_levels = top_event.get("signal_levels", {})
     sig_map = {
-        "ticket_demand":   ("Ticket demand",  signals_raw.get("ticket_demand",  {})),
-        "sentiment":       ("Sentiment",       signals_raw.get("sentiment",       {})),
-        "local_intent":    ("Local intent",    signals_raw.get("local_intent",    {})),
-        "historical_sales":("Sales history",   signals_raw.get("historical_sales",{})),
+        "ticket_demand":    "Ticket demand",
+        "sentiment":        "Sentiment",
+        "local_intent":     "Local intent",
+        "historical_sales": "Sales history",
     }
     dot_colors = {"high": "#1a9e6e", "medium": "#c9820a", "low": "#c0392b"}
     signals_html_parts = []
-    for key, (label, sig) in sig_map.items():
-        level = sig.get("level", "")
+    for key, label in sig_map.items():
+        level = signal_levels.get(key, "")
         if not level:
             continue
-        color = dot_colors.get(level, "#888")
+        color = dot_colors.get(level.lower(), "#888")
         signals_html_parts.append(
             f'<span class="sig">'
             f'<span class="dot" style="background:{color}"></span>'
