@@ -385,10 +385,23 @@ def build_insight(ev):
     if sp_top is not None and int(sp_top) >= 80:
         parts.append(f"Spotify top track: {sp_top}/100")
 
-    # ── 13. Secondary market floor ────────────────────────────────────
-    sg_floor = raw.get("seatgeek_floor")
-    if sg_floor is not None and float(sg_floor) >= 50:
-        parts.append(f"Secondary floor ${float(sg_floor):.0f}")
+    # ── 13. Secondary market (SeatGeek) ───────────────────────────────
+    sg_floor   = raw.get("seatgeek_floor")
+    sg_avg     = raw.get("seatgeek_avg_price")
+    sg_high    = raw.get("seatgeek_highest_price")
+    sg_listing = raw.get("seatgeek_listing_count") or 0
+    venue_cap  = raw.get("venue_cap", 0) or 0
+
+    if sg_floor is not None:
+        floor_f = float(sg_floor)
+        # Scarcity signal: very low listing count relative to venue
+        if sg_listing and venue_cap and (sg_listing / venue_cap) < 0.05:
+            parts.append(f"Only {int(sg_listing):,} tickets left · from ${floor_f:.0f}")
+        elif sg_avg is not None and float(sg_avg) >= 150:
+            avg_f = float(sg_avg)
+            parts.append(f"Resale avg ${avg_f:.0f} · floor ${floor_f:.0f}")
+        elif floor_f >= 75:
+            parts.append(f"Secondary floor ${floor_f:.0f}")
 
     # ── 14. Wikipedia trend ────────────────────────────────────────────
     trend = raw.get("wikipedia_7d_trend_pct")
