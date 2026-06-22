@@ -24,6 +24,7 @@ Path("output").mkdir(exist_ok=True)
 
 TEMPLATE_PATH = "templates/artist_card_module_wp_ready.html"
 OUTPUT_PATH   = "output/artist_card_module_wp_ready.html"
+WIDGET_PATH   = "output/widget.html"
 SCORES_PATH      = "data/scored_events.json"
 RANK_CACHE_PATH  = "data/rank_history.json"
 
@@ -835,6 +836,134 @@ def _genre_prior(genre):
 
 
 # ── Main build ────────────────────────────────────────────────────────────
+def build_widget_html(top_event):
+    """
+    Generate a compact standalone widget card showing the #1 ranked event.
+    Deployed to widget.html on GitHub Pages alongside the full dashboard.
+    Embedded on the homepage via a small iframe — updates automatically
+    every nightly pipeline run with zero extra work.
+    """
+    if not top_event:
+        return ""
+
+    import datetime as _dt
+
+    name         = top_event.get("name", "")
+    venue        = top_event.get("venue", "")
+    date_str     = top_event.get("date", "")
+    genre        = top_event.get("genre", "")
+    score        = int(top_event.get("score", 0))
+    score_pct    = min(100, score)
+    date_display = fmt_date(date_str)
+    insight_text = build_insight(top_event)
+    signals_raw  = top_event.get("raw_signals", {})
+    updated_date = _dt.date.today().strftime("%B %-d, %Y")
+
+    # Build up to 4 signal dots from raw scoring signals
+    sig_map = {
+        "ticket_demand":   ("Ticket demand",  signals_raw.get("ticket_demand",  {})),
+        "sentiment":       ("Sentiment",       signals_raw.get("sentiment",       {})),
+        "local_intent":    ("Local intent",    signals_raw.get("local_intent",    {})),
+        "historical_sales":("Sales history",   signals_raw.get("historical_sales",{})),
+    }
+    dot_colors = {"high": "#1a9e6e", "medium": "#c9820a", "low": "#c0392b"}
+    signals_html_parts = []
+    for key, (label, sig) in sig_map.items():
+        level = sig.get("level", "")
+        if not level:
+            continue
+        color = dot_colors.get(level, "#888")
+        signals_html_parts.append(
+            f'<span class="sig">'
+            f'<span class="dot" style="background:{color}"></span>'
+            f'{label}: {level.capitalize()}'
+            f'</span>'
+        )
+    signals_html = "\n".join(signals_html_parts[:4])
+
+    insight_html = ""
+    if insight_text:
+        insight_html = (
+            f'<div class="insight">{insight_text}</div>'
+        )
+
+    return f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Most Popular Atlanta Event — Concert Sentiment Index</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+*{{box-sizing:border-box;margin:0;padding:0}}
+body{{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#fff;color:#1a1a2e}}
+.card{{border:0.5px solid #e4e4e8;border-radius:12px;overflow:hidden;width:100%;max-width:360px;margin:0 auto}}
+.eyebrow{{display:flex;align-items:center;gap:6px;padding:9px 13px;background:#f8f8fb;border-bottom:0.5px solid #e4e4e8;font-size:10px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:#767686}}
+.eyebrow-dot{{width:6px;height:6px;border-radius:50%;background:#5a50d4;flex-shrink:0}}
+.body{{padding:13px 13px 12px;display:flex;gap:12px;align-items:flex-start}}
+.rank{{display:flex;flex-direction:column;align-items:center;flex-shrink:0;padding-top:2px}}
+.rank-num{{font-size:26px;font-weight:500;color:#5a50d4;line-height:1}}
+.rank-lbl{{font-size:8px;color:#767686;letter-spacing:.06em;text-transform:uppercase;margin-top:2px}}
+.info{{flex:1;min-width:0}}
+.name{{font-size:14px;font-weight:500;color:#1a1a2e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}}
+.pill{{display:inline-block;font-size:9px;font-weight:500;padding:1px 7px;border-radius:20px;background:#eeedfb;color:#4038b0;margin-left:5px;vertical-align:middle}}
+.meta{{font-size:11px;color:#767686;margin-bottom:8px}}
+.sigs{{display:flex;flex-wrap:wrap;gap:4px 10px;margin-bottom:8px}}
+.sig{{display:flex;align-items:center;gap:3px;font-size:10px;color:#4a4a58}}
+.dot{{width:6px;height:6px;border-radius:50%;flex-shrink:0}}
+.insight{{font-size:10px;color:#767686;font-style:italic;border-left:2px solid #e4e4e8;padding-left:7px;margin-bottom:9px}}
+.score-row{{display:flex;align-items:center;gap:10px}}
+.bar-wrap{{flex:1;height:3px;background:#f0f0f4;border-radius:2px;overflow:hidden}}
+.bar-fill{{height:100%;border-radius:2px;background:#5a50d4;width:{score_pct}%}}
+.score-num{{font-size:20px;font-weight:500;color:#5a50d4;line-height:1}}
+.score-sub{{font-size:8px;color:#767686;text-align:right}}
+.footer{{padding:7px 13px;border-top:0.5px solid #e4e4e8;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px}}
+.upd{{font-size:9px;color:#767686}}
+.cta{{font-size:9px;color:#5a50d4;text-decoration:none;font-weight:500;display:flex;align-items:center;gap:2px;white-space:nowrap}}
+@media(max-width:300px){{
+  .footer{{flex-direction:column;align-items:flex-start}}
+  .name{{font-size:13px}}
+}}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="eyebrow">
+    <span class="eyebrow-dot"></span>
+    Most Popular Atlanta Event
+  </div>
+  <div class="body">
+    <div class="rank">
+      <span class="rank-num">1</span>
+      <span class="rank-lbl">rank</span>
+    </div>
+    <div class="info">
+      <div class="name">{name}<span class="pill">{genre}</span></div>
+      <div class="meta">{date_display} &middot; {venue}</div>
+      <div class="sigs">
+{signals_html}
+      </div>
+{insight_html}
+      <div class="score-row">
+        <div class="bar-wrap"><div class="bar-fill"></div></div>
+        <div>
+          <div class="score-num">{score}</div>
+          <div class="score-sub">/ 100</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="footer">
+    <span class="upd"><i class="ti ti-refresh" style="font-size:10px;vertical-align:-1px"></i> Updated nightly &middot; rolling 90-day window</span>
+    <a class="cta" href="https://atlantamusicmagazine.com/concert-sentiment-index/" target="_blank" rel="noopener">
+      Concert Sentiment Index <i class="ti ti-arrow-right" style="font-size:9px"></i>
+    </a>
+  </div>
+</div>
+</body>
+</html>"""
+
+
 def build():
     print(f"[build] Building HTML — {datetime.datetime.now().isoformat()}")
 
@@ -1015,6 +1144,22 @@ def build():
     print(f"[build] Writing output to {OUTPUT_PATH}")
     with open(OUTPUT_PATH, "w") as f:
         f.write(html)
+    print(f"[build] Output written → {OUTPUT_PATH}")
+
+    # Build and write the homepage widget (top #1 card only)
+    try:
+        top_ev = top_events[0] if top_events else None
+        widget_html = build_widget_html(top_ev)
+        if widget_html:
+            import os
+            os.makedirs(os.path.dirname(WIDGET_PATH), exist_ok=True)
+            with open(WIDGET_PATH, "w") as f:
+                f.write(widget_html)
+            print(f"[build] Widget written → {WIDGET_PATH} ({top_ev.get('name','')[:40]})")
+        else:
+            print("[build] Widget skipped — no top event available")
+    except Exception as e:
+        print(f"[build] Widget error: {e}")
 
     # Verify card counts in output
     import re as _re
