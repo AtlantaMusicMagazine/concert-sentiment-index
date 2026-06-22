@@ -1107,6 +1107,8 @@ def fetch_seatgeek(event):
         "seatgeek_listing_count": ev.get("stats", {}).get("listing_count", 0),
         "seatgeek_floor":         ev.get("stats", {}).get("lowest_price", None),
         "seatgeek_avg_price":     ev.get("stats", {}).get("average_price", None),
+        "seatgeek_highest_price": ev.get("stats", {}).get("highest_price", None),
+        "seatgeek_median_price":  ev.get("stats", {}).get("median_price", None),
     }
 
 
