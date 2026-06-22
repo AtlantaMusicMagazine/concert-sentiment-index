@@ -966,6 +966,24 @@ def score_all():
 
     scored.sort(key=lambda e: e["score"], reverse=True)
 
+    # ── Post-blend rescale ────────────────────────────────────────────────
+    # Stretch the score distribution so the #1 event lands at ~94 and the
+    # spread across the top 20 is meaningful. Without this, the seed-model
+    # blend compresses everything into a 53–85 band. The rescale maps the
+    # observed roster min/max onto a 20–95 target range, preserving all
+    # relative ranking differences.
+    raw_scores = [e["score"] for e in scored]
+    lo_raw, hi_raw = min(raw_scores), max(raw_scores)
+    LO_TARGET, HI_TARGET = 35, 95   # target output range
+
+    if hi_raw > lo_raw:
+        for e in scored:
+            raw  = e["score"]
+            rescaled = LO_TARGET + (raw - lo_raw) / (hi_raw - lo_raw) * (HI_TARGET - LO_TARGET)
+            e["score"] = int(round(rescaled))
+
+    print(f"[score] Rescale: raw {lo_raw}–{hi_raw} → {LO_TARGET}–{HI_TARGET} target range")
+
     output = {
         "scored_at": datetime.datetime.utcnow().isoformat() + "Z",
         "events":    scored,
