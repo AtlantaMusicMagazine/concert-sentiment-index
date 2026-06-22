@@ -1086,29 +1086,59 @@ def fetch_ticketmaster(event):
 def fetch_seatgeek(event):
     if not SEATGEEK_CLIENT_ID:
         return {}
+
+    artist   = event.get("artist", "") or event.get("name", "")
+    date_str = event["date"]
+    base_params = {
+        "client_id":          SEATGEEK_CLIENT_ID,
+        "client_secret":      SEATGEEK_SECRET,
+        "venue.city":         "Atlanta",
+        "datetime_local.gte": date_str,
+        "datetime_local.lte": date_str,
+        "per_page":           1,
+    }
+
+    # Try 1: performer name lookup (more reliable than slug)
     data = safe_get(
         "https://api.seatgeek.com/2/events",
-        params={
-            "client_id":             SEATGEEK_CLIENT_ID,
-            "client_secret":         SEATGEEK_SECRET,
-            "performers.slug":       event.get("seatgeek_performer_slug", ""),
-            "venue.city":            "Atlanta",
-            "datetime_local.gte":    event["date"],
-            "datetime_local.lte":    event["date"],
-            "per_page":              1,
-        },
+        params={**base_params, "performers.name": artist},
         label="SeatGeek",
     )
-    if not data or not data.get("events"):
+    ev = None
+    if data and data.get("events"):
+        ev = data["events"][0]
+    else:
+        # Try 2: slug lookup fallback
+        slug = event.get("seatgeek_performer_slug", "")
+        if slug:
+            data2 = safe_get(
+                "https://api.seatgeek.com/2/events",
+                params={**base_params, "performers.slug": slug},
+                label="SeatGeek-slug",
+            )
+            if data2 and data2.get("events"):
+                ev = data2["events"][0]
+        # Try 3: date + city only (no performer filter) — picks up venue match
+        if ev is None:
+            data3 = safe_get(
+                "https://api.seatgeek.com/2/events",
+                params={**base_params, "q": artist},
+                label="SeatGeek-q",
+            )
+            if data3 and data3.get("events"):
+                ev = data3["events"][0]
+
+    if ev is None:
         return {}
-    ev = data["events"][0]
+
+    stats = ev.get("stats", {})
     return {
         "seatgeek_deal_score":    ev.get("score", 0),
-        "seatgeek_listing_count": ev.get("stats", {}).get("listing_count", 0),
-        "seatgeek_floor":         ev.get("stats", {}).get("lowest_price", None),
-        "seatgeek_avg_price":     ev.get("stats", {}).get("average_price", None),
-        "seatgeek_highest_price": ev.get("stats", {}).get("highest_price", None),
-        "seatgeek_median_price":  ev.get("stats", {}).get("median_price", None),
+        "seatgeek_listing_count": stats.get("listing_count", 0),
+        "seatgeek_floor":         stats.get("lowest_price", None),
+        "seatgeek_avg_price":     stats.get("average_price", None),
+        "seatgeek_highest_price": stats.get("highest_price", None),
+        "seatgeek_median_price":  stats.get("median_price", None),
     }
 
 
@@ -2390,6 +2420,12 @@ def discover_new_events():
 
                 # Check if already tracked by name (case-insensitive)
                 artist_lower = artist_name.lower()
+                # Filter known Ticketmaster false positives —
+                # single-word all-caps entries are usually ticket types
+                # (RUSH, GA, PIT, FLOOR) not actual artist names.
+                if re.match(r'^[A-Z]{2,6}$', artist_name):
+                    continue
+
                 already = any(
                     artist_lower in e.get("artist", "").lower() or
                     artist_lower in e.get("name", "").lower()
