@@ -855,8 +855,14 @@ def build_widget_html(top_event):
     score        = int(top_event.get("score", 0))
     score_pct    = min(100, score)
     date_display = fmt_date(date_str)
-    insight_text = build_insight(top_event)
-    signals_raw  = top_event.get("raw_signals", {})
+    insight_text = ""
+    try:
+        if top_event.get("raw_signals"):
+            insight_text = build_insight(top_event)
+    except Exception:
+        pass
+
+    signals_raw  = top_event.get("raw_signals") or {}
     updated_date = _dt.date.today().strftime("%B %-d, %Y")
 
     # Build up to 4 signal dots from raw scoring signals
@@ -1159,7 +1165,9 @@ def build():
         else:
             print("[build] Widget skipped — no top event available")
     except Exception as e:
+        import traceback
         print(f"[build] Widget error: {e}")
+        traceback.print_exc()
 
     # Verify card counts in output
     import re as _re
