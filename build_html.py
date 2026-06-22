@@ -961,7 +961,7 @@ body{{font-family:"Inter",-apple-system,BlinkMacSystemFont,sans-serif;background
   </div>
   <div class="footer">
     <span class="upd"><i class="ti ti-refresh" style="font-size:11px"></i> Updated nightly &middot; rolling 90-day window</span>
-    <a class="cta" href="https://atlantamusicmagazine.com/concert-sentiment-index/">
+    <a class="cta" href="https://atlantamusicmagazine.com/concert-sentiment-index/" target="_parent">
       Concert Sentiment Index <i class="ti ti-arrow-right" style="font-size:10px"></i>
     </a>
   </div>
