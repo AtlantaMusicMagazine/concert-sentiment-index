@@ -17,6 +17,15 @@ import score
 import build_html
 
 
+# ── Startup env diagnostic ────────────────────────────────────────────────
+_check_keys = ["TICKETMASTER_KEY", "SEATGEEK_CLIENT_ID", "SEATGEEK_SECRET",
+               "SPOTIFY_CLIENT_ID", "LASTFM_KEY", "SETLISTFM_KEY"]
+print("[pipeline] Env check:")
+for _k in _check_keys:
+    _v = os.environ.get(_k, "")
+    print(f"  {_k}: {'SET ('+str(len(_v))+' chars)' if _v else 'NOT SET'}")
+
+
 # ── WordPress credentials (set as GitHub Secrets) ────────────────────────
 WP_SITE_URL    = os.environ.get("WP_SITE_URL", "")       # e.g. https://atlantamusicmagazine.com
 WP_USERNAME    = os.environ.get("WP_USERNAME", "")        # WordPress username
