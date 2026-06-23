@@ -874,6 +874,15 @@ def build_widget_html(top_event):
             insight_text = build_insight(top_event)
     except Exception:
         pass
+
+    # Append SeatGeek deal score to insight if available
+    raw_signals = top_event.get("raw_signals", {})
+    sg_deal = raw_signals.get("seatgeek_deal_score") if raw_signals else None
+    if sg_deal is not None:
+        sg_pct = int(round(float(sg_deal) * 100))
+        sg_text = f"SeatGeek demand score: {sg_pct}/100"
+        insight_text = (insight_text + " · " + sg_text) if insight_text else sg_text
+
     updated_date = _dt.date.today().strftime("%B %-d, %Y")
 
     # Signal levels live in ev["signal_levels"], not ev["raw_signals"]
