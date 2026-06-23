@@ -889,6 +889,7 @@ EVENTS = [
         "bandsintown_artist": "Theory of a Deadman",
     },
 
+
 ]
 
 
@@ -1098,41 +1099,34 @@ def fetch_seatgeek(event):
         "per_page":           1,
     }
 
-    # Try 1: performer name lookup (more reliable than slug)
-    data = safe_get(
-        "https://api.seatgeek.com/2/events",
-        params={**base_params, "performers.name": artist},
-        label="SeatGeek",
-    )
     ev = None
-    if data and data.get("events"):
-        ev = data["events"][0]
-    else:
-        # Try 2: slug lookup fallback
-        slug = event.get("seatgeek_performer_slug", "")
-        if slug:
-            data2 = safe_get(
-                "https://api.seatgeek.com/2/events",
-                params={**base_params, "performers.slug": slug},
-                label="SeatGeek-slug",
-            )
-            if data2 and data2.get("events"):
-                ev = data2["events"][0]
-        # Try 3: date + city only (no performer filter) — picks up venue match
-        if ev is None:
-            data3 = safe_get(
-                "https://api.seatgeek.com/2/events",
-                params={**base_params, "q": artist},
-                label="SeatGeek-q",
-            )
-            if data3 and data3.get("events"):
-                ev = data3["events"][0]
+
+    # Try 1: performer slug lookup (primary)
+    slug = event.get("seatgeek_performer_slug", "")
+    if slug:
+        data = safe_get(
+            "https://api.seatgeek.com/2/events",
+            params={**base_params, "performers.slug": slug},
+            label="SeatGeek",
+        )
+        if data and data.get("events"):
+            ev = data["events"][0]
+
+    # Try 2: free-text search with artist name + city + date
+    if ev is None:
+        data2 = safe_get(
+            "https://api.seatgeek.com/2/events",
+            params={**base_params, "q": artist},
+            label="SeatGeek-q",
+        )
+        if data2 and data2.get("events"):
+            ev = data2["events"][0]
 
     if ev is None:
         return {}
 
     stats = ev.get("stats", {})
-    return {
+    result = {
         "seatgeek_deal_score":    ev.get("score", 0),
         "seatgeek_listing_count": stats.get("listing_count", 0),
         "seatgeek_floor":         stats.get("lowest_price", None),
@@ -1140,6 +1134,11 @@ def fetch_seatgeek(event):
         "seatgeek_highest_price": stats.get("highest_price", None),
         "seatgeek_median_price":  stats.get("median_price", None),
     }
+    floor  = result["seatgeek_floor"]
+    count  = result["seatgeek_listing_count"]
+    deal   = result["seatgeek_deal_score"]
+    print(f"  [SeatGeek] {artist[:35]:<35} deal={deal:.2f}  listings={count}  floor={'$'+str(int(floor)) if floor else 'n/a'}")
+    return result
 
 
 def fetch_spotify(event, token):
@@ -2372,11 +2371,14 @@ TRACKED_IDS = {e["id"] for e in EVENTS}
 def discover_new_events():
     """
     Query Ticketmaster Discovery API for all upcoming Atlanta music events
-    at tracked venues. Returns a list of discovered events not already in
-    the EVENTS list, sorted by date. Logged to stdout for editorial review.
+    at tracked venues. Logs untracked shows for EDITORIAL REVIEW ONLY.
 
-    This runs on every nightly pipeline execution and surfaces new shows
-    automatically so nothing like Flyleaf slips through again.
+    ⚠ DO NOT auto-add results to EVENTS list — Ticketmaster returns ticket
+    types, access passes (RUSH, GA, PIT), and VIP packages as "attractions"
+    alongside real artists. Every discovered entry must be manually verified
+    against the venue's official website before adding to collect.py.
+
+    This runs on every nightly pipeline execution for awareness only.
     """
     if not TICKETMASTER_KEY:
         print("[discover] No TICKETMASTER_KEY — skipping discovery")
