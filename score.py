@@ -125,7 +125,8 @@ def count_available_signals(signals):
 def norm_seatgeek_deal_score(val):
     if val is None:
         return None   # signal absent — caller handles
-    return max(0.0, min(1.0, float(val) / 100))
+    # SeatGeek's score field is already a 0.0–1.0 float
+    return max(0.0, min(1.0, float(val)))
 
 
 def norm_seatgeek_floor(val):
