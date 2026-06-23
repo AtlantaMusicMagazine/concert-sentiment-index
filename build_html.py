@@ -178,9 +178,10 @@ def build_signals_html(ev):
     # Dynamic detail signals based on available raw data
     sg_deal = raw.get("seatgeek_deal_score")
     if sg_deal is not None:
-        sg_deal = int(sg_deal)
-        lvl = "high" if sg_deal >= 65 else ("medium" if sg_deal >= 35 else "low")
-        signals.append((lvl, "SeatGeek Deal Score", f"{sg_deal}/100"))
+        # SeatGeek returns score as 0.0–1.0 float — convert to 0–100 for display
+        sg_deal_pct = int(round(float(sg_deal) * 100))
+        lvl = "high" if sg_deal_pct >= 65 else ("medium" if sg_deal_pct >= 35 else "low")
+        signals.append((lvl, "SeatGeek Deal Score", f"{sg_deal_pct}/100"))
 
     sg_floor = raw.get("seatgeek_floor")
     if sg_floor is not None:
@@ -388,7 +389,6 @@ def build_insight(ev):
     # ── 13. Secondary market (SeatGeek) ───────────────────────────────
     sg_floor   = raw.get("seatgeek_floor")
     sg_avg     = raw.get("seatgeek_avg_price")
-    sg_high    = raw.get("seatgeek_highest_price")
     sg_listing = raw.get("seatgeek_listing_count") or 0
     venue_cap  = raw.get("venue_cap", 0) or 0
 
@@ -397,11 +397,11 @@ def build_insight(ev):
         # Scarcity signal: very low listing count relative to venue
         if sg_listing and venue_cap and (sg_listing / venue_cap) < 0.05:
             parts.append(f"Only {int(sg_listing):,} tickets left · from ${floor_f:.0f}")
-        elif sg_avg is not None and float(sg_avg) >= 150:
+        elif sg_avg is not None and float(sg_avg) >= 100:
             avg_f = float(sg_avg)
             parts.append(f"Resale avg ${avg_f:.0f} · floor ${floor_f:.0f}")
-        elif floor_f >= 75:
-            parts.append(f"Secondary floor ${floor_f:.0f}")
+        elif floor_f >= 20:
+            parts.append(f"Tickets from ${floor_f:.0f} on SeatGeek")
 
     # ── 14. Wikipedia trend ────────────────────────────────────────────
     trend = raw.get("wikipedia_7d_trend_pct")
