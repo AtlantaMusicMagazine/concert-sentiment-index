@@ -1091,13 +1091,20 @@ def fetch_seatgeek(event):
 
     artist   = event.get("artist", "") or event.get("name", "")
     date_str = event["date"]
+
+    # Widen date window ±1 day — SeatGeek sometimes indexes events
+    # on adjacent dates due to timezone handling
+    import datetime as _dt
+    d = _dt.date.fromisoformat(date_str)
+    gte = (d - _dt.timedelta(days=1)).isoformat()
+    lte = (d + _dt.timedelta(days=1)).isoformat()
+
     base_params = {
         "client_id":          SEATGEEK_CLIENT_ID,
         "client_secret":      SEATGEEK_SECRET,
-        "venue.city":         "Atlanta",
-        "datetime_local.gte": date_str,
-        "datetime_local.lte": date_str,
-        "per_page":           1,
+        "datetime_local.gte": gte,
+        "datetime_local.lte": lte,
+        "per_page":           5,   # fetch a few to find best Atlanta match
     }
 
     ev = None
@@ -1111,9 +1118,14 @@ def fetch_seatgeek(event):
             label="SeatGeek",
         )
         if data and data.get("events"):
-            ev = data["events"][0]
+            # Pick the Atlanta event if multiple results returned
+            atl_ev = next((e for e in data["events"]
+                          if "atlanta" in e.get("venue", {}).get("city", "").lower()), None)
+            ev = atl_ev or data["events"][0]
+        elif data is not None:
+            print(f"  [SeatGeek] slug miss: {slug} ({data.get('meta', {}).get('total', 0)} results)")
 
-    # Try 2: free-text search with artist name + city + date
+    # Try 2: free-text search with artist name + date
     if ev is None:
         data2 = safe_get(
             "https://api.seatgeek.com/2/events",
@@ -1121,7 +1133,11 @@ def fetch_seatgeek(event):
             label="SeatGeek-q",
         )
         if data2 and data2.get("events"):
-            ev = data2["events"][0]
+            atl_ev2 = next((e for e in data2["events"]
+                           if "atlanta" in e.get("venue", {}).get("city", "").lower()), None)
+            ev = atl_ev2 or data2["events"][0]
+        elif data2 is not None:
+            print(f"  [SeatGeek] q miss: {artist[:30]} ({data2.get('meta', {}).get('total', 0)} results)")
 
     if ev is None:
         return {}
