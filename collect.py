@@ -1104,7 +1104,8 @@ def fetch_seatgeek(event):
         "client_secret":      SEATGEEK_SECRET,
         "datetime_local.gte": gte,
         "datetime_local.lte": lte,
-        "per_page":           5,   # fetch a few to find best Atlanta match
+        "per_page":           5,
+        "expand":             "event",
     }
 
     def is_atlanta(ev):
@@ -1152,6 +1153,9 @@ def fetch_seatgeek(event):
         return {}
 
     stats = ev.get("stats", {})
+    # Log full event keys on first few runs to diagnose stats structure
+    print(f"  [SeatGeek] ev keys: {list(ev.keys())}")
+    print(f"  [SeatGeek] stats content: {dict(list(stats.items())[:6]) if stats else 'EMPTY'}")
     result = {
         "seatgeek_deal_score":    ev.get("score", 0),
         "seatgeek_listing_count": stats.get("listing_count", 0),
