@@ -890,6 +890,37 @@ EVENTS = [
     },
 
 
+    {
+        "id": "tomahawk-melvins-2026",
+        "seed_score": 62,
+        "name": "Tomahawk with Melvins — A Huge Waste of Your Time and Money Tour",
+        "artist": "Tomahawk",
+        "venue": "Buckhead Theatre",
+        "date": "2026-07-24",
+        "genre": "Rock",
+        "spotify_artist_id": "0bmCBFCUkGaOLBLGfMXQAb",
+        "musicbrainz_mbid": "c6d70f33-7f83-4b6e-8af1-9d30c46e36c1",
+        "tm_attraction_id": "K8vZ9171oL7",
+        "seatgeek_performer_slug": "tomahawk",
+        "wikipedia_title": "Tomahawk_(band)",
+        "bandsintown_artist": "Tomahawk",
+    },
+    {
+        "id": "franz-ferdinand-2026",
+        "seed_score": 58,
+        "name": "Franz Ferdinand",
+        "artist": "Franz Ferdinand",
+        "venue": "Buckhead Theatre",
+        "date": "2026-08-12",
+        "genre": "Indie / Alt",
+        "spotify_artist_id": "4pXFHFGjuEQR5HHs1KFSz2",
+        "musicbrainz_mbid": "2f5f9de7-6651-4571-8dce-99f745c6b021",
+        "tm_attraction_id": "K8vZ9171C-7",
+        "seatgeek_performer_slug": "franz-ferdinand",
+        "wikipedia_title": "Franz_Ferdinand_(band)",
+        "bandsintown_artist": "Franz Ferdinand",
+    },
+
 ]
 
 
@@ -2399,14 +2430,16 @@ TRACKED_IDS = {e["id"] for e in EVENTS}
 def discover_new_events():
     """
     Query Ticketmaster Discovery API for all upcoming Atlanta music events
-    at tracked venues. Logs untracked shows for EDITORIAL REVIEW ONLY.
+    at tracked venues. Auto-adds genuine new shows to EVENTS with a default
+    seed score of 50 in the bottom panel.
 
-    ⚠ DO NOT auto-add results to EVENTS list — Ticketmaster returns ticket
-    types, access passes (RUSH, GA, PIT), and VIP packages as "attractions"
-    alongside real artists. Every discovered entry must be manually verified
-    against the venue's official website before adding to collect.py.
+    False positive filters (Ticketmaster returns ticket types as attractions):
+      1. All-caps short names (RUSH, GA, PIT, FLOOR, VIP)
+      2. No tm_attraction_id (real artists always have one)
+      3. Names containing ticket-type keywords (General Admission, Fast Lane etc.)
+      4. Single generic words that are common English words
 
-    This runs on every nightly pipeline execution for awareness only.
+    Events passing all filters are auto-added and scored on the next run.
     """
     if not TICKETMASTER_KEY:
         print("[discover] No TICKETMASTER_KEY — skipping discovery")
@@ -2417,7 +2450,33 @@ def discover_new_events():
     win_end   = (datetime.date.today() + datetime.timedelta(days=95)).isoformat()
     base_url  = "https://app.ticketmaster.com/discovery/v2/events.json"
 
+    # Words that indicate a ticket type, not an artist name
+    TICKET_KEYWORDS = {
+        "general", "admission", "fast", "lane", "lounge", "vip", "access",
+        "pit", "floor", "club", "premium", "package", "upgrade", "early",
+        "entry", "meet", "greet", "soundcheck", "backstage", "presale",
+    }
+
+    def is_false_positive(name, attr_id):
+        if not name:
+            return True
+        # All-caps short names (RUSH, GA, PIT)
+        if re.match(r'^[A-Z]{2,8}$', name):
+            return True
+        # No attraction ID = not a real artist entity
+        if not attr_id:
+            return True
+        # Name contains ticket-type keywords
+        words = set(name.lower().split())
+        if words & TICKET_KEYWORDS:
+            return True
+        # Pure numbers or very short
+        if len(name.strip()) < 3:
+            return True
+        return False
+
     discovered = []
+    auto_added = []
     seen_tm_ids = set()
 
     for venue_id, venue_name in TM_VENUE_IDS.items():
@@ -2443,19 +2502,15 @@ def discover_new_events():
                     continue
                 seen_tm_ids.add(tm_event_id)
 
-                # Extract headline artist name
                 attractions = ev.get("_embedded", {}).get("attractions", [])
                 artist_name = attractions[0]["name"] if attractions else ev.get("name", "")
                 tm_attr_id  = attractions[0].get("id", "") if attractions else ""
 
-                # Check if already tracked by name (case-insensitive)
-                artist_lower = artist_name.lower()
-                # Filter known Ticketmaster false positives —
-                # single-word all-caps entries are usually ticket types
-                # (RUSH, GA, PIT, FLOOR) not actual artist names.
-                if re.match(r'^[A-Z]{2,6}$', artist_name):
+                if is_false_positive(artist_name, tm_attr_id):
                     continue
 
+                # Already tracked?
+                artist_lower = artist_name.lower()
                 already = any(
                     artist_lower in e.get("artist", "").lower() or
                     artist_lower in e.get("name", "").lower()
@@ -2464,20 +2519,24 @@ def discover_new_events():
                 if already:
                     continue
 
-                # Get date
-                dates = ev.get("dates", {}).get("start", {})
+                dates    = ev.get("dates", {}).get("start", {})
                 date_str = dates.get("localDate", "")
                 if not date_str:
                     continue
 
+                # Determine genre from TM classification
+                classifications = ev.get("classifications", [{}])
+                genre = (classifications[0].get("genre", {}).get("name", "")
+                         or classifications[0].get("segment", {}).get("name", "Music"))
+                if genre in ("", "Undefined", "Music"):
+                    genre = "Rock"   # sensible default for unknown
+
                 discovered.append({
-                    "name":         artist_name,
-                    "date":         date_str,
-                    "venue":        venue_name,
-                    "tm_event_id":  tm_event_id,
-                    "tm_attr_id":   tm_attr_id,
-                    "event_name":   ev.get("name", artist_name),
-                    "url":          ev.get("url", ""),
+                    "name":        artist_name,
+                    "date":        date_str,
+                    "venue":       venue_name,
+                    "tm_attr_id":  tm_attr_id,
+                    "genre":       genre,
                 })
         except Exception as e:
             print(f"[discover] {venue_name}: {e}")
@@ -2485,13 +2544,52 @@ def discover_new_events():
 
     discovered.sort(key=lambda x: x["date"])
 
-    if discovered:
-        print(f"\n[discover] ⚠ {len(discovered)} UNTRACKED events found in window:")
-        for d in discovered:
-            print(f"  {d['date']} | {d['name'][:40]:40} | {d['venue']}")
-        print("[discover] Add these to EVENTS list in collect.py to include on dashboard\n")
-    else:
+    if not discovered:
         print("[discover] ✓ All Atlanta music events in window are tracked")
+        return []
+
+    # Auto-add new events to EVENTS list
+    GENRE_MAP = {
+        "Hip-Hop/Rap": "Hip-Hop", "R&B": "R&B", "Pop": "Pop",
+        "Rock": "Rock", "Country": "Country", "Latin": "Latin Pop",
+        "Electronic": "Electronic", "Alternative": "Indie / Alt",
+        "Indie": "Indie / Alt", "Metal": "Rock", "Punk": "Rock",
+        "Jazz": "Jazz", "Blues": "Blues", "Reggae": "Reggae",
+    }
+
+    for d in discovered:
+        slug = re.sub(r'[^a-z0-9]+', '-', d["name"].lower()).strip('-')
+        eid  = f"{slug}-2026"
+
+        # Skip if ID already exists (different name, same slug)
+        if any(e["id"] == eid for e in EVENTS):
+            continue
+
+        mapped_genre = GENRE_MAP.get(d["genre"], d["genre"] or "Rock")
+
+        new_event = {
+            "id":                     eid,
+            "seed_score":             50,
+            "name":                   d["name"],
+            "artist":                 d["name"],
+            "venue":                  d["venue"],
+            "date":                   d["date"],
+            "genre":                  mapped_genre,
+            "spotify_artist_id":      "",
+            "musicbrainz_mbid":       "",
+            "tm_attraction_id":       d["tm_attr_id"],
+            "seatgeek_performer_slug": slug,
+            "wikipedia_title":        d["name"].replace(" ", "_"),
+            "bandsintown_artist":     d["name"],
+        }
+        EVENTS.append(new_event)
+        auto_added.append(d["name"])
+        print(f"[discover] AUTO-ADDED: {d['date']} | {d['name'][:40]} @ {d['venue']}")
+
+    if auto_added:
+        print(f"[discover] {len(auto_added)} new events added to roster this run")
+    else:
+        print("[discover] ✓ No new events to add")
 
     return discovered
 
