@@ -2588,6 +2588,45 @@ def discover_new_events():
 
     if auto_added:
         print(f"[discover] {len(auto_added)} new events added to roster this run")
+
+        # Write new events back to collect.py so they persist across runs
+        # and rank history accumulates correctly.
+        try:
+            import ast as _ast
+            collect_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "collect.py")
+            with open(collect_path) as _f:
+                source = _f.read()
+
+            events_end = source.find('\n]\n', source.find('EVENTS = ['))
+            if events_end == -1:
+                raise ValueError("Could not find EVENTS list closing bracket")
+
+            def ev_to_source(e):
+                lines = ['    {']
+                for k, v in e.items():
+                    if isinstance(v, str):
+                        esc = v.replace('\\', '\\\\').replace('"', '\\"')
+                        lines.append(f'        "{k}": "{esc}",')
+                    else:
+                        lines.append(f'        "{k}": {v},')
+                lines.append('    },')
+                return '\n'.join(lines)
+
+            new_source_entries = '\n'.join(
+                ev_to_source(e) for e in EVENTS
+                if e.get("id", "").endswith("-2026")
+                and f'"id": "{e["id"]}"' not in source
+            )
+
+            if new_source_entries:
+                updated = source[:events_end] + '\n' + new_source_entries + '\n' + source[events_end:]
+                _ast.parse(updated)
+                with open(collect_path, 'w') as _f:
+                    _f.write(updated)
+                print(f"[discover] collect.py updated on disk — {len(auto_added)} events persisted")
+        except Exception as _e:
+            print(f"[discover] WARNING: could not persist to collect.py: {_e}")
+            print("[discover] Events scored this run only — will re-discover next run")
     else:
         print("[discover] ✓ No new events to add")
 
