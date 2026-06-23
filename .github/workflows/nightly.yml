@@ -130,8 +130,8 @@ jobs:
         run: |
           git config user.email "github-actions@github.com"
           git config user.name "GitHub Actions"
-          git add data/rank_history.json data/amm_coverage.json || true
-          git diff --staged --quiet || git commit -m "chore: update rank history $(date -u '+%Y-%m-%d')"
+          git add data/rank_history.json data/amm_coverage.json collect.py || true
+          git diff --staged --quiet || git commit -m "chore: update rank history + discovered events $(date -u '+%Y-%m-%d')"
           git push origin main || echo "[rank] Push skipped (no changes)"
 
       # 8. Deploy dashboard to GitHub Pages
