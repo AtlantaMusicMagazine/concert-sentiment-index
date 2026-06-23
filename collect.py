@@ -1086,6 +1086,7 @@ def fetch_ticketmaster(event):
 
 def fetch_seatgeek(event):
     if not SEATGEEK_CLIENT_ID:
+        print("  [SeatGeek] SKIPPED — SEATGEEK_CLIENT_ID not set")
         return {}
 
     artist   = event.get("artist", "") or event.get("name", "")
