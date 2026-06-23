@@ -1110,8 +1110,10 @@ def fetch_seatgeek(event):
     def is_atlanta(ev):
         city  = ev.get("venue", {}).get("city",  "").lower()
         state = ev.get("venue", {}).get("state", "").lower()
-        return "atlanta" in city or ("georgia" in state and any(
-            a in city for a in ["atlanta", "alpharetta", "marietta", "kennesaw"]))
+        atl_cities = {"atlanta", "alpharetta", "marietta", "kennesaw",
+                      "duluth", "college park", "cobb", "gwinnett"}
+        return any(a in city for a in atl_cities) or (
+            "georgia" in state and any(a in city for a in atl_cities))
 
     ev = None
 
@@ -1158,10 +1160,12 @@ def fetch_seatgeek(event):
         "seatgeek_highest_price": stats.get("highest_price", None),
         "seatgeek_median_price":  stats.get("median_price", None),
     }
-    floor  = result["seatgeek_floor"]
-    count  = result["seatgeek_listing_count"]
-    deal   = result["seatgeek_deal_score"]
+    floor = result["seatgeek_floor"]
+    count = result["seatgeek_listing_count"]
+    deal  = result["seatgeek_deal_score"]
     print(f"  [SeatGeek] {artist[:35]:<35} deal={deal:.2f}  listings={count}  floor={'$'+str(int(floor)) if floor else 'n/a'}")
+    if not floor and stats:
+        print(f"  [SeatGeek] raw stats keys: {list(stats.keys())[:8]}")
     return result
 
 
