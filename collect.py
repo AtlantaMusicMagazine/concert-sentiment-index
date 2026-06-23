@@ -1107,6 +1107,12 @@ def fetch_seatgeek(event):
         "per_page":           5,   # fetch a few to find best Atlanta match
     }
 
+    def is_atlanta(ev):
+        city  = ev.get("venue", {}).get("city",  "").lower()
+        state = ev.get("venue", {}).get("state", "").lower()
+        return "atlanta" in city or ("georgia" in state and any(
+            a in city for a in ["atlanta", "alpharetta", "marietta", "kennesaw"]))
+
     ev = None
 
     # Try 1: performer slug lookup (primary)
@@ -1118,10 +1124,10 @@ def fetch_seatgeek(event):
             label="SeatGeek",
         )
         if data and data.get("events"):
-            # Pick the Atlanta event if multiple results returned
-            atl_ev = next((e for e in data["events"]
-                          if "atlanta" in e.get("venue", {}).get("city", "").lower()), None)
-            ev = atl_ev or data["events"][0]
+            atl_ev = next((e for e in data["events"] if is_atlanta(e)), None)
+            ev = atl_ev or None   # only accept Atlanta matches
+            if ev is None:
+                print(f"  [SeatGeek] slug hit but no ATL match: {slug} (cities: {[e.get('venue',{}).get('city','?') for e in data['events'][:3]]})")
         elif data is not None:
             print(f"  [SeatGeek] slug miss: {slug} ({data.get('meta', {}).get('total', 0)} results)")
 
@@ -1133,9 +1139,10 @@ def fetch_seatgeek(event):
             label="SeatGeek-q",
         )
         if data2 and data2.get("events"):
-            atl_ev2 = next((e for e in data2["events"]
-                           if "atlanta" in e.get("venue", {}).get("city", "").lower()), None)
-            ev = atl_ev2 or data2["events"][0]
+            atl_ev2 = next((e for e in data2["events"] if is_atlanta(e)), None)
+            ev = atl_ev2
+            if ev is None:
+                print(f"  [SeatGeek] q hit but no ATL match: {artist[:30]} (cities: {[e.get('venue',{}).get('city','?') for e in data2['events'][:3]]})")
         elif data2 is not None:
             print(f"  [SeatGeek] q miss: {artist[:30]} ({data2.get('meta', {}).get('total', 0)} results)")
 
