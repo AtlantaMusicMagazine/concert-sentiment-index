@@ -1387,6 +1387,37 @@ EVENTS = [
         "bandsintown_artist": "Cameron Whitcomb",
     },
 
+    {
+        "id": "linea-personal-2026",
+        "seed_score": 50,
+        "name": "Linea Personal",
+        "artist": "Linea Personal",
+        "venue": "The Tabernacle",
+        "date": "2026-09-11",
+        "genre": "Latin Pop",
+        "spotify_artist_id": "",
+        "musicbrainz_mbid": "",
+        "tm_attraction_id": "K8vZ917qD3f",
+        "seatgeek_performer_slug": "linea-personal",
+        "wikipedia_title": "Linea_Personal",
+        "bandsintown_artist": "Linea Personal",
+    },
+    {
+        "id": "hulvey-2026",
+        "seed_score": 50,
+        "name": "Hulvey",
+        "artist": "Hulvey",
+        "venue": "The Tabernacle",
+        "date": "2026-09-27",
+        "genre": "Hip-Hop",
+        "spotify_artist_id": "",
+        "musicbrainz_mbid": "",
+        "tm_attraction_id": "K8vZ917h_n0",
+        "seatgeek_performer_slug": "hulvey",
+        "wikipedia_title": "Hulvey",
+        "bandsintown_artist": "Hulvey",
+    },
+
 ]
 
 

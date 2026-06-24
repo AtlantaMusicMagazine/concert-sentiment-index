@@ -1,11 +1,11 @@
 {
   "shaky-knees-2026": {
-    "rank": 1,
+    "rank": 3,
     "panel": "top",
     "first_seen": "2026-06-16"
   },
   "ariana-grande-2026": {
-    "rank": 3,
+    "rank": 1,
     "panel": "top",
     "first_seen": "2026-06-16"
   },
@@ -55,27 +55,27 @@
     "first_seen": "2026-06-16"
   },
   "lynyrd-skynyrd-2026": {
-    "rank": 14,
-    "panel": "top",
-    "first_seen": "2026-06-16"
-  },
-  "joji-2026": {
-    "rank": 15,
-    "panel": "top",
-    "first_seen": "2026-06-16"
-  },
-  "alex-warren-2026": {
     "rank": 16,
     "panel": "top",
     "first_seen": "2026-06-16"
   },
+  "joji-2026": {
+    "rank": 13,
+    "panel": "top",
+    "first_seen": "2026-06-16"
+  },
+  "alex-warren-2026": {
+    "rank": 14,
+    "panel": "top",
+    "first_seen": "2026-06-16"
+  },
   "santana-doobie-2026": {
-    "rank": 19,
+    "rank": 17,
     "panel": "top",
     "first_seen": "2026-06-16"
   },
   "buju-banton-2026": {
-    "rank": 17,
+    "rank": 18,
     "panel": "top",
     "first_seen": "2026-06-16"
   },
@@ -105,17 +105,17 @@
     "first_seen": "2026-06-16"
   },
   "isley-ojays-2026": {
-    "rank": 5,
-    "panel": "bottom",
-    "first_seen": "2026-06-16"
-  },
-  "wynonna-melissa-2026": {
     "rank": 3,
     "panel": "bottom",
     "first_seen": "2026-06-16"
   },
-  "guess-who-2026": {
+  "wynonna-melissa-2026": {
     "rank": 4,
+    "panel": "bottom",
+    "first_seen": "2026-06-16"
+  },
+  "guess-who-2026": {
+    "rank": 5,
     "panel": "bottom",
     "first_seen": "2026-06-16"
   },
@@ -140,7 +140,7 @@
     "first_seen": "2026-06-16"
   },
   "madison-beer-2026": {
-    "rank": 13,
+    "rank": 12,
     "panel": "bottom",
     "first_seen": "2026-06-16"
   },
@@ -155,7 +155,7 @@
     "first_seen": "2026-06-16"
   },
   "ne-yo-akon-2026": {
-    "rank": 12,
+    "rank": 13,
     "panel": "bottom",
     "first_seen": "2026-06-16"
   },
@@ -195,12 +195,12 @@
     "first_seen": "2026-06-16"
   },
   "flyleaf-2026": {
-    "rank": 18,
+    "rank": 19,
     "panel": "top",
     "first_seen": "2026-06-22"
   },
   "chance-rapper-2026": {
-    "rank": 13,
+    "rank": 15,
     "panel": "top",
     "first_seen": "2026-06-22"
   },
