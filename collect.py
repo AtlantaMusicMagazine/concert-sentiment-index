@@ -1418,6 +1418,22 @@ EVENTS = [
         "bandsintown_artist": "Hulvey",
     },
 
+    {
+        "id": "loathe-2026",
+        "seed_score": 50,
+        "name": "Loathe",
+        "artist": "Loathe",
+        "venue": "The Tabernacle",
+        "date": "2026-09-28",
+        "genre": "Rock",
+        "spotify_artist_id": "",
+        "musicbrainz_mbid": "",
+        "tm_attraction_id": "K8vZ917p3V0",
+        "seatgeek_performer_slug": "loathe",
+        "wikipedia_title": "Loathe",
+        "bandsintown_artist": "Loathe",
+    },
+
 ]
 
 
