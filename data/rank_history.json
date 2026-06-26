@@ -1,16 +1,16 @@
 {
   "shaky-knees-2026": {
-    "rank": 3,
-    "panel": "top",
-    "first_seen": "2026-06-16"
-  },
-  "ariana-grande-2026": {
     "rank": 1,
     "panel": "top",
     "first_seen": "2026-06-16"
   },
-  "j-cole-2026": {
+  "ariana-grande-2026": {
     "rank": 2,
+    "panel": "top",
+    "first_seen": "2026-06-16"
+  },
+  "j-cole-2026": {
+    "rank": 3,
     "panel": "top",
     "first_seen": "2026-06-16"
   },
@@ -55,7 +55,7 @@
     "first_seen": "2026-06-16"
   },
   "lynyrd-skynyrd-2026": {
-    "rank": 17,
+    "rank": 15,
     "panel": "top",
     "first_seen": "2026-06-16"
   },
@@ -70,12 +70,12 @@
     "first_seen": "2026-06-16"
   },
   "santana-doobie-2026": {
-    "rank": 18,
+    "rank": 16,
     "panel": "top",
     "first_seen": "2026-06-16"
   },
   "buju-banton-2026": {
-    "rank": 15,
+    "rank": 17,
     "panel": "top",
     "first_seen": "2026-06-16"
   },
@@ -105,17 +105,17 @@
     "first_seen": "2026-06-16"
   },
   "isley-ojays-2026": {
-    "rank": 3,
+    "rank": 5,
     "panel": "bottom",
     "first_seen": "2026-06-16"
   },
   "wynonna-melissa-2026": {
-    "rank": 4,
+    "rank": 3,
     "panel": "bottom",
     "first_seen": "2026-06-16"
   },
   "guess-who-2026": {
-    "rank": 5,
+    "rank": 4,
     "panel": "bottom",
     "first_seen": "2026-06-16"
   },
@@ -125,7 +125,7 @@
     "first_seen": "2026-06-16"
   },
   "jack-johnson-2026": {
-    "rank": 8,
+    "rank": 7,
     "panel": "bottom",
     "first_seen": "2026-06-16"
   },
@@ -135,22 +135,22 @@
     "first_seen": "2026-06-16"
   },
   "styx-chicago-2026": {
-    "rank": 9,
+    "rank": 8,
     "panel": "bottom",
     "first_seen": "2026-06-16"
   },
   "madison-beer-2026": {
-    "rank": 13,
-    "panel": "bottom",
-    "first_seen": "2026-06-16"
-  },
-  "john-mellencamp-2026": {
     "rank": 11,
     "panel": "bottom",
     "first_seen": "2026-06-16"
   },
-  "train-bnl-2026": {
+  "john-mellencamp-2026": {
     "rank": 10,
+    "panel": "bottom",
+    "first_seen": "2026-06-16"
+  },
+  "train-bnl-2026": {
+    "rank": 9,
     "panel": "bottom",
     "first_seen": "2026-06-16"
   },
@@ -160,12 +160,12 @@
     "first_seen": "2026-06-16"
   },
   "hayley-williams-2026": {
-    "rank": 14,
+    "rank": 13,
     "panel": "bottom",
     "first_seen": "2026-06-16"
   },
   "motionless-2026": {
-    "rank": 15,
+    "rank": 14,
     "panel": "bottom",
     "first_seen": "2026-06-16"
   },
@@ -175,17 +175,17 @@
     "first_seen": "2026-06-16"
   },
   "muse-2026": {
-    "rank": 16,
+    "rank": 15,
     "panel": "bottom",
     "first_seen": "2026-06-16"
   },
   "motley-crue-2026": {
-    "rank": 17,
+    "rank": 16,
     "panel": "bottom",
     "first_seen": "2026-06-16"
   },
   "ella-mai-2026": {
-    "rank": 18,
+    "rank": 17,
     "panel": "bottom",
     "first_seen": "2026-06-16"
   },
@@ -195,22 +195,22 @@
     "first_seen": "2026-06-16"
   },
   "flyleaf-2026": {
-    "rank": 19,
+    "rank": 18,
     "panel": "top",
     "first_seen": "2026-06-22"
   },
   "chance-rapper-2026": {
-    "rank": 16,
+    "rank": 14,
     "panel": "top",
     "first_seen": "2026-06-22"
   },
   "social-distortion-2026": {
-    "rank": 19,
+    "rank": 18,
     "panel": "bottom",
     "first_seen": "2026-06-22"
   },
   "theory-deadman-sevendust-2026": {
-    "rank": 20,
+    "rank": 19,
     "panel": "bottom",
     "first_seen": "2026-06-22"
   },
@@ -223,5 +223,10 @@
     "rank": 20,
     "panel": "top",
     "first_seen": "2026-06-23"
+  },
+  "lionel-richie-2026": {
+    "rank": 19,
+    "panel": "top",
+    "first_seen": "2026-06-26"
   }
 }
