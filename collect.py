@@ -1942,6 +1942,9 @@ def find_amm_article_direct(event):
     return None
 
 
+YOUTUBE_CACHE_PATH = "data/youtube_cache.json"
+
+
 def load_youtube_cache():
     """
     Load the rolling view-count cache from disk.
@@ -2587,6 +2590,7 @@ def discover_new_events():
 
                 # Already tracked? Check by date+artist combo so multi-night
                 # shows with the same artist are caught as separate entries.
+                artist_lower = artist_name.lower()
                 already = any(
                     artist_lower in e.get("artist", "").lower() and
                     e.get("date", "") == date_str
