@@ -55,7 +55,7 @@
     "first_seen": "2026-06-16"
   },
   "lynyrd-skynyrd-2026": {
-    "rank": 15,
+    "rank": 16,
     "panel": "top",
     "first_seen": "2026-06-16"
   },
@@ -70,7 +70,7 @@
     "first_seen": "2026-06-16"
   },
   "santana-doobie-2026": {
-    "rank": 17,
+    "rank": 19,
     "panel": "top",
     "first_seen": "2026-06-16"
   },
@@ -125,7 +125,7 @@
     "first_seen": "2026-06-16"
   },
   "jack-johnson-2026": {
-    "rank": 7,
+    "rank": 8,
     "panel": "bottom",
     "first_seen": "2026-06-16"
   },
@@ -135,7 +135,7 @@
     "first_seen": "2026-06-16"
   },
   "styx-chicago-2026": {
-    "rank": 8,
+    "rank": 7,
     "panel": "bottom",
     "first_seen": "2026-06-16"
   },
@@ -195,7 +195,7 @@
     "first_seen": "2026-06-16"
   },
   "flyleaf-2026": {
-    "rank": 16,
+    "rank": 17,
     "panel": "top",
     "first_seen": "2026-06-22"
   },
@@ -220,7 +220,7 @@
     "first_seen": "2026-06-23"
   },
   "tomahawk-melvins-2026": {
-    "rank": 18,
+    "rank": 20,
     "panel": "top",
     "first_seen": "2026-06-23"
   },
@@ -236,6 +236,11 @@
   },
   "shakira-2026-n2": {
     "rank": 4,
+    "panel": "top",
+    "first_seen": "2026-06-27"
+  },
+  "shakira-2026-0725": {
+    "rank": 15,
     "panel": "top",
     "first_seen": "2026-06-27"
   }
