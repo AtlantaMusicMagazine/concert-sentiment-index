@@ -1633,7 +1633,7 @@ def fetch_amm_catalog():
         else:
             dates_look_stale = False
 
-        if cached_posts and days_old < 7 and today.weekday() != 0 and not dates_look_stale:
+        if cached_posts and days_old < 1 and not dates_look_stale:
             print(f"[amm] Using cached catalog ({len(cached_posts)} posts, {days_old}d old)")
             return cached_posts
         if not cached_posts:
