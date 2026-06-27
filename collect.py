@@ -1434,6 +1434,22 @@ EVENTS = [
         "bandsintown_artist": "Loathe",
     },
 
+    {
+        "id": "suki-waterhouse-2026",
+        "seed_score": 50,
+        "name": "Suki Waterhouse",
+        "artist": "Suki Waterhouse",
+        "venue": "Coca-Cola Roxy",
+        "date": "2026-09-29",
+        "genre": "Rock",
+        "spotify_artist_id": "",
+        "musicbrainz_mbid": "",
+        "tm_attraction_id": "K8vZ917QfmV",
+        "seatgeek_performer_slug": "suki-waterhouse",
+        "wikipedia_title": "Suki_Waterhouse",
+        "bandsintown_artist": "Suki Waterhouse",
+    },
+
 ]
 
 
