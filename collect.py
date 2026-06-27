@@ -1879,7 +1879,67 @@ def match_amm_article(artist_name, catalog):
     }
 
 
-YOUTUBE_CACHE_PATH = "data/youtube_cache.json"
+def find_amm_article_direct(event):
+    """
+    Fallback for articles not yet indexed in the Jetpack sitemap.
+    Constructs candidate URLs from the artist name + event date and
+    verifies them with an HTTP HEAD request. Catches articles published
+    after the last sitemap regeneration (typically within 24 hours of publication).
+
+    Pattern: /artist-name-atlanta-georgia-month-day-year/
+    e.g. /shakira-atlanta-georgia-june-26-2026/
+    """
+    artist = event.get("artist", "")
+    date_str = event.get("date", "")
+    if not artist or not date_str:
+        return None
+
+    try:
+        d = datetime.date.fromisoformat(date_str)
+        month_name = d.strftime("%B").lower()
+        day = d.day
+        year = d.year
+
+        # Build slug from artist name
+        artist_slug = re.sub(r'[^a-z0-9]+', '-', artist.lower()).strip('-')
+
+        # Try most likely URL patterns
+        candidates = [
+            f"{AMM_BASE_URL}/{artist_slug}-atlanta-georgia-{month_name}-{day}-{year}/",
+            f"{AMM_BASE_URL}/{artist_slug}-state-farm-arena-atlanta-georgia-{month_name}-{day}-{year}/",
+            f"{AMM_BASE_URL}/{artist_slug}-atlanta-{month_name}-{day}-{year}/",
+        ]
+
+        for url in candidates:
+            try:
+                r = requests.head(
+                    url,
+                    headers={"User-Agent": MB_USER_AGENT},
+                    timeout=5,
+                    allow_redirects=True,
+                )
+                if r.status_code == 200:
+                    # Fetch title
+                    r2 = requests.get(url, headers={"User-Agent": MB_USER_AGENT}, timeout=8)
+                    title = artist
+                    if r2.status_code == 200:
+                        og = re.search(
+                            r'<meta[^>]+property="og:title"[^>]+content="([^"]+)"', r2.text
+                        )
+                        if og:
+                            title = re.split(r'\s+[-|–—]\s+(?:Covering|Atlanta)', og.group(1))[0].strip()
+                    print(f"    [AMM-direct] Found: {url}")
+                    return {
+                        "title":        title,
+                        "link":         url,
+                        "date":         date_str,
+                        "display_date": d.strftime("%b %Y"),
+                    }
+            except Exception:
+                continue
+    except Exception:
+        pass
+    return None
 
 
 def load_youtube_cache():
@@ -2683,6 +2743,9 @@ def collect_all():
         # (catches co-headliner billing like "Lynyrd Skynyrd & Foreigner")
         if not amm and event.get("name") != amm_artist:
             amm = match_amm_article(event.get("name", ""), amm_catalog)
+        # Fallback: try direct URL construction for articles not yet in sitemap
+        if not amm:
+            amm = find_amm_article_direct(event)
         if amm:
             event["amm_article_title"]   = amm["title"]
             event["amm_article_url"]     = amm["link"]
