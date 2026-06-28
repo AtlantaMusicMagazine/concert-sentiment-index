@@ -1,11 +1,11 @@
 {
   "shaky-knees-2026": {
-    "rank": 1,
+    "rank": 3,
     "panel": "top",
     "first_seen": "2026-06-16"
   },
   "ariana-grande-2026": {
-    "rank": 3,
+    "rank": 1,
     "panel": "top",
     "first_seen": "2026-06-16"
   },
@@ -40,12 +40,12 @@
     "first_seen": "2026-06-16"
   },
   "mumford-sons-2026": {
-    "rank": 9,
+    "rank": 10,
     "panel": "top",
     "first_seen": "2026-06-16"
   },
   "louis-tomlinson-2026": {
-    "rank": 10,
+    "rank": 9,
     "panel": "top",
     "first_seen": "2026-06-16"
   },
@@ -55,7 +55,7 @@
     "first_seen": "2026-06-16"
   },
   "lynyrd-skynyrd-2026": {
-    "rank": 16,
+    "rank": 15,
     "panel": "top",
     "first_seen": "2026-06-16"
   },
@@ -70,12 +70,12 @@
     "first_seen": "2026-06-16"
   },
   "santana-doobie-2026": {
-    "rank": 19,
+    "rank": 16,
     "panel": "top",
     "first_seen": "2026-06-16"
   },
   "buju-banton-2026": {
-    "rank": 19,
+    "rank": 17,
     "panel": "top",
     "first_seen": "2026-06-16"
   },
@@ -105,17 +105,17 @@
     "first_seen": "2026-06-16"
   },
   "isley-ojays-2026": {
-    "rank": 5,
-    "panel": "bottom",
-    "first_seen": "2026-06-16"
-  },
-  "wynonna-melissa-2026": {
     "rank": 3,
     "panel": "bottom",
     "first_seen": "2026-06-16"
   },
-  "guess-who-2026": {
+  "wynonna-melissa-2026": {
     "rank": 4,
+    "panel": "bottom",
+    "first_seen": "2026-06-16"
+  },
+  "guess-who-2026": {
+    "rank": 5,
     "panel": "bottom",
     "first_seen": "2026-06-16"
   },
@@ -125,7 +125,7 @@
     "first_seen": "2026-06-16"
   },
   "jack-johnson-2026": {
-    "rank": 8,
+    "rank": 7,
     "panel": "bottom",
     "first_seen": "2026-06-16"
   },
@@ -135,12 +135,12 @@
     "first_seen": "2026-06-16"
   },
   "styx-chicago-2026": {
-    "rank": 7,
+    "rank": 8,
     "panel": "bottom",
     "first_seen": "2026-06-16"
   },
   "madison-beer-2026": {
-    "rank": 12,
+    "rank": 11,
     "panel": "bottom",
     "first_seen": "2026-06-16"
   },
@@ -155,7 +155,7 @@
     "first_seen": "2026-06-16"
   },
   "ne-yo-akon-2026": {
-    "rank": 11,
+    "rank": 12,
     "panel": "bottom",
     "first_seen": "2026-06-16"
   },
@@ -195,7 +195,7 @@
     "first_seen": "2026-06-16"
   },
   "flyleaf-2026": {
-    "rank": 17,
+    "rank": 18,
     "panel": "top",
     "first_seen": "2026-06-22"
   },
@@ -225,7 +225,7 @@
     "first_seen": "2026-06-23"
   },
   "lionel-richie-2026": {
-    "rank": 18,
+    "rank": 19,
     "panel": "top",
     "first_seen": "2026-06-26"
   },
