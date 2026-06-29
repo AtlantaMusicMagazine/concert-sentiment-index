@@ -70,7 +70,7 @@
     "first_seen": "2026-06-16"
   },
   "santana-doobie-2026": {
-    "rank": 19,
+    "rank": 18,
     "panel": "top",
     "first_seen": "2026-06-16"
   },
@@ -195,7 +195,7 @@
     "first_seen": "2026-06-16"
   },
   "flyleaf-2026": {
-    "rank": 17,
+    "rank": 16,
     "panel": "top",
     "first_seen": "2026-06-22"
   },
@@ -220,12 +220,12 @@
     "first_seen": "2026-06-23"
   },
   "tomahawk-melvins-2026": {
-    "rank": 20,
+    "rank": 19,
     "panel": "top",
     "first_seen": "2026-06-23"
   },
   "lionel-richie-2026": {
-    "rank": 18,
+    "rank": 17,
     "panel": "top",
     "first_seen": "2026-06-26"
   },
@@ -246,6 +246,11 @@
   },
   "guns-n-roses-2026": {
     "rank": 5,
+    "panel": "top",
+    "first_seen": "2026-06-29"
+  },
+  "the-pussycat-dolls-2026": {
+    "rank": 20,
     "panel": "top",
     "first_seen": "2026-06-29"
   }
