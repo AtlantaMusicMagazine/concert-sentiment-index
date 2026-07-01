@@ -1464,6 +1464,22 @@ EVENTS = [
         "bandsintown_artist": "Kany Garcia",
     },
 
+    {
+        "id": "grupo-duelo-2026",
+        "seed_score": 50,
+        "name": "Grupo Duelo",
+        "artist": "Grupo Duelo",
+        "venue": "Coca-Cola Roxy",
+        "date": "2026-10-03",
+        "genre": "Latin Pop",
+        "spotify_artist_id": "",
+        "musicbrainz_mbid": "",
+        "tm_attraction_id": "K8vZ917uYv7",
+        "seatgeek_performer_slug": "grupo-duelo",
+        "wikipedia_title": "Grupo_Duelo",
+        "bandsintown_artist": "Grupo Duelo",
+    },
+
 ]
 
 
