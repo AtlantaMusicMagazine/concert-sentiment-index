@@ -1070,7 +1070,7 @@ EVENTS = [
         "date": "2026-09-16",
         "genre": "Rock",
         "spotify_artist_id": "1oWVhFJXhPJIbhSRMoF1Ck",
-        "musicbrainz_mbid": "8a2f6c1b-3e4d-5f6a-7b8c-9d0e1f2a3b4c",
+        "musicbrainz_mbid": "27e2997f-f7a1-4353-bcc4-57b9274fa9a4",
         "tm_attraction_id": "K8vZ9171oB7",
         "seatgeek_performer_slug": "babymetal",
         "wikipedia_title": "Babymetal",
@@ -2684,7 +2684,7 @@ TM_VENUE_IDS = {
 
 TRACKED_IDS = {e["id"] for e in EVENTS}
 
-def discover_new_events():
+def discover_new_events(blocklist=None):
     """
     Query Ticketmaster Discovery API for all upcoming Atlanta music events
     at tracked venues. Auto-adds genuine new shows to EVENTS with a default
@@ -2775,6 +2775,11 @@ def discover_new_events():
                     artist_lower in e.get("artist", "").lower()
                     for e in EVENTS
                 )
+                # Also block if the generated ID would be in the blocklist
+                _slug = re.sub(r'[^a-z0-9]+', '-', artist_lower).strip('-')
+                _eid  = f"{_slug}-2026"
+                if blocklist and _eid in blocklist:
+                    continue
                 if already:
                     continue
 
@@ -2913,7 +2918,13 @@ def collect_all():
 
     # Discover any Atlanta music events not yet in the EVENTS list.
     # Runs on every nightly build and logs untracked shows for editorial review.
-    discover_new_events()
+    # Pass the blocklist so auto-discovered events are filtered immediately.
+    try:
+        with open("data/event_blocklist.json") as _blf:
+            _active_blocklist = set(json.load(_blf))
+    except FileNotFoundError:
+        _active_blocklist = set()
+    discover_new_events(blocklist=_active_blocklist)
 
     spotify_token = get_spotify_token()
 
