@@ -127,7 +127,10 @@ VENUE_CAPS = {
     "The Tabernacle":                                  2600,
     "Variety Playhouse":                               1000,
     "Terminal West":                                   900,
-    "Buckhead Theatre":                               1800,   # Live Nation venue, Atlanta
+    "Buckhead Theatre":                               1800,
+    "The Bowl at Sugar Hill":                         7000,
+    "Atlanta Symphony Hall":                          1800,
+    "Cobb Energy Performing Arts Centre":             2750,   # Live Nation venue, Atlanta
     "Piedmont Park":                                     40000,   # Shaky Knees festival grounds
 }
 
@@ -454,6 +457,15 @@ BOTTOM_PANEL_IDS = {
     "ne-yo-akon-2026", "styx-chicago-2026", "5sos-2026",
     "madison-beer-2026", "motionless-2026",
     "jinjer-2026", "hayley-williams-2026",
+    "babymetal-2026",
+    "311-dirty-heads-2026",
+    "better-than-ezra-2026",
+    "squeeze-2026",
+    "buddy-guy-2026",
+    "men-at-work-2026",
+    "dogstar-2026",
+    "franz-ferdinand-2026",
+    "tomahawk-melvins-2026",
     "theory-deadman-sevendust-2026",
     "social-distortion-2026",
     "dominic-fike-2026",
