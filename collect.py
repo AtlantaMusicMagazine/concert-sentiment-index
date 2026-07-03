@@ -2848,8 +2848,34 @@ def discover_new_events():
         print(f"[discover] AUTO-ADDED: {d['date']} | {d['name'][:40]} @ {d['venue']}")
 
     if auto_added:
-        print(f"[discover] {len(auto_added)} new events added to roster this run (in-memory only)")
-        print(f"[discover] To persist: manually add to collect.py and commit")
+        print(f"[discover] {len(auto_added)} new events added to roster this run")
+        # Persist to discovered_events.json (separate from curated collect.py)
+        try:
+            disc_path = "data/discovered_events.json"
+            try:
+                with open(disc_path) as _f:
+                    existing_disc = json.load(_f)
+            except (FileNotFoundError, json.JSONDecodeError):
+                existing_disc = []
+            existing_disc_ids = {e["id"] for e in existing_disc}
+            new_disc = [e for e in EVENTS if e["id"] not in existing_disc_ids
+                        and e["id"] not in {ev["id"] for ev in EVENTS
+                                            if ev.get("id","") in
+                                            {x["id"] for x in
+                                             [ev2 for ev2 in EVENTS
+                                              if ev2.get("seed_score") != 50]}}]
+            # Simpler: just add any newly auto-added event not already in file
+            truly_new = [e for e in EVENTS
+                         if e["id"] not in existing_disc_ids
+                         and e.get("seed_score") == 50
+                         and e["id"].endswith("-2026")]
+            if truly_new:
+                existing_disc.extend(truly_new)
+                with open(disc_path, "w") as _f:
+                    json.dump(existing_disc, _f, indent=2)
+                print(f"[discover] {len(truly_new)} new events persisted to discovered_events.json")
+        except Exception as _e:
+            print(f"[discover] WARNING: could not write discovered_events.json: {_e}")
     else:
         print("[discover] ✓ No new events to add")
 
@@ -2858,6 +2884,35 @@ def discover_new_events():
 
 def collect_all():
     print(f"[collect] Starting — {datetime.datetime.now().isoformat()}")
+
+    # Load auto-discovered events from data/discovered_events.json
+    # These are events found by discover_new_events() on previous runs.
+    # Kept separate from collect.py so the pipeline never overwrites
+    # the manually curated event list.
+    try:
+        with open("data/discovered_events.json") as _f:
+            _discovered = json.load(_f)
+        _existing_ids = {e["id"] for e in EVENTS}
+        _added = [e for e in _discovered if e["id"] not in _existing_ids]
+        EVENTS.extend(_added)
+        if _added:
+            print(f"[collect] Loaded {len(_added)} previously discovered events from discovered_events.json")
+    except FileNotFoundError:
+        pass
+
+    # Apply blocklist — filter events editorially blocked from both sources.
+    # Add IDs to data/event_blocklist.json to suppress without editing collect.py.
+    try:
+        with open("data/event_blocklist.json") as _f:
+            _blocklist = set(json.load(_f))
+        _before = len(EVENTS)
+        EVENTS[:] = [e for e in EVENTS if e["id"] not in _blocklist]
+        _removed = _before - len(EVENTS)
+        if _removed:
+            print(f"[collect] Blocklist suppressed {_removed} event(s)")
+    except FileNotFoundError:
+        pass
+
     print(f"[collect] Total events to collect: {len(EVENTS)}")
 
     # Discover any Atlanta music events not yet in the EVENTS list.
