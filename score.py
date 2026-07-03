@@ -59,7 +59,10 @@ VENUE_CAPS = {
     "The Tabernacle":                                  2600,
     "Variety Playhouse":                               1000,
     "Terminal West":                                   900,
-    "Buckhead Theatre":                               1800,   # Live Nation venue, Atlanta
+    "Buckhead Theatre":                               1800,
+    "The Bowl at Sugar Hill":                         7000,
+    "Atlanta Symphony Hall":                          1800,
+    "Cobb Energy Performing Arts Centre":             2750,   # Live Nation venue, Atlanta
     "Piedmont Park":                                     40000,   # Shaky Knees festival grounds
 }
 
