@@ -2894,9 +2894,15 @@ def collect_all():
         # (catches co-headliner billing like "Lynyrd Skynyrd & Foreigner")
         if not amm and event.get("name") != amm_artist:
             amm = match_amm_article(event.get("name", ""), amm_catalog)
-        # Fallback: try direct URL construction for articles not yet in sitemap
+        # Fallback: try direct URL construction for recent articles not yet in sitemap
+        # Only for shows within the past 14 days to limit HTTP requests
         if not amm:
-            amm = find_amm_article_direct(event)
+            try:
+                event_date = datetime.date.fromisoformat(event.get("date", "2000-01-01"))
+                if abs((datetime.date.today() - event_date).days) <= 14:
+                    amm = find_amm_article_direct(event)
+            except Exception:
+                pass
         if amm:
             event["amm_article_title"]   = amm["title"]
             event["amm_article_url"]     = amm["link"]
