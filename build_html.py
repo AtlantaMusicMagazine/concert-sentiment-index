@@ -457,6 +457,8 @@ BOTTOM_PANEL_IDS = {
     "ne-yo-akon-2026", "styx-chicago-2026", "5sos-2026",
     "madison-beer-2026", "motionless-2026",
     "jinjer-2026", "hayley-williams-2026",
+    "koe-wetzel-2026",
+    "toto-2026",
     "babymetal-2026",
     "311-dirty-heads-2026",
     "better-than-ezra-2026",
@@ -578,7 +580,7 @@ def build_card(ev, rank, is_bottom=False, delta_class="flat", delta_label="\u201
 
 # ── Window constants ──────────────────────────────────────────────────────
 WINDOW_START = datetime.date(2026, 6, 8)
-WINDOW_END   = datetime.date(2026, 9, 21)   # extended to include Shaky Knees Sep 18-20 and Slayyyter Sep 21
+WINDOW_END   = datetime.date.today() + datetime.timedelta(days=90)   # rolling 90-day window
 
 GENRE_POOL_START_MARKER = "  var GENRE_POOL_TOP = ["
 GENRE_POOL_END_MARKER   = "  var GENRE_POOL_BOTTOM = GENRE_POOL_TOP.slice();"
