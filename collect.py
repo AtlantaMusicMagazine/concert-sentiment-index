@@ -1070,7 +1070,7 @@ EVENTS = [
         "date": "2026-09-16",
         "genre": "Rock",
         "spotify_artist_id": "1oWVhFJXhPJIbhSRMoF1Ck",
-        "musicbrainz_mbid": "c2b4e657-d1d0-4cf7-a75f-3cbef42dc38d",
+        "musicbrainz_mbid": "8a2f6c1b-3e4d-5f6a-7b8c-9d0e1f2a3b4c",
         "tm_attraction_id": "K8vZ9171oB7",
         "seatgeek_performer_slug": "babymetal",
         "wikipedia_title": "Babymetal",
@@ -2886,9 +2886,6 @@ def collect_all():
     print(f"[collect] Starting — {datetime.datetime.now().isoformat()}")
 
     # Load auto-discovered events from data/discovered_events.json
-    # These are events found by discover_new_events() on previous runs.
-    # Kept separate from collect.py so the pipeline never overwrites
-    # the manually curated event list.
     try:
         with open("data/discovered_events.json") as _f:
             _discovered = json.load(_f)
@@ -2900,8 +2897,7 @@ def collect_all():
     except FileNotFoundError:
         pass
 
-    # Apply blocklist — filter events editorially blocked from both sources.
-    # Add IDs to data/event_blocklist.json to suppress without editing collect.py.
+    # Apply blocklist AFTER loading all sources — filters both curated and discovered events
     try:
         with open("data/event_blocklist.json") as _f:
             _blocklist = set(json.load(_f))
@@ -2909,7 +2905,7 @@ def collect_all():
         EVENTS[:] = [e for e in EVENTS if e["id"] not in _blocklist]
         _removed = _before - len(EVENTS)
         if _removed:
-            print(f"[collect] Blocklist suppressed {_removed} event(s)")
+            print(f"[collect] Blocklist suppressed {_removed} event(s): {_blocklist}")
     except FileNotFoundError:
         pass
 
