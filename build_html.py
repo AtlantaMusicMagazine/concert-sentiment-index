@@ -710,6 +710,34 @@ def build_genre_pool_js(events):
         mb_rec = raw.get("mb_has_recent_album")
         lastfm = raw.get("lastfm_listeners")
 
+        # AMM coverage — same extraction + slug-based date recompute as the
+        # server-rendered top/bottom-20 cards (see build_card / amm_strip).
+        # Without this, the genre-filtered pool never carries these fields
+        # and the "Prior Atlanta Music Magazine coverage" strip can never
+        # render for any card viewed through a genre filter.
+        amm_title = raw.get("amm_article_title", "") or ""
+        amm_url   = raw.get("amm_article_url", "") or ""
+        amm_date  = raw.get("amm_article_date", "") or ""
+        if amm_url:
+            _slug_months = {
+                "january":"01","february":"02","march":"03","april":"04",
+                "may":"05","june":"06","july":"07","august":"08",
+                "september":"09","october":"10","november":"11","december":"12",
+            }
+            _dm = re.search(
+                r"(january|february|march|april|may|june|july|august"
+                r"|september|october|november|december)-(\d{1,2})-(20\d{2})(?:-|/|$)",
+                amm_url,
+            )
+            if _dm:
+                try:
+                    _d = datetime.date(int(_dm.group(3)),
+                                        int(_slug_months[_dm.group(1)]),
+                                        int(_dm.group(2)))
+                    amm_date = _d.strftime("%b %Y")
+                except (ValueError, KeyError):
+                    pass   # keep stored amm_date as fallback
+
         # Build 8 signal rows
         signals = [
             [_signal_level(p_sent),  "Sentiment",      _pillar_label(p_sent)],
@@ -798,6 +826,9 @@ def build_genre_pool_js(events):
             "delta_label":   ev.get("_delta_label", "\u2014"),
             "signals":       signals,
             "insight":       insight,
+            "amm_title":     amm_title,
+            "amm_url":       amm_url,
+            "amm_date":      amm_date,
         })
 
     # Build JS string
@@ -815,6 +846,10 @@ def build_genre_pool_js(events):
             "signals":    e["signals"],
             "insight":    e["insight"],
         }
+        if e["amm_title"] and e["amm_url"]:
+            obj["ammTitle"] = e["amm_title"]
+            obj["ammUrl"]   = e["amm_url"]
+            obj["ammDate"]  = e["amm_date"]
         entry_strs.append("    " + _json.dumps(obj, ensure_ascii=False))
 
     pool_js = (
