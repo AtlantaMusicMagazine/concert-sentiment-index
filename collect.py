@@ -2199,7 +2199,9 @@ def match_amm_article(artist_name, catalog):
 
     Single-word artists (e.g. "Usher", "Santana") match on that one word.
     Multi-word artists (e.g. "John Mellencamp") require ALL words to match,
-    in order, contiguously.
+    in order, contiguously. A trailing possessive apostrophe-s ("Train's")
+    is also matched against slugs that collapsed it into a plain "s"
+    ("trains-am-gold-tour-...") during URL slugification.
 
     Returns: dict {title, link, date, display_date} or None
     """
@@ -2220,14 +2222,31 @@ def match_amm_article(artist_name, catalog):
         }
         return [w for w in s.split() if len(w) > 2 and w not in stopwords]
 
+    def words_match(artist_word, slug_word):
+        """
+        True if artist_word and slug_word should be treated as the same
+        token. Handles the case where a possessive ("Train's") loses its
+        apostrophe during URL slugification and collapses into the slug
+        as the plain word plus a trailing "s" ("trains"). Exact equality
+        still covers the overwhelming majority of cases; this only adds
+        the one-directional possessive check on top.
+        """
+        if artist_word == slug_word:
+            return True
+        if slug_word == artist_word + "s":
+            return True
+        return False
+
     def is_contiguous_subsequence(needle, haystack):
         """True if `needle` (list) appears in `haystack` (list) as a
-        contiguous, in-order run. Empty needle never matches."""
+        contiguous, in-order run — using words_match rather than strict
+        equality, so possessive forms ("trains" for "Train") still count.
+        Empty needle never matches."""
         n, h = len(needle), len(haystack)
         if n == 0:
             return False
         for start in range(h - n + 1):
-            if haystack[start:start + n] == needle:
+            if all(words_match(needle[i], haystack[start + i]) for i in range(n)):
                 return True
         return False
 
