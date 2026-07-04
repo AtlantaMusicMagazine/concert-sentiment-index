@@ -457,6 +457,8 @@ BOTTOM_PANEL_IDS = {
     "ne-yo-akon-2026", "styx-chicago-2026", "5sos-2026",
     "madison-beer-2026", "motionless-2026",
     "jinjer-2026", "hayley-williams-2026",
+    "needtobreathe-2026",
+    "sarah-mclachlan-2026",
     "koe-wetzel-2026",
     "toto-2026",
     "babymetal-2026",
