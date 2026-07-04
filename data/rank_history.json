@@ -20,22 +20,22 @@
     "first_seen": "2026-06-16"
   },
   "tame-impala-2026": {
-    "rank": 7,
-    "panel": "top",
-    "first_seen": "2026-06-16"
-  },
-  "acdc-2026": {
-    "rank": 6,
-    "panel": "top",
-    "first_seen": "2026-06-16"
-  },
-  "usher-2026": {
     "rank": 8,
     "panel": "top",
     "first_seen": "2026-06-16"
   },
-  "noah-kahan-2026": {
+  "acdc-2026": {
+    "rank": 5,
+    "panel": "top",
+    "first_seen": "2026-06-16"
+  },
+  "usher-2026": {
     "rank": 9,
+    "panel": "top",
+    "first_seen": "2026-06-16"
+  },
+  "noah-kahan-2026": {
+    "rank": 7,
     "panel": "top",
     "first_seen": "2026-06-16"
   },
@@ -105,7 +105,7 @@
     "first_seen": "2026-06-16"
   },
   "isley-ojays-2026": {
-    "rank": 5,
+    "rank": 4,
     "panel": "bottom",
     "first_seen": "2026-06-16"
   },
@@ -115,7 +115,7 @@
     "first_seen": "2026-06-16"
   },
   "guess-who-2026": {
-    "rank": 4,
+    "rank": 5,
     "panel": "bottom",
     "first_seen": "2026-06-16"
   },
@@ -175,12 +175,12 @@
     "first_seen": "2026-06-16"
   },
   "muse-2026": {
-    "rank": 15,
+    "rank": 14,
     "panel": "bottom",
     "first_seen": "2026-06-16"
   },
   "motley-crue-2026": {
-    "rank": 14,
+    "rank": 15,
     "panel": "bottom",
     "first_seen": "2026-06-16"
   },
@@ -245,7 +245,7 @@
     "first_seen": "2026-06-27"
   },
   "guns-n-roses-2026": {
-    "rank": 5,
+    "rank": 4,
     "panel": "top",
     "first_seen": "2026-06-29"
   },
@@ -280,7 +280,7 @@
     "first_seen": "2026-07-03"
   },
   "kacey-musgraves-2026": {
-    "rank": 4,
+    "rank": 6,
     "panel": "top",
     "first_seen": "2026-07-04"
   }
