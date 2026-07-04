@@ -1,11 +1,11 @@
 {
   "shaky-knees-2026": {
-    "rank": 1,
+    "rank": 2,
     "panel": "top",
     "first_seen": "2026-06-16"
   },
   "ariana-grande-2026": {
-    "rank": 2,
+    "rank": 1,
     "panel": "top",
     "first_seen": "2026-06-16"
   },
@@ -75,7 +75,7 @@
     "first_seen": "2026-06-16"
   },
   "buju-banton-2026": {
-    "rank": 19,
+    "rank": 20,
     "panel": "top",
     "first_seen": "2026-06-16"
   },
@@ -278,5 +278,10 @@
     "rank": 20,
     "panel": "bottom",
     "first_seen": "2026-07-03"
+  },
+  "kacey-musgraves-2026": {
+    "rank": 19,
+    "panel": "top",
+    "first_seen": "2026-07-04"
   }
 }

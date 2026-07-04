@@ -478,5 +478,20 @@
     "seatgeek_performer_slug": "suki-waterhouse",
     "wikipedia_title": "Suki_Waterhouse",
     "bandsintown_artist": "Suki Waterhouse"
+  },
+  {
+    "id": "kany-garcia-2026",
+    "seed_score": 50,
+    "name": "Kany Garcia",
+    "artist": "Kany Garcia",
+    "venue": "Coca-Cola Roxy",
+    "date": "2026-10-01",
+    "genre": "Pop",
+    "spotify_artist_id": "",
+    "musicbrainz_mbid": "",
+    "tm_attraction_id": "K8vZ917KB97",
+    "seatgeek_performer_slug": "kany-garcia",
+    "wikipedia_title": "Kany_Garcia",
+    "bandsintown_artist": "Kany Garcia"
   }
 ]
