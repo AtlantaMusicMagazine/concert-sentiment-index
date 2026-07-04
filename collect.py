@@ -1063,7 +1063,7 @@ EVENTS = [
     },
     {
         "id": "babymetal-2026",
-        "seed_score": 65,
+        "seed_score": 72,
         "name": "BABYMETAL World Tour 2026",
         "artist": "BABYMETAL",
         "venue": "Ameris Bank Amphitheatre",
@@ -1107,6 +1107,23 @@ EVENTS = [
         "seatgeek_performer_slug": "koe-wetzel",
         "wikipedia_title": "Koe_Wetzel",
         "bandsintown_artist": "Koe Wetzel",
+    },
+
+    {
+        "id": "kacey-musgraves-2026",
+        "seed_score": 85,
+        "grammy_wins_override": 4,
+        "name": "Kacey Musgraves \u2014 Middle of Nowhere Tour",
+        "artist": "Kacey Musgraves",
+        "venue": "State Farm Arena",
+        "date": "2026-09-30",
+        "genre": "Country",
+        "spotify_artist_id": "7jVv8c5Fj3E9VhNjxT4snq",
+        "musicbrainz_mbid": "9047a310-28fd-4a23-9f43-e3e0ddc6ed8c",
+        "tm_attraction_id": "K8vZ917-lVV",
+        "seatgeek_performer_slug": "kacey-musgraves",
+        "wikipedia_title": "Kacey_Musgraves",
+        "bandsintown_artist": "Kacey Musgraves",
     },
 
 ]
