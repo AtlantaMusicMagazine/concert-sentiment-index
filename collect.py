@@ -1063,7 +1063,7 @@ EVENTS = [
     },
     {
         "id": "babymetal-2026",
-        "seed_score": 72,
+        "seed_score": 65,
         "name": "BABYMETAL World Tour 2026",
         "artist": "BABYMETAL",
         "venue": "Ameris Bank Amphitheatre",
@@ -1119,7 +1119,7 @@ EVENTS = [
         "date": "2026-09-30",
         "genre": "Country",
         "spotify_artist_id": "7jVv8c5Fj3E9VhNjxT4snq",
-        "musicbrainz_mbid": "9047a310-28fd-4a23-9f43-e3e0ddc6ed8c",
+        "musicbrainz_mbid": "d1393ecb-431b-4fde-a6ea-d769f2f040cb",
         "tm_attraction_id": "K8vZ917-lVV",
         "seatgeek_performer_slug": "kacey-musgraves",
         "wikipedia_title": "Kacey_Musgraves",
