@@ -2185,12 +2185,21 @@ def match_amm_article(artist_name, catalog):
     Find the most recent atlantamusicmagazine.com article for a given artist.
 
     Matching requires ALL significant artist name words to appear in
-    the article slug — not just any one word. This prevents false matches
+    the article slug AS A CONTIGUOUS SEQUENCE (in order, no gaps) —
+    not just present anywhere in the slug. This prevents false matches
     like "summer" matching "Bret Michaels Summer tour" for Summer Walker,
-    or "john" matching "John Corabi" for John Mellencamp.
+    "john" matching "John Corabi" for John Mellencamp, or (the contiguity
+    requirement specifically) "horses" alone matching a "Stone Horses"
+    article for "Band of Horses" once short connector words are stripped.
+
+    NOTE: "band" is intentionally NOT a stopword. Stripping it left only
+    "horses" for "Band of Horses", which happily matched any slug containing
+    "horses" — including unrelated ones like "stone-horses". Keeping "band"
+    avoids collapsing multi-word act names down to an over-generic remainder.
 
     Single-word artists (e.g. "Usher", "Santana") match on that one word.
-    Multi-word artists (e.g. "John Mellencamp") require ALL words to match.
+    Multi-word artists (e.g. "John Mellencamp") require ALL words to match,
+    in order, contiguously.
 
     Returns: dict {title, link, date, display_date} or None
     """
@@ -2200,15 +2209,27 @@ def match_amm_article(artist_name, catalog):
     def norm_words(s):
         s = s.lower()
         s = re.sub(r"[^a-z0-9\s]", " ", s)
-        # Broader stopword list to avoid false matches on common words
+        # Broader stopword list to avoid false matches on common words.
+        # "band" removed — see docstring note above.
         stopwords = {
-            "and", "the", "with", "feat", "from", "live", "tour", "band",
+            "and", "the", "with", "feat", "from", "live", "tour",
             "featuring", "presents", "world", "2026", "2025", "2024",
             "2023", "2022", "2021", "music", "festival", "show", "concert",
             "summer", "spring", "fall", "winter", "night", "day", "big",
             "new", "old", "all", "one", "two", "rock", "pop", "hip", "hop",
         }
         return [w for w in s.split() if len(w) > 2 and w not in stopwords]
+
+    def is_contiguous_subsequence(needle, haystack):
+        """True if `needle` (list) appears in `haystack` (list) as a
+        contiguous, in-order run. Empty needle never matches."""
+        n, h = len(needle), len(haystack)
+        if n == 0:
+            return False
+        for start in range(h - n + 1):
+            if haystack[start:start + n] == needle:
+                return True
+        return False
 
     # Primary artist name: strip everything after " — " or " - " (tour names)
     primary = re.split(r'\s+[—\-]\s+', artist_name)[0].strip()
@@ -2226,8 +2247,9 @@ def match_amm_article(artist_name, catalog):
             continue
         for post in catalog:
             slug_words = norm_words(post["slug"])
-            # ALL words of this partner must appear in the slug
-            if all(w in slug_words for w in artist_words):
+            # All words of this partner must appear in the slug as a
+            # contiguous, ordered run — not just scattered anywhere.
+            if is_contiguous_subsequence(artist_words, slug_words):
                 if post not in matches:
                     matches.append(post)
 
