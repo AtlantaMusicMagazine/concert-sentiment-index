@@ -25,7 +25,7 @@
     "first_seen": "2026-06-16"
   },
   "acdc-2026": {
-    "rank": 5,
+    "rank": 6,
     "panel": "top",
     "first_seen": "2026-06-16"
   },
@@ -35,27 +35,27 @@
     "first_seen": "2026-06-16"
   },
   "noah-kahan-2026": {
-    "rank": 6,
-    "panel": "top",
-    "first_seen": "2026-06-16"
-  },
-  "mumford-sons-2026": {
     "rank": 9,
     "panel": "top",
     "first_seen": "2026-06-16"
   },
-  "louis-tomlinson-2026": {
-    "rank": 11,
+  "mumford-sons-2026": {
+    "rank": 10,
     "panel": "top",
     "first_seen": "2026-06-16"
   },
-  "olivia-dean-2026": {
+  "louis-tomlinson-2026": {
     "rank": 12,
     "panel": "top",
     "first_seen": "2026-06-16"
   },
+  "olivia-dean-2026": {
+    "rank": 13,
+    "panel": "top",
+    "first_seen": "2026-06-16"
+  },
   "lynyrd-skynyrd-2026": {
-    "rank": 14,
+    "rank": 15,
     "panel": "top",
     "first_seen": "2026-06-16"
   },
@@ -70,7 +70,7 @@
     "first_seen": "2026-06-16"
   },
   "santana-doobie-2026": {
-    "rank": 15,
+    "rank": 16,
     "panel": "top",
     "first_seen": "2026-06-16"
   },
@@ -80,7 +80,7 @@
     "first_seen": "2026-06-16"
   },
   "brooks-dunn-2026": {
-    "rank": 16,
+    "rank": 17,
     "panel": "top",
     "first_seen": "2026-06-16"
   },
@@ -105,7 +105,7 @@
     "first_seen": "2026-06-16"
   },
   "isley-ojays-2026": {
-    "rank": 4,
+    "rank": 5,
     "panel": "bottom",
     "first_seen": "2026-06-16"
   },
@@ -115,7 +115,7 @@
     "first_seen": "2026-06-16"
   },
   "guess-who-2026": {
-    "rank": 5,
+    "rank": 4,
     "panel": "bottom",
     "first_seen": "2026-06-16"
   },
@@ -195,12 +195,12 @@
     "first_seen": "2026-06-16"
   },
   "flyleaf-2026": {
-    "rank": 17,
+    "rank": 18,
     "panel": "top",
     "first_seen": "2026-06-22"
   },
   "chance-rapper-2026": {
-    "rank": 13,
+    "rank": 14,
     "panel": "top",
     "first_seen": "2026-06-22"
   },
@@ -225,7 +225,7 @@
     "first_seen": "2026-06-23"
   },
   "lionel-richie-2026": {
-    "rank": 18,
+    "rank": 19,
     "panel": "top",
     "first_seen": "2026-06-26"
   },
@@ -245,7 +245,7 @@
     "first_seen": "2026-06-27"
   },
   "guns-n-roses-2026": {
-    "rank": 4,
+    "rank": 5,
     "panel": "top",
     "first_seen": "2026-06-29"
   },
@@ -260,7 +260,7 @@
     "first_seen": "2026-07-02"
   },
   "rob-zombie-2026": {
-    "rank": 10,
+    "rank": 11,
     "panel": "top",
     "first_seen": "2026-07-03"
   },
@@ -280,7 +280,7 @@
     "first_seen": "2026-07-03"
   },
   "kacey-musgraves-2026": {
-    "rank": 19,
+    "rank": 4,
     "panel": "top",
     "first_seen": "2026-07-04"
   }
