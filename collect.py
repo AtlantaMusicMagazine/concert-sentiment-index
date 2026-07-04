@@ -1131,13 +1131,29 @@ EVENTS = [
 
 # ── Helpers ────────────────────────────────────────────────────────────────
 def safe_get(url, params=None, headers=None, label="", timeout=10):
-    try:
-        r = requests.get(url, params=params, headers=headers, timeout=timeout)
-        r.raise_for_status()
-        return r.json()
-    except Exception as e:
-        print(f"  [WARN] {label} failed: {e}")
-        return None
+    for attempt in range(3):
+        try:
+            r = requests.get(url, params=params, headers=headers, timeout=timeout)
+            if r.status_code == 429:
+                wait = 2 ** attempt  # 1s, 2s, 4s
+                print(f"  [WARN] {label} rate limited — retrying in {wait}s")
+                time.sleep(wait)
+                continue
+            r.raise_for_status()
+            return r.json()
+        except requests.exceptions.HTTPError as e:
+            if "429" in str(e):
+                wait = 2 ** attempt
+                print(f"  [WARN] {label} rate limited — retrying in {wait}s")
+                time.sleep(wait)
+                continue
+            print(f"  [WARN] {label} failed: {e}")
+            return None
+        except Exception as e:
+            print(f"  [WARN] {label} failed: {e}")
+            return None
+    print(f"  [WARN] {label} gave up after 3 attempts (rate limited)")
+    return None
 
 
 def get_spotify_token():
@@ -2217,7 +2233,7 @@ def fetch_youtube(event, cache):
             },
             label=f"YouTube channel search: {artist_name}",
         )
-        time.sleep(0.2)
+        time.sleep(0.5)
         if not search_data or not search_data.get("items"):
             return {}
         channel_id = search_data["items"][0].get("id", {}).get("channelId", "")
@@ -2245,7 +2261,7 @@ def fetch_youtube(event, cache):
             },
             label=f"YouTube recent video: {artist_name}",
         )
-        time.sleep(0.2)
+        time.sleep(0.5)
         if recent_data and recent_data.get("items"):
             video_id = (recent_data["items"][0]
                         .get("id", {}).get("videoId", video_id))
@@ -2263,7 +2279,7 @@ def fetch_youtube(event, cache):
         },
         label=f"YouTube video stats: {artist_name}",
     )
-    time.sleep(0.2)
+    time.sleep(0.5)
 
     if not stats_data or not stats_data.get("items"):
         return {}
@@ -2281,7 +2297,7 @@ def fetch_youtube(event, cache):
         },
         label=f"YouTube channel stats: {artist_name}",
     )
-    time.sleep(0.2)
+    time.sleep(0.5)
     subscriber_count = 0
     if chan_data and chan_data.get("items"):
         chan_stats       = chan_data["items"][0].get("statistics", {})
