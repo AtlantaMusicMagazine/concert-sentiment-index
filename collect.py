@@ -183,7 +183,7 @@ EVENTS = [
         "spotify_artist_id": "23zg3TcAtWQy7J6upgbUnj",
         "musicbrainz_mbid": "2f9ecbed-439d-44d6-a862-a9d2a2b3c1c4",
         "tm_attraction_id": "K8vZ9171p10",
-        "seatgeek_performer_slug": "usher",
+        "seatgeek_performer_slug": "usher-raymond",
         "wikipedia_title": "Usher_(musician)",
         "bandsintown_artist": "Usher",
     },
@@ -2359,7 +2359,7 @@ def fetch_youtube(event, cache):
             },
             label=f"YouTube channel search: {artist_name}",
         )
-        time.sleep(0.5)
+        time.sleep(1.5)
         if not search_data or not search_data.get("items"):
             return {}
         channel_id = search_data["items"][0].get("id", {}).get("channelId", "")
@@ -2387,7 +2387,7 @@ def fetch_youtube(event, cache):
             },
             label=f"YouTube recent video: {artist_name}",
         )
-        time.sleep(0.5)
+        time.sleep(1.5)
         if recent_data and recent_data.get("items"):
             video_id = (recent_data["items"][0]
                         .get("id", {}).get("videoId", video_id))
@@ -2405,7 +2405,7 @@ def fetch_youtube(event, cache):
         },
         label=f"YouTube video stats: {artist_name}",
     )
-    time.sleep(0.5)
+    time.sleep(1.5)
 
     if not stats_data or not stats_data.get("items"):
         return {}
@@ -2423,7 +2423,7 @@ def fetch_youtube(event, cache):
         },
         label=f"YouTube channel stats: {artist_name}",
     )
-    time.sleep(0.5)
+    time.sleep(1.5)
     subscriber_count = 0
     if chan_data and chan_data.get("items"):
         chan_stats       = chan_data["items"][0].get("statistics", {})
