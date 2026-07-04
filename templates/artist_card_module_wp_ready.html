@@ -1641,6 +1641,16 @@ if (window.parent !== window) {
     var risk = ev.risk
       ? '\n      <p class="card-risk">' + ev.risk + '</p>'
       : "";
+    var ammStrip = (ev.ammTitle && ev.ammUrl)
+      ? '\n  <div class="amm-strip">' +
+        '<div class="amm-icon"><i class="ti ti-camera" aria-hidden="true"></i></div>' +
+        '<div class="amm-text">' +
+        '<div class="amm-eyebrow">Prior Atlanta Music Magazine coverage</div>' +
+        '<div class="amm-headline"><a href="' + ev.ammUrl + '" target="_blank" rel="noopener">' + ev.ammTitle + '</a></div>' +
+        '</div>' +
+        '<div class="amm-date">' + (ev.ammDate || "") + '</div>' +
+        '</div>'
+      : "";
     return (
       '  <article class="event-card' + (isBottom ? ' bottom' : '') +
       '" style="border-left-color:' + bc + ';"' +
@@ -1669,7 +1679,7 @@ if (window.parent !== window) {
       ' aria-label="Score ' + ev.score + ' out of 100">\n' +
       '        <div class="score-bar-fill" style="width:' + ev.score + '%;background:' + sc + ';"></div>\n' +
       '      </div>\n' +
-      '    </div>\n' +
+      '    </div>' + ammStrip + '\n' +
       '  </article>'
     );
   }
