@@ -120,7 +120,7 @@ EVENTS = [
         "date": "2026-07-17",
         "genre": "Hip-Hop",
         "spotify_artist_id": "6l3HvQ5sa6mXTsMTB6Mmy",
-        "musicbrainz_mbid": "5c1f3e89-229d-4d48-a6c7-1d6e6c3b3c87",
+        "musicbrainz_mbid": "5adaeb0a-4090-4e46-a7f3-8c0a10cdd069",
         "tm_attraction_id": "K8vZ9171oJ7",
         "seatgeek_performer_slug": "j-cole",
         "wikipedia_title": "J._Cole",
@@ -364,7 +364,7 @@ EVENTS = [
         "date": "2026-07-27",
         "genre": "Indie / Alt",
         "spotify_artist_id": "2RQXRUsr4IW1f3mKyKsy4B",
-        "musicbrainz_mbid": "4bb4e4e4-3a6b-4b8e-9b5c-3d6e5f7a8c9d",
+        "musicbrainz_mbid": "8c89ef34-8fca-4f09-b9b6-0a3ea73ac5a8",
         "tm_attraction_id": "K8vZ9178bMV",
         "seatgeek_performer_slug": "noah-kahan",
         "wikipedia_title": "Noah_Kahan",
@@ -1262,7 +1262,7 @@ EVENTS = [
         "date": "2026-07-19",
         "genre": "R&B",
         "spotify_artist_id": "3gMaNLQm7D9MornNILzdSl",
-        "musicbrainz_mbid": "87e2f333-3f99-4d86-b61a-8547e37e58b0",
+        "musicbrainz_mbid": "8b8a38a0-8d70-11e0-91fa-0025312b67c4",
         "tm_attraction_id": "K8vZ9171C-7",
         "seatgeek_performer_slug": "lionel-richie",
         "wikipedia_title": "Lionel_Richie",
@@ -1278,7 +1278,7 @@ EVENTS = [
         "date": "2026-07-13",
         "genre": "Indie / Alt",
         "spotify_artist_id": "2TI7qyDE0QfyOlnbtfDo7L",
-        "musicbrainz_mbid": "b8ee9b4f-6c89-4d56-9872-5e73e6d1a5c2",
+        "musicbrainz_mbid": "cb7cae55-16b1-4862-b32a-3d78cdad96d2",
         "tm_attraction_id": "K8vZ9171oAV",
         "seatgeek_performer_slug": "paul-simon",
         "wikipedia_title": "Paul_Simon",
@@ -2425,17 +2425,24 @@ def fetch_youtube(event, cache):
         )
         time.sleep(1.5)
         if not search_data or not search_data.get("items"):
+            # Cache a sentinel so we don't retry every run
+            cache[eid] = {"channel_id": "NOT_FOUND", "date": today_str}
             return {}
         channel_id = search_data["items"][0].get("id", {}).get("channelId", "")
         if not channel_id:
+            cache[eid] = {"channel_id": "NOT_FOUND", "date": today_str}
             return {}
+    
+    # Skip if channel was previously marked not found
+    if channel_id == "NOT_FOUND":
+        return {}
 
     # ── Step 2: Get most recent video from the channel ────────────────────
     video_id   = cached.get("video_id", "")
     # Refresh video ID weekly (Monday) or when not yet cached
     should_refresh_video = (
         not video_id
-        or datetime.date.today().weekday() == 0  # Monday
+        or datetime.date.today().day == 1  # first of month only
     )
 
     if should_refresh_video:
