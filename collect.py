@@ -2239,15 +2239,30 @@ def match_amm_article(artist_name, catalog):
 
     def is_contiguous_subsequence(needle, haystack):
         """True if `needle` (list) appears in `haystack` (list) as a
-        contiguous, in-order run — using words_match rather than strict
-        equality, so possessive forms ("trains" for "Train") still count.
-        Empty needle never matches."""
+        contiguous, in-order run.
+
+        Two passes:
+        1. Exact match, anywhere in the slug — the well-tested general case.
+        2. Possessive apostrophe-s fallback (artist_word + "s" == slug_word),
+           but ONLY at position 0 of the slug. Real article titles almost
+           always open with the artist's name, so a genuine possessive
+           collapse ("Train's" -> "trains" in "trains-am-gold-tour-...")
+           shows up at the front. Without this positional restriction, a
+           single remaining word like "dinosaur" (from "Dinosaur Jr." once
+           "Jr." is dropped by the length filter) would also match "dinosaurs"
+           anywhere it happens to appear — e.g. an unrelated co-billed act
+           called "Last Dinosaurs" buried mid-slug in a multi-artist article.
+
+        Empty needle never matches.
+        """
         n, h = len(needle), len(haystack)
         if n == 0:
             return False
         for start in range(h - n + 1):
-            if all(words_match(needle[i], haystack[start + i]) for i in range(n)):
+            if haystack[start:start + n] == needle:
                 return True
+        if h >= n and all(words_match(needle[i], haystack[i]) for i in range(n)):
+            return True
         return False
 
     # Primary artist name: strip everything after " — " or " - " (tour names)
