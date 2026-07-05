@@ -1,6 +1,6 @@
 {
   "shaky-knees-2026": {
-    "rank": 2,
+    "rank": 6,
     "panel": "top",
     "first_seen": "2026-06-16"
   },
@@ -10,7 +10,7 @@
     "first_seen": "2026-06-16"
   },
   "j-cole-2026": {
-    "rank": 3,
+    "rank": 5,
     "panel": "top",
     "first_seen": "2026-06-16"
   },
@@ -25,12 +25,12 @@
     "first_seen": "2026-06-16"
   },
   "acdc-2026": {
-    "rank": 10,
+    "rank": 11,
     "panel": "top",
     "first_seen": "2026-06-16"
   },
   "usher-2026": {
-    "rank": 11,
+    "rank": 10,
     "panel": "top",
     "first_seen": "2026-06-16"
   },
@@ -105,17 +105,17 @@
     "first_seen": "2026-06-16"
   },
   "isley-ojays-2026": {
-    "rank": 5,
-    "panel": "bottom",
-    "first_seen": "2026-06-16"
-  },
-  "wynonna-melissa-2026": {
     "rank": 3,
     "panel": "bottom",
     "first_seen": "2026-06-16"
   },
-  "guess-who-2026": {
+  "wynonna-melissa-2026": {
     "rank": 4,
+    "panel": "bottom",
+    "first_seen": "2026-06-16"
+  },
+  "guess-who-2026": {
+    "rank": 5,
     "panel": "bottom",
     "first_seen": "2026-06-16"
   },
@@ -125,7 +125,7 @@
     "first_seen": "2026-06-16"
   },
   "jack-johnson-2026": {
-    "rank": 7,
+    "rank": 8,
     "panel": "bottom",
     "first_seen": "2026-06-16"
   },
@@ -135,7 +135,7 @@
     "first_seen": "2026-06-16"
   },
   "styx-chicago-2026": {
-    "rank": 8,
+    "rank": 7,
     "panel": "bottom",
     "first_seen": "2026-06-16"
   },
@@ -185,7 +185,7 @@
     "first_seen": "2026-06-16"
   },
   "ella-mai-2026": {
-    "rank": 17,
+    "rank": 19,
     "panel": "bottom",
     "first_seen": "2026-06-16"
   },
@@ -265,12 +265,12 @@
     "first_seen": "2026-07-03"
   },
   "men-at-work-2026": {
-    "rank": 19,
+    "rank": 18,
     "panel": "bottom",
     "first_seen": "2026-07-03"
   },
   "dogstar-2026": {
-    "rank": 18,
+    "rank": 17,
     "panel": "bottom",
     "first_seen": "2026-07-03"
   },
@@ -285,17 +285,17 @@
     "first_seen": "2026-07-04"
   },
   "ariana-grande-2026-n2": {
-    "rank": 4,
+    "rank": 2,
     "panel": "top",
     "first_seen": "2026-07-04"
   },
   "j-cole-2026-n2": {
-    "rank": 5,
+    "rank": 3,
     "panel": "top",
     "first_seen": "2026-07-04"
   },
   "ariana-grande-2026-n3": {
-    "rank": 6,
+    "rank": 4,
     "panel": "top",
     "first_seen": "2026-07-04"
   },
