@@ -568,5 +568,20 @@
     "seatgeek_performer_slug": "bleachers",
     "wikipedia_title": "Bleachers",
     "bandsintown_artist": "Bleachers"
+  },
+  {
+    "id": "wave-to-earth-2026",
+    "seed_score": 50,
+    "name": "Wave To Earth",
+    "artist": "Wave To Earth",
+    "venue": "Coca-Cola Roxy",
+    "date": "2026-10-06",
+    "genre": "Pop",
+    "spotify_artist_id": "",
+    "musicbrainz_mbid": "",
+    "tm_attraction_id": "K8vZ917h9Jf",
+    "seatgeek_performer_slug": "wave-to-earth",
+    "wikipedia_title": "Wave_To_Earth",
+    "bandsintown_artist": "Wave To Earth"
   }
 ]
