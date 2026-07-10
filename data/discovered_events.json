@@ -583,5 +583,20 @@
     "seatgeek_performer_slug": "wave-to-earth",
     "wikipedia_title": "Wave_To_Earth",
     "bandsintown_artist": "Wave To Earth"
+  },
+  {
+    "id": "artemas-2026",
+    "seed_score": 50,
+    "name": "Artemas",
+    "artist": "Artemas",
+    "venue": "The Tabernacle",
+    "date": "2026-10-07",
+    "genre": "Pop",
+    "spotify_artist_id": "",
+    "musicbrainz_mbid": "",
+    "tm_attraction_id": "K8vZ917QYD7",
+    "seatgeek_performer_slug": "artemas",
+    "wikipedia_title": "Artemas",
+    "bandsintown_artist": "Artemas"
   }
 ]
