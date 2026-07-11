@@ -598,5 +598,35 @@
     "seatgeek_performer_slug": "artemas",
     "wikipedia_title": "Artemas",
     "bandsintown_artist": "Artemas"
+  },
+  {
+    "id": "bryson-tiller-2026",
+    "seed_score": 50,
+    "name": "Bryson Tiller",
+    "artist": "Bryson Tiller",
+    "venue": "Ameris Bank Amphitheatre",
+    "date": "2026-09-13",
+    "genre": "Hip-Hop",
+    "spotify_artist_id": "",
+    "musicbrainz_mbid": "",
+    "tm_attraction_id": "K8vZ917KBFf",
+    "seatgeek_performer_slug": "bryson-tiller",
+    "wikipedia_title": "Bryson_Tiller",
+    "bandsintown_artist": "Bryson Tiller"
+  },
+  {
+    "id": "trampled-by-turtles-2026",
+    "seed_score": 50,
+    "name": "Trampled By Turtles",
+    "artist": "Trampled By Turtles",
+    "venue": "The Tabernacle",
+    "date": "2026-10-09",
+    "genre": "Folk",
+    "spotify_artist_id": "",
+    "musicbrainz_mbid": "",
+    "tm_attraction_id": "K8vZ917Gkv0",
+    "seatgeek_performer_slug": "trampled-by-turtles",
+    "wikipedia_title": "Trampled_By_Turtles",
+    "bandsintown_artist": "Trampled By Turtles"
   }
 ]
