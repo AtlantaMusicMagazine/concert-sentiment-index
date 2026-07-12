@@ -14,7 +14,7 @@ jobs:
   refresh:
     name: Collect → Score → Build → Upload
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 50
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
@@ -44,6 +44,7 @@ jobs:
             data/youtube_cache.json
             data/rank_history.json
             data/amm_coverage.json
+            data/google_trends_cache.json
           key: pipeline-cache-${{ github.run_number }}
           restore-keys: |
             pipeline-cache-
@@ -54,6 +55,7 @@ jobs:
             echo "[cache] Pipeline cache restored from previous run"
             python3 -c "import json; c=json.load(open('data/youtube_cache.json')); print(f'[cache] YouTube: {len(c)} events cached')" 2>/dev/null || true
             python3 -c "import json; c=json.load(open('data/rank_history.json')); print(f'[cache] Rank history: {len(c)} events cached')" 2>/dev/null || true
+            python3 -c "import json; c=json.load(open('data/google_trends_cache.json')); print(f'[cache] Google Trends: {len(c)} artists cached')" 2>/dev/null || true
             if [ -f data/amm_coverage.json ]; then
               rm data/amm_coverage.json
               echo "[cache] Deleted stale amm_coverage.json — will re-fetch from sitemap"
@@ -62,6 +64,15 @@ jobs:
             echo "[cache] No Actions cache — checking repo for rank_history.json"
             mkdir -p data
             echo '{}' > data/youtube_cache.json
+            # google_trends_cache.json is committed to the repo as a durability
+            # fallback (see the repo-persistence step) — use it directly if
+            # the Actions cache itself got evicted, rather than starting cold.
+            if [ -f data/google_trends_cache.json ]; then
+              python3 -c "import json; c=json.load(open('data/google_trends_cache.json')); print(f'[cache] Google Trends from repo: {len(c)} artists')" 2>/dev/null || true
+            else
+              echo '{}' > data/google_trends_cache.json
+              echo "[cache] No google_trends_cache.json found — starting fresh (this run will be slower)"
+            fi
             # rank_history.json is committed to the repo — use it directly
             if [ -f data/rank_history.json ]; then
               python3 -c "import json; c=json.load(open('data/rank_history.json')); print(f'[cache] Rank history from repo: {len(c)} events')" 2>/dev/null || true
@@ -121,6 +132,7 @@ jobs:
             data/youtube_cache.json
             data/rank_history.json
             data/amm_coverage.json
+            data/google_trends_cache.json
           key: pipeline-cache-${{ github.run_number }}
 
       # 7. Persist rank history to main branch so deltas survive cache eviction.
@@ -130,7 +142,7 @@ jobs:
         run: |
           git config user.email "github-actions@github.com"
           git config user.name "GitHub Actions"
-          git add data/rank_history.json data/amm_coverage.json data/event_blocklist.json data/discovered_events.json || true
+          git add data/rank_history.json data/amm_coverage.json data/event_blocklist.json data/discovered_events.json data/google_trends_cache.json || true
           git diff --staged --quiet || git commit -m "chore: update rank history $(date -u '+%Y-%m-%d')"
           git push origin main || echo "[rank] Push skipped (no changes)"
 
