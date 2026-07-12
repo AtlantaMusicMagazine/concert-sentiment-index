@@ -1533,7 +1533,14 @@ def fetch_ticketmaster(event):
         params={
             "apikey":        TICKETMASTER_KEY,
             "attractionId":  attraction_id,
-            "city":          "Atlanta",
+            # Was "city": "Atlanta" — likely why Yeat's Coca-Cola Roxy show
+            # returned zero results. That venue is technically in Cumberland/
+            # Smyrna, GA (part of The Battery Atlanta complex), and Ticketmaster's
+            # own venue record may use that city name rather than "Atlanta",
+            # making an exact "city" match silently fail for this and possibly
+            # other metro-Atlanta venues outside the city limits proper.
+            # stateCode avoids exact-city-string matching entirely.
+            "stateCode":     "GA",
             "startDateTime": today.isoformat() + "T00:00:00Z",
             "endDateTime":   far_future.isoformat() + "T23:59:59Z",
             "sort":          "date,asc",
@@ -1543,13 +1550,13 @@ def fetch_ticketmaster(event):
     )
     if not data or "_embedded" not in data:
         print(f"    [Ticketmaster] {event.get('name','')[:50]}: no response / no _embedded "
-              f"key for attractionId={attraction_id} (city filter or bad ID?)")
+              f"key for attractionId={attraction_id} (bad attraction ID?)")
         return {}
     events = data["_embedded"].get("events", [])
     if not events:
         print(f"    [Ticketmaster] {event.get('name','')[:50]}: 0 events found for "
-              f"attractionId={attraction_id} in Atlanta within the next 18 months "
-              f"(city filter, wrong attraction ID, or genuinely nothing on sale)")
+              f"attractionId={attraction_id} in Georgia within the next 18 months "
+              f"(wrong attraction ID, or genuinely nothing on sale)")
         return {}
     ev = events[0]   # soonest upcoming Atlanta date Ticketmaster has on file
 
@@ -1614,7 +1621,8 @@ def fetch_seatgeek(event):
         city  = ev.get("venue", {}).get("city",  "").lower()
         state = ev.get("venue", {}).get("state", "").lower()
         atl_cities = {"atlanta", "alpharetta", "marietta", "kennesaw",
-                      "duluth", "college park", "cobb", "gwinnett"}
+                      "duluth", "college park", "cobb", "gwinnett",
+                      "smyrna", "cumberland"}
         return any(a in city for a in atl_cities) or (
             "georgia" in state and any(a in city for a in atl_cities))
 
@@ -1924,7 +1932,14 @@ def fetch_google_trends(event):
         params={
             "engine":    "google_trends",
             "q":         event["artist"],
-            "geo":       "US-GA-524",
+            # DMA-style "US-GA-524" (Atlanta metro) is REJECTED by SerpApi
+            # for TIMESERIES — confirmed via the actual error body:
+            # "Unsupported `US-GA-524` geographic location." SerpApi's
+            # DMA/metro-level "region" targeting is only usable with the
+            # GEO_MAP/GEO_MAP_0 data types, not TIMESERIES. Falling back to
+            # state-level "US-GA", which IS supported — trades Atlanta-metro
+            # precision for actually getting data instead of a guaranteed 400.
+            "geo":       "US-GA",
             "data_type": "TIMESERIES",
             "date":      "today 1-m",
             "api_key":   SERPAPI_KEY,
