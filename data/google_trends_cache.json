@@ -1,0 +1,358 @@
+{
+  "ariana grande": {
+    "value": 20,
+    "fetched_at": "2026-07-12"
+  },
+  "shakira": {
+    "value": 25,
+    "fetched_at": "2026-07-12"
+  },
+  "megan moroney": {
+    "value": 31,
+    "fetched_at": "2026-07-12"
+  },
+  "j. cole": {
+    "value": 100,
+    "fetched_at": "2026-07-12"
+  },
+  "ac/dc": {
+    "value": 54,
+    "fetched_at": "2026-07-12"
+  },
+  "tame impala": {
+    "value": 100,
+    "fetched_at": "2026-07-12"
+  },
+  "a$ap rocky": {
+    "value": 0,
+    "fetched_at": "2026-07-12"
+  },
+  "louis tomlinson": {
+    "value": 45,
+    "fetched_at": "2026-07-12"
+  },
+  "olivia dean": {
+    "value": 39,
+    "fetched_at": "2026-07-12"
+  },
+  "lynyrd skynyrd": {
+    "value": 67,
+    "fetched_at": "2026-07-12"
+  },
+  "joji": {
+    "value": 6,
+    "fetched_at": "2026-07-12"
+  },
+  "alex warren": {
+    "value": 5,
+    "fetched_at": "2026-07-12"
+  },
+  "yungblud": {
+    "value": 7,
+    "fetched_at": "2026-07-12"
+  },
+  "santana": {
+    "value": 28,
+    "fetched_at": "2026-07-12"
+  },
+  "buju banton": {
+    "value": 100,
+    "fetched_at": "2026-07-12"
+  },
+  "noah kahan": {
+    "value": 70,
+    "fetched_at": "2026-07-12"
+  },
+  "brooks & dunn": {
+    "value": 0,
+    "fetched_at": "2026-07-12"
+  },
+  "empire of the sun": {
+    "value": 93,
+    "fetched_at": "2026-07-12"
+  },
+  "summer walker": {
+    "value": 7,
+    "fetched_at": "2026-07-12"
+  },
+  "5 seconds of summer": {
+    "value": 0,
+    "fetched_at": "2026-07-12"
+  },
+  "kali uchis": {
+    "value": 25,
+    "fetched_at": "2026-07-12"
+  },
+  "slayyyter": {
+    "value": 67,
+    "fetched_at": "2026-07-12"
+  },
+  "the isley brothers": {
+    "value": 19,
+    "fetched_at": "2026-07-12"
+  },
+  "justine skye": {
+    "value": 0,
+    "fetched_at": "2026-07-12"
+  },
+  "wynonna judd": {
+    "value": 0,
+    "fetched_at": "2026-07-12"
+  },
+  "the guess who": {
+    "value": 100,
+    "fetched_at": "2026-07-12"
+  },
+  "john mellencamp": {
+    "value": 100,
+    "fetched_at": "2026-07-12"
+  },
+  "ne-yo": {
+    "value": 79,
+    "fetched_at": "2026-07-12"
+  },
+  "styx": {
+    "value": 39,
+    "fetched_at": "2026-07-12"
+  },
+  "madison beer": {
+    "value": 17,
+    "fetched_at": "2026-07-12"
+  },
+  "motionless in white": {
+    "value": 100,
+    "fetched_at": "2026-07-12"
+  },
+  "flyleaf": {
+    "value": 0,
+    "fetched_at": "2026-07-12"
+  },
+  "hayley williams": {
+    "value": 75,
+    "fetched_at": "2026-07-12"
+  },
+  "muse": {
+    "value": 64,
+    "fetched_at": "2026-07-12"
+  },
+  "evanescence": {
+    "value": 4,
+    "fetched_at": "2026-07-12"
+  },
+  "m\u00f6tley cr\u00fce": {
+    "value": 0,
+    "fetched_at": "2026-07-12"
+  },
+  "ella mai": {
+    "value": 93,
+    "fetched_at": "2026-07-12"
+  },
+  "train": {
+    "value": 86,
+    "fetched_at": "2026-07-12"
+  },
+  "hilary duff": {
+    "value": 9,
+    "fetched_at": "2026-07-12"
+  },
+  "parker mccollum": {
+    "value": 50,
+    "fetched_at": "2026-07-12"
+  },
+  "chance the rapper": {
+    "value": 21,
+    "fetched_at": "2026-07-12"
+  },
+  "yeat": {
+    "value": 51,
+    "fetched_at": "2026-07-12"
+  },
+  "jack harlow": {
+    "value": 82,
+    "fetched_at": "2026-07-12"
+  },
+  "metric": {
+    "value": 17,
+    "fetched_at": "2026-07-12"
+  },
+  "juanes": {
+    "value": 0,
+    "fetched_at": "2026-07-12"
+  },
+  "lord huron": {
+    "value": 0,
+    "fetched_at": "2026-07-12"
+  },
+  "dominic fike": {
+    "value": 28,
+    "fetched_at": "2026-07-12"
+  },
+  "social distortion": {
+    "value": 0,
+    "fetched_at": "2026-07-12"
+  },
+  "tomahawk": {
+    "value": 20,
+    "fetched_at": "2026-07-12"
+  },
+  "franz ferdinand": {
+    "value": 0,
+    "fetched_at": "2026-07-12"
+  },
+  "guns n' roses": {
+    "value": 0,
+    "fetched_at": "2026-07-12"
+  },
+  "men at work": {
+    "value": 16,
+    "fetched_at": "2026-07-12"
+  },
+  "buddy guy": {
+    "value": 90,
+    "fetched_at": "2026-07-12"
+  },
+  "squeeze": {
+    "value": 37,
+    "fetched_at": "2026-07-12"
+  },
+  "better than ezra": {
+    "value": 0,
+    "fetched_at": "2026-07-12"
+  },
+  "rob zombie": {
+    "value": 76,
+    "fetched_at": "2026-07-12"
+  },
+  "311": {
+    "value": 39,
+    "fetched_at": "2026-07-12"
+  },
+  "babymetal": {
+    "value": 100,
+    "fetched_at": "2026-07-12"
+  },
+  "toto": {
+    "value": 66,
+    "fetched_at": "2026-07-12"
+  },
+  "koe wetzel": {
+    "value": 91,
+    "fetched_at": "2026-07-12"
+  },
+  "kacey musgraves": {
+    "value": 28,
+    "fetched_at": "2026-07-12"
+  },
+  "needtobreathe": {
+    "value": 100,
+    "fetched_at": "2026-07-12"
+  },
+  "daniel caesar": {
+    "value": 51,
+    "fetched_at": "2026-07-12"
+  },
+  "sarah mclachlan": {
+    "value": 0,
+    "fetched_at": "2026-07-12"
+  },
+  "aespa": {
+    "value": 24,
+    "fetched_at": "2026-07-12"
+  },
+  "lionel richie": {
+    "value": 17,
+    "fetched_at": "2026-07-12"
+  },
+  "paul simon": {
+    "value": 100,
+    "fetched_at": "2026-07-12"
+  },
+  "tori amos": {
+    "value": 83,
+    "fetched_at": "2026-07-12"
+  },
+  "band of horses": {
+    "value": 0,
+    "fetched_at": "2026-07-12"
+  },
+  "hermanos espinoza": {
+    "value": 0,
+    "fetched_at": "2026-07-12"
+  },
+  "billy currington": {
+    "value": 11,
+    "fetched_at": "2026-07-12"
+  },
+  "the red clay strays": {
+    "value": 0,
+    "fetched_at": "2026-07-12"
+  },
+  "isaiah rashad": {
+    "value": 0,
+    "fetched_at": "2026-07-12"
+  },
+  "masego": {
+    "value": 81,
+    "fetched_at": "2026-07-12"
+  },
+  "poppy": {
+    "value": 58,
+    "fetched_at": "2026-07-12"
+  },
+  "el tri": {
+    "value": 0,
+    "fetched_at": "2026-07-12"
+  },
+  "myles smith": {
+    "value": 0,
+    "fetched_at": "2026-07-12"
+  },
+  "malcolm todd": {
+    "value": 29,
+    "fetched_at": "2026-07-12"
+  },
+  "thee sacred souls": {
+    "value": 0,
+    "fetched_at": "2026-07-12"
+  },
+  "cameron whitcomb": {
+    "value": 0,
+    "fetched_at": "2026-07-12"
+  },
+  "hulvey": {
+    "value": 0,
+    "fetched_at": "2026-07-12"
+  },
+  "loathe": {
+    "value": 60,
+    "fetched_at": "2026-07-12"
+  },
+  "suki waterhouse": {
+    "value": 59,
+    "fetched_at": "2026-07-12"
+  },
+  "jonas brothers": {
+    "value": 39,
+    "fetched_at": "2026-07-12"
+  },
+  "bleachers": {
+    "value": 68,
+    "fetched_at": "2026-07-12"
+  },
+  "wave to earth": {
+    "value": 0,
+    "fetched_at": "2026-07-12"
+  },
+  "artemas": {
+    "value": 0,
+    "fetched_at": "2026-07-12"
+  },
+  "bryson tiller": {
+    "value": 60,
+    "fetched_at": "2026-07-12"
+  },
+  "gov't mule": {
+    "value": 0,
+    "fetched_at": "2026-07-12"
+  }
+}
