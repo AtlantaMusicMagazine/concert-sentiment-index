@@ -1853,7 +1853,12 @@ def fetch_wikipedia_pageviews(event):
     if not title:
         return {}
     today = datetime.date.today()
-    start = (today - datetime.timedelta(days=30)).strftime("%Y%m%d")
+    # Widened from 30 to ~194 days so we can compute a 90-day trend
+    # (comparing two full non-overlapping 90-day windows) alongside the
+    # original 7-day trend. A 7-day window alone can't tell a genuine
+    # ascending/declining trajectory apart from a one-off news spike or
+    # a quiet week — it's the same keyless endpoint, just a wider range.
+    start = (today - datetime.timedelta(days=194)).strftime("%Y%m%d")
     end   = today.strftime("%Y%m%d")
     data  = safe_get(
         f"https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/"
@@ -1863,16 +1868,30 @@ def fetch_wikipedia_pageviews(event):
     )
     if not data or "items" not in data:
         return {}
-    views  = [item["views"] for item in data["items"]]
+    views = [item["views"] for item in data["items"]]
     if len(views) < 14:
         return {}
-    recent = sum(views[-7:])
-    prior  = sum(views[-14:-7]) or 1
-    trend  = round((recent - prior) / prior * 100, 1)
-    return {
-        "wikipedia_30d_views":    sum(views),
-        "wikipedia_7d_trend_pct": trend,
+
+    recent7 = sum(views[-7:])
+    prior7  = sum(views[-14:-7]) or 1
+    trend7  = round((recent7 - prior7) / prior7 * 100, 1)
+
+    result = {
+        "wikipedia_30d_views":    sum(views[-30:]),
+        "wikipedia_7d_trend_pct": trend7,
     }
+
+    # Medium-term (90-day) trajectory signal — needs a full 180 days of
+    # history to compare two non-overlapping 90-day windows. Falls back
+    # to absent (None downstream) if the article is too new to have that
+    # much pageview history yet.
+    if len(views) >= 180:
+        recent90 = sum(views[-90:])
+        prior90  = sum(views[-180:-90]) or 1
+        trend90  = round((recent90 - prior90) / prior90 * 100, 1)
+        result["wikipedia_90d_trend_pct"] = trend90
+
+    return result
 
 
 def fetch_google_trends(event):
