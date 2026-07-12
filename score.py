@@ -294,6 +294,23 @@ def norm_wikipedia_trend(val):
     return (clamped + 100) / 300
 
 
+def norm_wikipedia_long_trend(val):
+    """
+    Wikipedia 90-day pageview trend — medium-term trajectory signal.
+    Unlike the 7-day trend (which can spike from a single news day, a
+    viral clip, or a controversy), this compares two full non-overlapping
+    90-day windows. It's a much more reliable read on whether an artist's
+    public interest is genuinely rising or fading over time, rather than
+    reacting to one moment — this is the closest thing the model has to
+    an actual ascending/legacy trajectory read, alongside the Setlist.fm
+    venue-trajectory signal in score_historical_sales.
+    """
+    if val is None:
+        return None
+    clamped = max(-100, min(200, float(val)))
+    return (clamped + 100) / 300
+
+
 def norm_chartmetric_trend(val):
     if val is None:
         return None
@@ -670,37 +687,50 @@ def score_historical_sales(signals):
     """
     Pillar 2 — Historical Sales (25%)
     Sources (all weights sum to 1.00 — handled by weighted_avg):
-      18% — MusicBrainz release recency  [KEYLESS]
-      14% — Wikidata Grammy wins         [KEYLESS]
-      13% — Wikidata Wikipedia languages [KEYLESS]
-      11% — Wikipedia 7-day trend        [KEYLESS]
-      09% — Wikidata active years        [KEYLESS]
-      08% — MusicBrainz career depth     [KEYLESS]
-      07% — iTunes album count           [KEYLESS]
-      06% — Wikidata Grammy nominations  [KEYLESS]
-      06% — Setlist.fm venue trajectory
-      05% — Spotify popularity
-      02% — Chartmetric stream trend
+      16% — MusicBrainz release recency  [KEYLESS]
+      16% — Wikidata Grammy wins         [KEYLESS]
+      14% — Wikidata Wikipedia languages [KEYLESS]
+      12% — Setlist.fm venue trajectory  — UP from 3%. This compares an
+            artist's current show's venue capacity to their own historical
+            average venue capacity on Setlist.fm — i.e. are they playing
+            bigger or smaller rooms than they used to. It's the model's
+            most direct existing measure of ascending vs. declining draw,
+            so it now carries weight commensurate with that instead of
+            being a 3% afterthought.
+      08% — Wikipedia 90-day trend       [KEYLESS] — NEW. Two full
+            non-overlapping 90-day windows compared, so it reflects a
+            genuine multi-month trajectory rather than a single-week
+            spike. Keyless, same endpoint as the 7-day trend below.
+      07% — Wikipedia 7-day trend        [KEYLESS] — short-term buzz only,
+            kept separate from the 90-day trend above since a viral
+            moment and a real trajectory shift aren't the same thing.
+      07% — Wikidata active years        [KEYLESS]
+      06% — MusicBrainz career depth     [KEYLESS]
+      05% — Wikidata Grammy nominations  [KEYLESS]
+      04% — iTunes album count           [KEYLESS]
+      03% — Spotify popularity
+      01% — Chartmetric stream trend
       01% — Wikidata genre breadth       [KEYLESS]
     """
     venue       = signals.get("event_meta", {}).get("venue", "")
     current_cap = VENUE_CAPS.get(venue)
 
     components = [
-        (0.18, norm_mb_recent_album(
+        (0.16, norm_mb_recent_album(
                    signals.get("mb_has_recent_album"),
                    signals.get("mb_days_since_last_album"))),
-        (0.18, norm_grammy_wins(signals.get("wd_grammy_wins"))),           # +4% — best active differentiator
-        (0.16, norm_wikipedia_languages(signals.get("wd_wikipedia_languages"))),  # +3% — best active differentiator
-        (0.11, norm_wikipedia_trend(signals.get("wikipedia_7d_trend_pct"))),
-        (0.09, norm_active_years(signals.get("wd_active_years"))),
-        (0.08, norm_mb_career_depth(signals.get("mb_total_albums"))),
-        (0.06, norm_grammy_nominations(signals.get("wd_grammy_nominations"))),
-        (0.05, norm_itunes_album_count(signals.get("itunes_album_count"))),  # -2%
-        (0.03, norm_setlist_venue_trajectory(
-                   signals.get("setlist_avg_venue_cap"), current_cap)),     # -3%
-        (0.03, norm_spotify_popularity(signals.get("spotify_popularity"))), # -2%
-        (0.02, norm_chartmetric_trend(signals.get("cm_spotify_stream_trend"))),
+        (0.16, norm_grammy_wins(signals.get("wd_grammy_wins"))),
+        (0.14, norm_wikipedia_languages(signals.get("wd_wikipedia_languages"))),
+        (0.12, norm_setlist_venue_trajectory(
+                   signals.get("setlist_avg_venue_cap"), current_cap)),
+        (0.08, norm_wikipedia_long_trend(signals.get("wikipedia_90d_trend_pct"))),
+        (0.07, norm_wikipedia_trend(signals.get("wikipedia_7d_trend_pct"))),
+        (0.07, norm_active_years(signals.get("wd_active_years"))),
+        (0.06, norm_mb_career_depth(signals.get("mb_total_albums"))),
+        (0.05, norm_grammy_nominations(signals.get("wd_grammy_nominations"))),
+        (0.04, norm_itunes_album_count(signals.get("itunes_album_count"))),
+        (0.03, norm_spotify_popularity(signals.get("spotify_popularity"))),
+        (0.01, norm_chartmetric_trend(signals.get("cm_spotify_stream_trend"))),
         (0.01, norm_genre_breadth(signals.get("wd_genres_count"))),
     ]
     return weighted_avg(components, neutral=0.50)
