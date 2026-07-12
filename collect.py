@@ -1337,7 +1337,21 @@ def safe_get(url, params=None, headers=None, label="", timeout=10):
                 print(f"  [WARN] {label} rate limited — retrying in {wait}s")
                 time.sleep(wait)
                 continue
+            # The generic HTTPError string (e.g. "400 Client Error: Bad
+            # Request for url: ...") doesn't include WHY the request was
+            # rejected. Most JSON APIs — including SerpApi — return a
+            # specific "error" field in the response body explaining the
+            # real cause (bad param, invalid key, out of quota, etc).
+            # Without this, a 400 tells us nothing actionable.
+            detail = ""
+            try:
+                body = r.json()
+                detail = body.get("error", "") or str(body)[:300]
+            except Exception:
+                detail = (r.text or "")[:300]
             print(f"  [WARN] {label} failed: {e}")
+            if detail:
+                print(f"  [WARN] {label} response body: {detail}")
             return None
         except Exception as e:
             print(f"  [WARN] {label} failed: {e}")
@@ -1528,9 +1542,14 @@ def fetch_ticketmaster(event):
         label="Ticketmaster",
     )
     if not data or "_embedded" not in data:
+        print(f"    [Ticketmaster] {event.get('name','')[:50]}: no response / no _embedded "
+              f"key for attractionId={attraction_id} (city filter or bad ID?)")
         return {}
     events = data["_embedded"].get("events", [])
     if not events:
+        print(f"    [Ticketmaster] {event.get('name','')[:50]}: 0 events found for "
+              f"attractionId={attraction_id} in Atlanta within the next 18 months "
+              f"(city filter, wrong attraction ID, or genuinely nothing on sale)")
         return {}
     ev = events[0]   # soonest upcoming Atlanta date Ticketmaster has on file
 
@@ -1556,6 +1575,9 @@ def fetch_ticketmaster(event):
     elif status in ("cancelled", "offsale") and old_date:
         print(f"    [WARN] {event.get('name','')[:50]}: Ticketmaster status "
               f"is '{status}' — may need to be blocklisted rather than rescheduled.")
+    else:
+        print(f"    [Ticketmaster] {event.get('name','')[:50]}: confirmed {tm_date or old_date} "
+              f"(status: {status or 'unknown'}) — matches stored date, no reschedule.")
 
     ranges = ev.get("priceRanges", [])
     floor  = min((p.get("min", 9999) for p in ranges), default=None)
