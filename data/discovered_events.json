@@ -628,5 +628,20 @@
     "seatgeek_performer_slug": "trampled-by-turtles",
     "wikipedia_title": "Trampled_By_Turtles",
     "bandsintown_artist": "Trampled By Turtles"
+  },
+  {
+    "id": "gov-t-mule-2026",
+    "seed_score": 50,
+    "name": "Gov't Mule",
+    "artist": "Gov't Mule",
+    "venue": "Coca-Cola Roxy",
+    "date": "2026-10-10",
+    "genre": "Rock",
+    "spotify_artist_id": "",
+    "musicbrainz_mbid": "",
+    "tm_attraction_id": "K8vZ9175Sn0",
+    "seatgeek_performer_slug": "gov-t-mule",
+    "wikipedia_title": "Gov't_Mule",
+    "bandsintown_artist": "Gov't Mule"
   }
 ]
