@@ -790,13 +790,13 @@ EVENTS = [
         "name": "Yeat",
         "artist": "Yeat",
         "venue": "Coca-Cola Roxy",
-        "date": "2026-07-30",
+        "date": "2026-09-22",
         "genre": "Hip-Hop",
         "spotify_artist_id": "6GQaJFCQsU0V6p3pzOcR3M",
-        "musicbrainz_mbid": "1d60df67-cda4-4c4b-8e12-11ea1f55b60e",
+        "musicbrainz_mbid": "9e6a6a2f-f696-4cc0-87f1-e4f712e46802",
         "tm_attraction_id": "K8vZ9178B17",
         "seatgeek_performer_slug": "yeat",
-        "wikipedia_title": "Yeat_(rapper)",
+        "wikipedia_title": "Yeat",
         "bandsintown_artist": "Yeat",
     },
     {
@@ -1599,22 +1599,26 @@ def fetch_seatgeek(event):
         print("  [SeatGeek] SKIPPED — SEATGEEK_CLIENT_ID not set")
         return {}
 
-    artist   = event.get("artist", "") or event.get("name", "")
-    date_str = event["date"]
+    artist = event.get("artist", "") or event.get("name", "")
 
-    # Widen date window ±1 day — SeatGeek sometimes indexes events
-    # on adjacent dates due to timezone handling
+    # Was: ±1 day around the stored event["date"]. If a show reschedules
+    # months out (see fetch_ticketmaster's RESCHEDULE DETECTED case), that
+    # narrow window returns zero results — same failure mode, same fix:
+    # search broadly for this artist's next ~18 months of dates instead of
+    # trusting our own possibly-stale stored date, then filter to Atlanta.
     import datetime as _dt
-    d = _dt.date.fromisoformat(date_str)
-    gte = (d - _dt.timedelta(days=1)).isoformat()
-    lte = (d + _dt.timedelta(days=1)).isoformat()
+    today      = _dt.date.today()
+    far_future = today + _dt.timedelta(days=548)  # ~18 months
+    gte = today.isoformat()
+    lte = far_future.isoformat()
 
     base_params = {
         "client_id":          SEATGEEK_CLIENT_ID,
         "client_secret":      SEATGEEK_SECRET,
         "datetime_local.gte": gte,
         "datetime_local.lte": lte,
-        "per_page":           5,
+        "sort":               "datetime_local.asc",
+        "per_page":           25,
     }
 
     def is_atlanta(ev):
@@ -1644,7 +1648,7 @@ def fetch_seatgeek(event):
         elif data is not None:
             print(f"  [SeatGeek] slug miss: {slug} ({data.get('meta', {}).get('total', 0)} results)")
 
-    # Try 2: free-text search with artist name + date
+    # Try 2: free-text search with artist name
     if ev is None:
         data2 = safe_get(
             "https://api.seatgeek.com/2/events",
