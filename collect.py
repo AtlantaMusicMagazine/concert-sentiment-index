@@ -1924,9 +1924,58 @@ def fetch_wikipedia_pageviews(event):
     return result
 
 
-def fetch_google_trends(event):
+GOOGLE_TRENDS_CACHE_PATH     = "data/google_trends_cache.json"
+GOOGLE_TRENDS_CACHE_MAX_AGE_DAYS = 4
+
+
+def load_google_trends_cache():
+    """
+    Load the rolling Google Trends cache from disk. Keyed by lowercased
+    artist name -> {"value": int, "fetched_at": "YYYY-MM-DD"}.
+
+    SerpApi's Google Trends engine runs a live scrape rather than serving
+    a cached lookup, making it one of the slowest calls in the whole
+    pipeline. Re-running it for every one of the ~100+ tracked events each
+    night was pushing total runtime right up against (and eventually over)
+    the GitHub Actions timeout. Trend interest doesn't meaningfully shift
+    day to day, so reusing a value for a few days trades a small amount of
+    freshness for a large amount of wall-clock time back.
+    """
+    try:
+        with open(GOOGLE_TRENDS_CACHE_PATH) as f:
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return {}
+
+
+def save_google_trends_cache(cache):
+    """
+    Write the updated cache back to disk after all events are collected.
+    GitHub Actions cache@v4 persists this file between runs (added to
+    nightly.yml's cache path list alongside youtube_cache.json).
+    """
+    with open(GOOGLE_TRENDS_CACHE_PATH, "w") as f:
+        json.dump(cache, f, indent=2)
+
+
+def fetch_google_trends(event, cache):
     if not SERPAPI_KEY:
         return {}
+
+    artist_key = event.get("artist", "").strip().lower()
+    if not artist_key:
+        return {}
+
+    cached = cache.get(artist_key)
+    if cached:
+        try:
+            fetched_at = datetime.date.fromisoformat(cached.get("fetched_at", ""))
+            age_days   = (datetime.date.today() - fetched_at).days
+            if age_days < GOOGLE_TRENDS_CACHE_MAX_AGE_DAYS:
+                return {"google_trends_atl": cached.get("value")}
+        except (ValueError, TypeError):
+            pass  # malformed/legacy cache entry — fall through and refetch
+
     data = safe_get(
         "https://serpapi.com/search",
         params={
@@ -1952,6 +2001,11 @@ def fetch_google_trends(event):
     if not timeline:
         return {}
     latest = timeline[-1].get("values", [{}])[0].get("extracted_value", 0)
+
+    cache[artist_key] = {
+        "value":      latest,
+        "fetched_at": datetime.date.today().isoformat(),
+    }
     return {"google_trends_atl": latest}
 
 
@@ -3314,6 +3368,12 @@ def collect_all():
     yt_cache = load_youtube_cache()
     print(f"[collect] YouTube cache loaded: {len(yt_cache)} cached entries")
 
+    # Load Google Trends cache from previous run — same persistence
+    # mechanism, same rationale: avoid re-running SerpApi's slow live
+    # scrape for every event every night when a few days old is fine.
+    gtrends_cache = load_google_trends_cache()
+    print(f"[collect] Google Trends cache loaded: {len(gtrends_cache)} cached entries")
+
     # Fetch AMM article catalog once (weekly refresh via local cache)
     amm_catalog = fetch_amm_catalog()
 
@@ -3376,7 +3436,7 @@ def collect_all():
 
         try:
             # 20% — Local Intent
-            signals.update(fetch_google_trends(event)); time.sleep(0.5)
+            signals.update(fetch_google_trends(event, gtrends_cache)); time.sleep(0.5)
             signals.update(fetch_bandsintown(event));   time.sleep(0.2)
         except Exception as e:
             print(f"    [WARN] Local intent fetch failed: {e}")
@@ -3387,6 +3447,11 @@ def collect_all():
     save_youtube_cache(yt_cache)
     cached_count = sum(1 for v in yt_cache.values() if v.get("view_count"))
     print(f"[collect] YouTube cache saved: {cached_count} entries")
+
+    # Persist updated Google Trends cache — most entries will be reused
+    # (not refetched) for up to GOOGLE_TRENDS_CACHE_MAX_AGE_DAYS days
+    save_google_trends_cache(gtrends_cache)
+    print(f"[collect] Google Trends cache saved: {len(gtrends_cache)} entries")
 
     output_path = "data/raw_signals.json"
     with open(output_path, "w") as f:
