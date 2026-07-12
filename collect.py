@@ -795,6 +795,7 @@ EVENTS = [
         "spotify_artist_id": "6GQaJFCQsU0V6p3pzOcR3M",
         "musicbrainz_mbid": "9e6a6a2f-f696-4cc0-87f1-e4f712e46802",
         "tm_attraction_id": "K8vZ9178B17",
+        "tm_event_id": "0E00647A8D2E5C28",
         "seatgeek_performer_slug": "yeat",
         "wikipedia_title": "Yeat",
         "bandsintown_artist": "Yeat",
@@ -1516,49 +1517,73 @@ def fetch_ticketmaster(event):
         return {}
 
     attraction_id = event.get("tm_attraction_id", "")
-    if not attraction_id:
+    event_id      = event.get("tm_event_id", "")
+    if not attraction_id and not event_id:
         return {}
 
-    # IMPORTANT: query a wide forward-looking window rather than the exact
-    # stored `event["date"]`. If an artist reschedules, a query locked to
-    # the old date returns zero results — the show silently vanishes from
-    # this run instead of surfacing the date change. Searching broadly for
-    # this attraction's next ~18 months of Atlanta dates means we find the
-    # real upcoming show regardless of whether it's moved, and can then
-    # detect + correct the mismatch below rather than losing the event.
-    today      = datetime.date.today()
-    far_future = today + datetime.timedelta(days=548)  # ~18 months
-    data = safe_get(
-        "https://app.ticketmaster.com/discovery/v2/events",
-        params={
-            "apikey":        TICKETMASTER_KEY,
-            "attractionId":  attraction_id,
-            # Was "city": "Atlanta" — likely why Yeat's Coca-Cola Roxy show
-            # returned zero results. That venue is technically in Cumberland/
-            # Smyrna, GA (part of The Battery Atlanta complex), and Ticketmaster's
-            # own venue record may use that city name rather than "Atlanta",
-            # making an exact "city" match silently fail for this and possibly
-            # other metro-Atlanta venues outside the city limits proper.
-            # stateCode avoids exact-city-string matching entirely.
-            "stateCode":     "GA",
-            "startDateTime": today.isoformat() + "T00:00:00Z",
-            "endDateTime":   far_future.isoformat() + "T23:59:59Z",
-            "sort":          "date,asc",
-            "size":          5,
-        },
-        label="Ticketmaster",
-    )
-    if not data or "_embedded" not in data:
-        print(f"    [Ticketmaster] {event.get('name','')[:50]}: no response / no _embedded "
-              f"key for attractionId={attraction_id} (bad attraction ID?)")
+    ev = None
+
+    # Path 1: attraction-ID search across a wide forward-looking window
+    # rather than the exact stored `event["date"]`. If an artist reschedules,
+    # a query locked to the old date returns zero results — the show
+    # silently vanishes from this run instead of surfacing the date change.
+    # Searching broadly for this attraction's next ~18 months of Georgia
+    # dates means we find the real upcoming show regardless of whether it's
+    # moved, and can then detect + correct the mismatch below.
+    if attraction_id:
+        today      = datetime.date.today()
+        far_future = today + datetime.timedelta(days=548)  # ~18 months
+        data = safe_get(
+            "https://app.ticketmaster.com/discovery/v2/events",
+            params={
+                "apikey":        TICKETMASTER_KEY,
+                "attractionId":  attraction_id,
+                # Was "city": "Atlanta" — likely why Yeat's Coca-Cola Roxy show
+                # returned zero results. That venue is technically in Cumberland/
+                # Smyrna, GA (part of The Battery Atlanta complex), and Ticketmaster's
+                # own venue record may use that city name rather than "Atlanta",
+                # making an exact "city" match silently fail for this and possibly
+                # other metro-Atlanta venues outside the city limits proper.
+                # stateCode avoids exact-city-string matching entirely.
+                "stateCode":     "GA",
+                "startDateTime": today.isoformat() + "T00:00:00Z",
+                "endDateTime":   far_future.isoformat() + "T23:59:59Z",
+                "sort":          "date,asc",
+                "size":          5,
+            },
+            label="Ticketmaster",
+        )
+        if data and "_embedded" in data:
+            events = data["_embedded"].get("events", [])
+            if events:
+                ev = events[0]   # soonest upcoming Georgia date on file
+        if ev is None:
+            print(f"    [Ticketmaster] {event.get('name','')[:50]}: attraction search "
+                  f"found nothing for attractionId={attraction_id}"
+                  + (" — trying direct event ID fallback" if event_id else
+                     " (no tm_event_id fallback available)"))
+
+    # Path 2: direct event-ID lookup, bypassing attraction search entirely.
+    # Useful when we have a SPECIFIC confirmed Ticketmaster event ID (e.g.
+    # pulled from a venue's own announcement page, as with Yeat's Coca-Cola
+    # Roxy show) but the broader attraction-ID search isn't surfacing it —
+    # whether because that ID is stale or for some other reason we can't
+    # diagnose from outside Ticketmaster's own system.
+    if ev is None and event_id:
+        direct = safe_get(
+            f"https://app.ticketmaster.com/discovery/v2/events/{event_id}",
+            params={"apikey": TICKETMASTER_KEY},
+            label="Ticketmaster direct event",
+        )
+        if direct:
+            ev = direct
+            print(f"    [Ticketmaster] {event.get('name','')[:50]}: found via direct "
+                  f"event ID fallback ({event_id})")
+
+    if ev is None:
+        print(f"    [Ticketmaster] {event.get('name','')[:50]}: no data found via "
+              f"attraction ID or direct event ID lookup")
         return {}
-    events = data["_embedded"].get("events", [])
-    if not events:
-        print(f"    [Ticketmaster] {event.get('name','')[:50]}: 0 events found for "
-              f"attractionId={attraction_id} in Georgia within the next 18 months "
-              f"(wrong attraction ID, or genuinely nothing on sale)")
-        return {}
-    ev = events[0]   # soonest upcoming Atlanta date Ticketmaster has on file
 
     status   = ev.get("dates", {}).get("status", {}).get("code", "")
     tm_date  = ev.get("dates", {}).get("start", {}).get("localDate", "")
