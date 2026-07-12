@@ -354,5 +354,17 @@
   "gov't mule": {
     "value": 0,
     "fetched_at": "2026-07-12"
+  },
+  "usher": {
+    "value": 84,
+    "fetched_at": "2026-07-12"
+  },
+  "mumford & sons": {
+    "value": 0,
+    "fetched_at": "2026-07-12"
+  },
+  "jack johnson": {
+    "value": 100,
+    "fetched_at": "2026-07-12"
   }
 }
