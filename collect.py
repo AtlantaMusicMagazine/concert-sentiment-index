@@ -1500,15 +1500,30 @@ def fetch_musicbrainz(event):
 def fetch_ticketmaster(event):
     if not TICKETMASTER_KEY:
         return {}
+
+    attraction_id = event.get("tm_attraction_id", "")
+    if not attraction_id:
+        return {}
+
+    # IMPORTANT: query a wide forward-looking window rather than the exact
+    # stored `event["date"]`. If an artist reschedules, a query locked to
+    # the old date returns zero results — the show silently vanishes from
+    # this run instead of surfacing the date change. Searching broadly for
+    # this attraction's next ~18 months of Atlanta dates means we find the
+    # real upcoming show regardless of whether it's moved, and can then
+    # detect + correct the mismatch below rather than losing the event.
+    today      = datetime.date.today()
+    far_future = today + datetime.timedelta(days=548)  # ~18 months
     data = safe_get(
         "https://app.ticketmaster.com/discovery/v2/events",
         params={
-            "apikey":          TICKETMASTER_KEY,
-            "attractionId":    event.get("tm_attraction_id", ""),
-            "city":            "Atlanta",
-            "startDateTime":   event["date"] + "T00:00:00Z",
-            "endDateTime":     event["date"] + "T23:59:59Z",
-            "size":            1,
+            "apikey":        TICKETMASTER_KEY,
+            "attractionId":  attraction_id,
+            "city":          "Atlanta",
+            "startDateTime": today.isoformat() + "T00:00:00Z",
+            "endDateTime":   far_future.isoformat() + "T23:59:59Z",
+            "sort":          "date,asc",
+            "size":          5,
         },
         label="Ticketmaster",
     )
@@ -1517,12 +1532,36 @@ def fetch_ticketmaster(event):
     events = data["_embedded"].get("events", [])
     if not events:
         return {}
-    ev     = events[0]
+    ev = events[0]   # soonest upcoming Atlanta date Ticketmaster has on file
+
+    status   = ev.get("dates", {}).get("status", {}).get("code", "")
+    tm_date  = ev.get("dates", {}).get("start", {}).get("localDate", "")
+    old_date = event.get("date", "")
+
+    # Reschedule detection: Ticketmaster's actual date differs from ours.
+    # Correct `event["date"]` in place — event is the same dict referenced
+    # by signals["event_meta"], so this fixes scoring/display for the rest
+    # of this run automatically. The original curated date is preserved
+    # under date_originally_scheduled for reference. This does NOT edit the
+    # hardcoded EVENTS entry in this file — do that separately once confirmed,
+    # or the next run will just re-detect the same mismatch again.
+    if tm_date and old_date and tm_date != old_date:
+        print(f"    [RESCHEDULE DETECTED] {event.get('name','')[:50]}: "
+              f"{old_date} -> {tm_date} (Ticketmaster status: {status or 'unknown'}). "
+              f"Using {tm_date} for this run — update the EVENTS entry in "
+              f"collect.py to make this permanent.")
+        event["date_originally_scheduled"] = old_date
+        event["date"] = tm_date
+        event["rescheduled"] = True
+    elif status in ("cancelled", "offsale") and old_date:
+        print(f"    [WARN] {event.get('name','')[:50]}: Ticketmaster status "
+              f"is '{status}' — may need to be blocklisted rather than rescheduled.")
+
     ranges = ev.get("priceRanges", [])
     floor  = min((p.get("min", 9999) for p in ranges), default=None)
     return {
         "tm_floor_price": floor,
-        "tm_status":      ev.get("dates", {}).get("status", {}).get("code", ""),
+        "tm_status":      status,
     }
 
 
