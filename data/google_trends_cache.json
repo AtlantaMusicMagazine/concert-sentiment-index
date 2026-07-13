@@ -374,5 +374,13 @@
   "dogstar": {
     "value": 0,
     "fetched_at": "2026-07-13"
+  },
+  "isoxo": {
+    "value": 0,
+    "fetched_at": "2026-07-13"
+  },
+  "houndmouth": {
+    "value": 0,
+    "fetched_at": "2026-07-13"
   }
 }
