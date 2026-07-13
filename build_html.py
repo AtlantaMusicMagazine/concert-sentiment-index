@@ -265,13 +265,15 @@ def build_insight(ev):
       5. Career longevity (10+ years — nostalgia premium)
       6. Tour scale (setlist tour show count)
       7. YouTube velocity (current cultural acceleration)
-      8. Eventbrite sell-through %
-      9. Last.fm depth (plays/listener ratio)
-     10. ATL market history
-     11. Bands in Town RSVPs
-     12. Spotify top track popularity
-     13. Secondary market floor price
-     14. Wikipedia trend
+      8. ATL search interest — Google Trends 65+ only (strong-reading
+         callout; weaker readings surface via the risk flag instead)
+      9. Eventbrite sell-through %
+     10. Last.fm depth (plays/listener ratio)
+     11. ATL market history
+     12. Bands in Town RSVPs
+     13. Spotify top track popularity
+     14. Secondary market floor price
+     15. Wikipedia trend
     """
     raw   = ev["raw_signals"]
     parts = []
@@ -331,7 +333,17 @@ def build_insight(ev):
                    if yt_vel >= 1_000_000 else f"{yt_vel/1_000:.0f}K views/week")
         parts.append(f"YouTube: {vel_str}")
 
-    # ── 8. Eventbrite sell-through ─────────────────────────────────────
+    # ── 8. ATL search interest (Google Trends) ─────────────────────────
+    # Previously had no representation anywhere in this insight line — it
+    # only ever showed up as a tiered stat bullet (build_signals_html) or,
+    # for LOW readings, the risk-flag panel (build_risk). This adds the
+    # missing positive-side callout: strong readings surface here as a
+    # highlight, same 65+ threshold as the "high" tier used elsewhere.
+    gtrend_insight = raw.get("google_trends_atl")
+    if gtrend_insight is not None and int(gtrend_insight) >= 65:
+        parts.append(f"Strong ATL search interest ({int(gtrend_insight)}/100)")
+
+    # ── 9. Eventbrite sell-through ──────────────────────────────────────
     pct = raw.get("eb_sell_through_pct")
     if pct is not None and not raw.get("eb_is_sold_out"):
         pct = float(pct)
@@ -340,7 +352,7 @@ def build_insight(ev):
         elif pct >= 50:
             parts.append(f"Eventbrite: {pct:.0f}% sold")
 
-    # ── 9. Last.fm depth ───────────────────────────────────────────────
+    # ── 10. Last.fm depth ───────────────────────────────────────────────
     ppl       = raw.get("lastfm_plays_per_listener")
     listeners = raw.get("lastfm_listeners")
     if ppl is not None and listeners is not None:
@@ -353,7 +365,7 @@ def build_insight(ev):
     elif listeners is not None and int(listeners) >= 1_000_000:
         parts.append(f"Last.fm: {int(listeners)/1_000_000:.1f}M listeners")
 
-    # ── 10. ATL market history ─────────────────────────────────────────
+    # ── 11. ATL market history ──────────────────────────────────────────
     atl_shows = raw.get("setlist_atl_shows_5y")
     genre     = (ev.get("genre") or "").lower()
     amm_date  = raw.get("amm_article_date", "") or ""
@@ -379,17 +391,17 @@ def build_insight(ev):
     if raw.get("setlist_sold_out_flag"):
         parts.append("Prior ATL show sold out")
 
-    # ── 11. Bands in Town RSVPs ────────────────────────────────────────
+    # ── 12. Bands in Town RSVPs ─────────────────────────────────────────
     bit = raw.get("bandsintown_rsvps")
     if bit is not None and int(bit) >= 500:
         parts.append(f"{int(bit):,} ATL fans tracking")
 
-    # ── 12. Spotify top track popularity ──────────────────────────────
+    # ── 13. Spotify top track popularity ───────────────────────────────
     sp_top = raw.get("spotify_top_track_popularity")
     if sp_top is not None and int(sp_top) >= 80:
         parts.append(f"Spotify top track: {sp_top}/100")
 
-    # ── 13. Secondary market (SeatGeek) ───────────────────────────────
+    # ── 14. Secondary market (SeatGeek) ────────────────────────────────
     sg_floor   = raw.get("seatgeek_floor")
     sg_avg     = raw.get("seatgeek_avg_price")
     sg_listing = raw.get("seatgeek_listing_count") or 0
@@ -406,7 +418,7 @@ def build_insight(ev):
         elif floor_f >= 20:
             parts.append(f"Tickets from ${floor_f:.0f} on SeatGeek")
 
-    # ── 14. Wikipedia trend ────────────────────────────────────────────
+    # ── 15. Wikipedia trend ─────────────────────────────────────────────
     trend = raw.get("wikipedia_7d_trend_pct")
     if trend is not None:
         trend = float(trend)
@@ -432,9 +444,17 @@ def build_risk(ev):
         if ratio > 0.4:
             flags.append(f"High listing volume ({listing_count:,} available)")
 
+    # Suppress only when the reading itself is unreliable (under 10 — see
+    # note above on Google Trends' sample-size floor). No upper cutoff —
+    # any value 10 and up displays, with wording that adapts to magnitude
+    # so a strong reading doesn't read as a contradiction inside the risk
+    # panel. Thresholds match the tiering already used elsewhere in this
+    # file (build_signals_html) for the same signal.
     trends_atl = raw.get("google_trends_atl")
-    if trends_atl is not None and int(trends_atl) < 20:
-        flags.append(f"ATL Trends: {trends_atl}")
+    if trends_atl is not None and int(trends_atl) >= 10:
+        _gt = int(trends_atl)
+        _gt_word = "Strong" if _gt >= 65 else ("Medium" if _gt >= 35 else "Weak")
+        flags.append(f"{_gt_word} local buzz \u2014 Google Trends {_gt}/100")
 
     bit_rsvps = raw.get("bandsintown_rsvps")
     if bit_rsvps is not None and int(bit_rsvps) < 500:
@@ -757,7 +777,8 @@ def build_genre_pool_js(events):
             signals.append(["medium", "Secondary floor",
                              f"${float(sg_fl):.0f}"])
         elif gtrend is not None:
-            signals.append(["medium", "ATL Google Trends",
+            _gt_lvl = "high" if int(gtrend) >= 65 else ("medium" if int(gtrend) >= 35 else "low")
+            signals.append([_gt_lvl, "ATL Google Trends",
                              f"{int(gtrend)}/100"])
         else:
             # Keyless fallback — venue capacity
@@ -793,7 +814,9 @@ def build_genre_pool_js(events):
             direction = "+" if float(wiki) >= 0 else ""
             insight_parts.append(f"Wikipedia {direction}{float(wiki):.0f}%")
         if gtrend is not None:
-            insight_parts.append(f"ATL Trends {int(gtrend)}/100")
+            _gt_val  = int(gtrend)
+            _gt_word = "Strong" if _gt_val >= 65 else ("Medium" if _gt_val >= 35 else "Weak")
+            insight_parts.append(f"{_gt_word} ATL Trends {_gt_val}/100")
         if not insight_parts:
             # Keyless fallback
             try:
