@@ -193,7 +193,7 @@ def build_signals_html(ev):
         signals.append((lvl, "Secondary floor", f"${sg_floor:.0f}"))
 
     gtrends = raw.get("google_trends_atl")
-    if gtrends is not None:
+    if gtrends is not None and int(gtrends) >= 10:
         gtrends = int(gtrends)
         lvl = "high" if gtrends >= 65 else ("medium" if gtrends >= 35 else "low")
         signals.append((lvl, "ATL Google Trends index", str(gtrends)))
@@ -776,7 +776,7 @@ def build_genre_pool_js(events):
         elif sg_fl is not None:
             signals.append(["medium", "Secondary floor",
                              f"${float(sg_fl):.0f}"])
-        elif gtrend is not None:
+        elif gtrend is not None and int(gtrend) >= 10:
             _gt_lvl = "high" if int(gtrend) >= 65 else ("medium" if int(gtrend) >= 35 else "low")
             signals.append([_gt_lvl, "ATL Google Trends",
                              f"{int(gtrend)}/100"])
