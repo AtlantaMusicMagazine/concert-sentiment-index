@@ -30,17 +30,17 @@
     "first_seen": "2026-06-16"
   },
   "usher-2026": {
-    "rank": 5,
+    "rank": 4,
     "panel": "top",
     "first_seen": "2026-06-16"
   },
   "noah-kahan-2026": {
-    "rank": 7,
+    "rank": 5,
     "panel": "top",
     "first_seen": "2026-06-16"
   },
   "mumford-sons-2026": {
-    "rank": 17,
+    "rank": 16,
     "panel": "top",
     "first_seen": "2026-06-16"
   },
@@ -50,12 +50,12 @@
     "first_seen": "2026-06-16"
   },
   "olivia-dean-2026": {
-    "rank": 18,
+    "rank": 17,
     "panel": "top",
     "first_seen": "2026-06-16"
   },
   "lynyrd-skynyrd-2026": {
-    "rank": 16,
+    "rank": 15,
     "panel": "top",
     "first_seen": "2026-06-16"
   },
@@ -75,7 +75,7 @@
     "first_seen": "2026-06-16"
   },
   "buju-banton-2026": {
-    "rank": 12,
+    "rank": 9,
     "panel": "top",
     "first_seen": "2026-06-16"
   },
@@ -85,7 +85,7 @@
     "first_seen": "2026-06-16"
   },
   "empire-of-the-sun-2026": {
-    "rank": 19,
+    "rank": 18,
     "panel": "top",
     "first_seen": "2026-06-16"
   },
@@ -125,7 +125,7 @@
     "first_seen": "2026-06-16"
   },
   "jack-johnson-2026": {
-    "rank": 9,
+    "rank": 10,
     "panel": "bottom",
     "first_seen": "2026-06-16"
   },
@@ -160,7 +160,7 @@
     "first_seen": "2026-06-16"
   },
   "hayley-williams-2026": {
-    "rank": 14,
+    "rank": 15,
     "panel": "bottom",
     "first_seen": "2026-06-16"
   },
@@ -175,7 +175,7 @@
     "first_seen": "2026-06-16"
   },
   "muse-2026": {
-    "rank": 15,
+    "rank": 20,
     "panel": "bottom",
     "first_seen": "2026-06-16"
   },
@@ -245,7 +245,7 @@
     "first_seen": "2026-06-27"
   },
   "guns-n-roses-2026": {
-    "rank": 15,
+    "rank": 14,
     "panel": "top",
     "first_seen": "2026-06-29"
   },
@@ -260,27 +260,27 @@
     "first_seen": "2026-07-02"
   },
   "rob-zombie-2026": {
-    "rank": 9,
+    "rank": 8,
     "panel": "top",
     "first_seen": "2026-07-03"
   },
   "men-at-work-2026": {
-    "rank": 13,
+    "rank": 14,
     "panel": "bottom",
     "first_seen": "2026-07-03"
   },
   "dogstar-2026": {
-    "rank": 16,
-    "panel": "bottom",
-    "first_seen": "2026-07-03"
-  },
-  "franz-ferdinand-2026": {
     "rank": 11,
     "panel": "bottom",
     "first_seen": "2026-07-03"
   },
+  "franz-ferdinand-2026": {
+    "rank": 13,
+    "panel": "bottom",
+    "first_seen": "2026-07-03"
+  },
   "kacey-musgraves-2026": {
-    "rank": 8,
+    "rank": 7,
     "panel": "top",
     "first_seen": "2026-07-04"
   },
@@ -305,12 +305,12 @@
     "first_seen": "2026-07-04"
   },
   "aespa-2026": {
-    "rank": 13,
+    "rank": 12,
     "panel": "top",
     "first_seen": "2026-07-04"
   },
   "daniel-caesar-2026": {
-    "rank": 14,
+    "rank": 13,
     "panel": "top",
     "first_seen": "2026-07-04"
   },
@@ -320,7 +320,7 @@
     "first_seen": "2026-07-04"
   },
   "band-of-horses-2026": {
-    "rank": 10,
+    "rank": 9,
     "panel": "bottom",
     "first_seen": "2026-07-04"
   },
@@ -335,8 +335,18 @@
     "first_seen": "2026-07-12"
   },
   "better-than-ezra-2026": {
-    "rank": 18,
+    "rank": 19,
     "panel": "bottom",
     "first_seen": "2026-07-12"
+  },
+  "jonas-brothers-2026": {
+    "rank": 19,
+    "panel": "top",
+    "first_seen": "2026-07-13"
+  },
+  "bryson-tiller-2026": {
+    "rank": 20,
+    "panel": "top",
+    "first_seen": "2026-07-13"
   }
 }

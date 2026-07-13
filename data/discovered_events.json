@@ -643,5 +643,20 @@
     "seatgeek_performer_slug": "gov-t-mule",
     "wikipedia_title": "Gov't_Mule",
     "bandsintown_artist": "Gov't Mule"
+  },
+  {
+    "id": "mt-joy-2026",
+    "seed_score": 50,
+    "name": "Mt. Joy",
+    "artist": "Mt. Joy",
+    "venue": "Ameris Bank Amphitheatre",
+    "date": "2026-09-17",
+    "genre": "Folk",
+    "spotify_artist_id": "",
+    "musicbrainz_mbid": "",
+    "tm_attraction_id": "K8vZ9174RDf",
+    "seatgeek_performer_slug": "mt-joy",
+    "wikipedia_title": "Mt._Joy",
+    "bandsintown_artist": "Mt. Joy"
   }
 ]
