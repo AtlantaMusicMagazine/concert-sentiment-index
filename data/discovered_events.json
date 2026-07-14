@@ -658,5 +658,20 @@
     "seatgeek_performer_slug": "mt-joy",
     "wikipedia_title": "Mt._Joy",
     "bandsintown_artist": "Mt. Joy"
+  },
+  {
+    "id": "johnnyswim-2026",
+    "seed_score": 50,
+    "name": "JOHNNYSWIM",
+    "artist": "JOHNNYSWIM",
+    "venue": "The Tabernacle",
+    "date": "2026-10-11",
+    "genre": "Rock",
+    "spotify_artist_id": "",
+    "musicbrainz_mbid": "",
+    "tm_attraction_id": "K8vZ917uwk7",
+    "seatgeek_performer_slug": "johnnyswim",
+    "wikipedia_title": "JOHNNYSWIM",
+    "bandsintown_artist": "JOHNNYSWIM"
   }
 ]
