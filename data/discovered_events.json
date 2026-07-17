@@ -688,5 +688,20 @@
     "seatgeek_performer_slug": "freya-skye",
     "wikipedia_title": "Freya_Skye",
     "bandsintown_artist": "Freya Skye"
+  },
+  {
+    "id": "foster-the-people-2026",
+    "seed_score": 50,
+    "name": "Foster the People",
+    "artist": "Foster the People",
+    "venue": "Coca-Cola Roxy",
+    "date": "2026-10-14",
+    "genre": "Rock",
+    "spotify_artist_id": "",
+    "musicbrainz_mbid": "",
+    "tm_attraction_id": "K8vZ917GmLV",
+    "seatgeek_performer_slug": "foster-the-people",
+    "wikipedia_title": "Foster_the_People",
+    "bandsintown_artist": "Foster the People"
   }
 ]
