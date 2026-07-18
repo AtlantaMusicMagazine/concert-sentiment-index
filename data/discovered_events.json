@@ -703,5 +703,20 @@
     "seatgeek_performer_slug": "foster-the-people",
     "wikipedia_title": "Foster_the_People",
     "bandsintown_artist": "Foster the People"
+  },
+  {
+    "id": "arc-ngel-2026",
+    "seed_score": 50,
+    "name": "Arc\u00e1ngel",
+    "artist": "Arc\u00e1ngel",
+    "venue": "Coca-Cola Roxy",
+    "date": "2026-10-15",
+    "genre": "Hip-Hop",
+    "spotify_artist_id": "",
+    "musicbrainz_mbid": "",
+    "tm_attraction_id": "K8vZ917okqf",
+    "seatgeek_performer_slug": "arc-ngel",
+    "wikipedia_title": "Arc\u00e1ngel",
+    "bandsintown_artist": "Arc\u00e1ngel"
   }
 ]
