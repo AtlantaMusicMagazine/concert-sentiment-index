@@ -718,5 +718,35 @@
     "seatgeek_performer_slug": "arc-ngel",
     "wikipedia_title": "Arc\u00e1ngel",
     "bandsintown_artist": "Arc\u00e1ngel"
+  },
+  {
+    "id": "san-holo-2026",
+    "seed_score": 50,
+    "name": "San Holo",
+    "artist": "San Holo",
+    "venue": "The Tabernacle",
+    "date": "2026-10-16",
+    "genre": "Pop",
+    "spotify_artist_id": "",
+    "musicbrainz_mbid": "",
+    "tm_attraction_id": "K8vZ917fIvV",
+    "seatgeek_performer_slug": "san-holo",
+    "wikipedia_title": "San_Holo",
+    "bandsintown_artist": "San Holo"
+  },
+  {
+    "id": "polyphia-2026",
+    "seed_score": 50,
+    "name": "Polyphia",
+    "artist": "Polyphia",
+    "venue": "Coca-Cola Roxy",
+    "date": "2026-10-17",
+    "genre": "Rock",
+    "spotify_artist_id": "",
+    "musicbrainz_mbid": "",
+    "tm_attraction_id": "K8vZ9173RN0",
+    "seatgeek_performer_slug": "polyphia",
+    "wikipedia_title": "Polyphia",
+    "bandsintown_artist": "Polyphia"
   }
 ]
