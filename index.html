@@ -1,0 +1,1965 @@
+<!DOCTYPE html>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+/* ============================================================
+   ATLANTA MUSIC MAGAZINE — Concert Sentiment Index
+   Scoped CSS for WordPress Custom HTML block.
+   All rules are prefixed with .csi-embed to avoid
+   conflicting with the WordPress theme.
+   Paste this entire block into a Custom HTML module
+   ABOVE the dashboard content on the page.
+   ============================================================ */
+
+/* Google Fonts — Inter */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* Wrapper that scopes everything */
+.csi-embed {
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #f2f2f5;
+  padding: 32px 24px 48px;
+  width: 100%;
+  box-sizing: border-box;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* Reset inside scope only */
+.csi-embed *, .csi-embed *::before, .csi-embed *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* Skip link */
+.csi-embed .skip-link {
+  position: absolute; top: -40px; left: 0;
+  background: #5a50d4; color: #fff;
+  padding: 8px 16px; font-size: 14px; font-weight: 600;
+  text-decoration: none; z-index: 9999;
+  border-radius: 0 0 6px 0; transition: top 0.2s;
+}
+.csi-embed .skip-link:focus { top: 0; }
+
+/* Visually hidden */
+.csi-embed .sr-only {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+}
+
+/* Focus ring */
+.csi-embed a:focus-visible,
+.csi-embed button:focus-visible,
+.csi-embed [tabindex="0"]:focus-visible {
+  outline: 2px solid #5a50d4; outline-offset: 2px; border-radius: 3px;
+}
+
+/* Headings — override WordPress theme heading styles */
+.csi-embed h1 {
+  font-size: 15px; font-weight: 700; color: #111118;
+  letter-spacing: 0; text-transform: none; line-height: 1.3;
+  margin: 0 auto 20px; max-width: 680px;
+  border: none; padding: 0;
+}
+.csi-embed h2 {
+  font-size: 12px !important; font-weight: 700 !important;
+  letter-spacing: 0.1em !important; text-transform: uppercase !important;
+  color: #111118 !important; line-height: 1.2 !important;
+  border: none !important; padding: 0 !important;
+  margin: 0 !important;
+}
+.csi-embed h3 {
+  font-size: 15px !important; font-weight: 700 !important;
+  color: #111118 !important; line-height: 1.3 !important;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  border: none !important; padding: 0 !important;
+  margin: 0 !important;
+}
+.csi-embed p {
+  margin: 0; font-size: inherit; line-height: inherit; color: inherit;
+}
+.csi-embed ul, .csi-embed ol {
+  list-style: none; margin: 0; padding: 0;
+}
+.csi-embed li { margin: 0; padding: 0; }
+.csi-embed button {
+  font-family: inherit;
+  line-height: inherit;
+}
+
+/* ── Event card ─────────────────────────────────────── */
+.csi-embed .event-card {
+  display: grid;
+  grid-template-columns: 36px 1fr 80px;
+  align-items: start;
+  background: #ffffff;
+  border: 1px solid #e4e4e8 !important;
+  border-radius: 8px;
+  border-left: 3px solid #5a50d4 !important;
+  padding: 14px 20px 14px 14px;
+  max-width: 680px;
+  margin: 0 auto 10px;
+  transition: box-shadow 0.15s, border-color 0.15s;
+  text-decoration: none;
+}
+.csi-embed .event-card:hover,
+.csi-embed .event-card:focus-within {
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  border-color: #c8c5f7 !important;
+}
+.csi-embed .event-card.bottom { border-left-color: #2a58a0 !important; }
+.csi-embed .event-card.bottom .score-value    { color: #2a58a0 !important; }
+.csi-embed .event-card.bottom .score-bar-fill { background: #2a58a0 !important; }
+.csi-embed .event-card.bottom .score-bar-track{ background: #c0d0ed !important; }
+
+/* ── Rank ───────────────────────────────────────────── */
+.csi-embed .card-rank-wrap {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 3px; padding-top: 2px;
+}
+.csi-embed .rank-num {
+  font-size: 17px; font-weight: 600; color: #888898; line-height: 1;
+}
+.csi-embed .rank-delta { font-size: 9px; font-weight: 700; line-height: 1; }
+.csi-embed .delta-up   { color: #1a6e2a; }
+.csi-embed .delta-down { color: #a80000; }
+.csi-embed .delta-flat { color: #767686; }
+.csi-embed .delta-new  { color: #5a50d4; font-size: 8px; letter-spacing: .03em; }
+.csi-embed .amm-strip  { grid-column: 1 / -1; border-top: 0.5px solid var(--color-border-tertiary); margin: 8px -20px -14px; padding: .65rem 20px; display: flex; align-items: center; gap: 10px; background: var(--color-background-secondary); border-radius: 0 0 8px 8px; }
+.csi-embed .amm-icon   { width: 30px; height: 30px; border-radius: 6px; background: #eeedfe; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.csi-embed .amm-icon i { font-size: 15px; color: #5a50d4; }
+.csi-embed .amm-text   { flex: 1; min-width: 0; }
+.csi-embed .amm-eyebrow{ font-size: 9px; font-weight: 500; letter-spacing: .07em; text-transform: uppercase; color: var(--color-text-tertiary); margin-bottom: 2px; }
+.csi-embed .amm-headline{ font-size: 12px; font-weight: 500; line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.csi-embed .amm-headline a { color: #5a50d4; text-decoration: none; }
+.csi-embed .amm-headline a:hover { text-decoration: underline; }
+.csi-embed .amm-date   { font-size: 10px; color: var(--color-text-tertiary); flex-shrink: 0; margin-left: 8px; }
+
+/* ── Card body ──────────────────────────────────────── */
+.csi-embed .card-body {
+  display: flex; flex-direction: column; gap: 5px;
+  min-width: 0; padding-right: 14px;
+}
+.csi-embed .card-title {
+  font-size: 15px !important; font-weight: 700 !important;
+  color: #111118 !important; line-height: 1.3 !important;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.csi-embed .card-meta {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+.csi-embed .card-meta-text {
+  font-size: 12px; color: #4a4a58; font-weight: 400;
+}
+.csi-embed .genre-pill {
+  display: inline-block; font-size: 11px; font-weight: 600;
+  border-radius: 20px; padding: 2px 10px; white-space: nowrap;
+}
+
+/* ── Signals ────────────────────────────────────────── */
+.csi-embed .card-signals {
+  display: flex; flex-wrap: wrap; gap: 5px 14px;
+  list-style: none; padding: 0;
+}
+.csi-embed .signal {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 11px; font-weight: 500; color: #333340; white-space: nowrap;
+}
+.csi-embed .signal-dot {
+  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+}
+.csi-embed .dot-high   { background: #1a6e2a; border: 1.5px solid #1a6e2a; }
+.csi-embed .dot-medium { background: #7a5200; border: 1.5px solid #7a5200; }
+.csi-embed .dot-low    { background: #a80000; border: 1.5px solid #a80000; }
+
+.csi-embed .card-insight {
+  font-size: 11.5px; color: #444450; line-height: 1.5;
+}
+.csi-embed .card-risk {
+  font-size: 11px; color: #123878; font-weight: 500;
+  display: flex; align-items: center; gap: 5px;
+}
+.csi-embed .card-risk::before { content: "\2691"; font-size: 10px; }
+
+/* ── Score ──────────────────────────────────────────── */
+.csi-embed .card-score {
+  display: flex; flex-direction: column;
+  align-items: flex-end; gap: 4px; padding-top: 2px; flex-shrink: 0;
+}
+.csi-embed .score-label {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.1em;
+  text-transform: uppercase; color: #767686;
+}
+.csi-embed .score-value {
+  font-size: 34px; font-weight: 700; color: #5a50d4;
+  line-height: 1; letter-spacing: -0.02em;
+}
+.csi-embed .score-bar-track {
+  width: 56px; height: 4px; background: #d8d6f8;
+  border-radius: 2px; overflow: hidden;
+}
+.csi-embed .score-bar-fill {
+  height: 100%; background: #5a50d4; border-radius: 2px;
+}
+
+/* ── Section headers ────────────────────────────────── */
+.csi-embed .section-header {
+  max-width: 680px; margin: 0 auto 10px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding-bottom: 6px; border-bottom: 2px solid #111118;
+}
+.csi-embed .section-tag {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.08em;
+  text-transform: uppercase; padding: 2px 8px; border-radius: 3px;
+}
+.csi-embed .tag-hot  {
+  background: rgba(120,28,12,0.08); color: #781c0c;
+  border: 1px solid rgba(120,28,12,0.3);
+}
+.csi-embed .tag-cold {
+  background: rgba(15,45,100,0.08); color: #0f2d64;
+  border: 1px solid rgba(15,45,100,0.3);
+}
+.csi-embed .spacer { height: 28px; }
+
+/* ── Refresh bar ────────────────────────────────────── */
+.csi-embed .section-break {
+  max-width: 680px; margin: 24px auto 16px;
+  border: none; border-top: 1px solid #e4e4e8;
+}
+.csi-embed .refresh-bar {
+  max-width: 680px; margin: 0 auto;
+  background: #fff; border: 1px solid #e4e4e8;
+  border-radius: 8px; overflow: hidden;
+}
+.csi-embed .refresh-window-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 18px; background: #f8f8fb;
+  border-bottom: 1px solid #e4e4e8; flex-wrap: wrap;
+}
+.csi-embed .refresh-window-label {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.1em;
+  text-transform: uppercase; color: #767686;
+}
+.csi-embed .refresh-window-range {
+  font-size: 13px; font-weight: 600; color: #111118;
+}
+.csi-embed .refresh-window-chip {
+  font-size: 10px; font-weight: 600; letter-spacing: 0.06em;
+  text-transform: uppercase; color: #4038b0;
+  background: #eeedfb; border: 1px solid #c0bdf5;
+  border-radius: 20px; padding: 2px 9px; white-space: nowrap;
+}
+.csi-embed .refresh-bar-inner {
+  padding: 12px 18px; display: flex;
+  align-items: center; gap: 20px; flex-wrap: wrap;
+}
+.csi-embed .refresh-left {
+  display: flex; align-items: center; gap: 8px; flex-shrink: 0;
+}
+.csi-embed .refresh-live-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: #5a50d4;
+  animation: csi-dot-blink 1.8s ease-in-out infinite;
+  flex-shrink: 0;
+}
+@keyframes csi-dot-blink { 0%,100% { opacity: 1; } 50% { opacity: 0.2; } }
+.csi-embed .refresh-label {
+  font-size: 11px; font-weight: 600; letter-spacing: 0.06em;
+  text-transform: uppercase; color: #4a4a58;
+}
+.csi-embed .refresh-clock {
+  font-size: 15px; font-weight: 700; color: #111118;
+  font-variant-numeric: tabular-nums; min-width: 82px;
+}
+.csi-embed .refresh-center {
+  display: flex; align-items: center; gap: 10px; flex: 1; min-width: 120px;
+}
+.csi-embed .refresh-track {
+  flex: 1; height: 4px; background: #e0e0e8; border-radius: 2px; overflow: hidden;
+}
+.csi-embed .refresh-fill {
+  height: 100%; background: #5a50d4; border-radius: 2px;
+  width: 0%; transition: width 1s linear;
+}
+.csi-embed .refresh-track-label { font-size: 10px; color: #767686; white-space: nowrap; }
+.csi-embed .refresh-sources-row {
+  display: none !important;
+}
+.csi-embed .refresh-sources-label {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.08em;
+  text-transform: uppercase; color: #4a4a58; flex-shrink: 0;
+}
+.csi-embed .source-chip {
+  font-size: 10px; font-weight: 500; color: #333340;
+  background: #f0f0f4; border: 1px solid #e0e0e8;
+  border-radius: 4px; padding: 1px 7px; white-space: nowrap;
+}
+
+/* ── Segmented control ──────────────────────────────── */
+.csi-embed .seg-wrap {
+  max-width: 680px; margin: 0 auto 14px;
+  display: flex; align-items: center; gap: 6px; position: relative;
+}
+.csi-embed .seg-track {
+  display: flex; align-items: stretch;
+  background: #f0f0f4; border: 1px solid #e0e0e8;
+  border-radius: 8px; padding: 3px; gap: 2px;
+  flex: 1; min-width: 0;
+}
+.csi-embed .seg-btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 11px; font-weight: 600; padding: 5px 11px;
+  border-radius: 6px; border: none; background: transparent;
+  color: #5a5a6a; white-space: nowrap; cursor: pointer;
+  user-select: none; -webkit-user-select: none;
+  transition: background 0.12s, color 0.12s, box-shadow 0.12s;
+  flex-shrink: 0; line-height: 1.2; font-family: inherit;
+}
+.csi-embed .seg-btn:hover:not(.seg-active) {
+  background: #e6e6ec; color: #333340;
+}
+.csi-embed .seg-btn.seg-active {
+  background: #ffffff; color: #5a50d4;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 0 0 1px rgba(90,80,212,0.15);
+}
+.csi-embed .bottom-seg .seg-btn.seg-active {
+  color: #2a58a0;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 0 0 1px rgba(42,88,160,0.15);
+}
+.csi-embed .bottom-seg .seg-btn:hover:not(.seg-active) { color: #2a58a0; }
+.csi-embed .seg-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 9px; font-weight: 700; line-height: 1;
+  min-width: 16px; height: 16px; padding: 0 4px;
+  border-radius: 8px; background: rgba(0,0,0,0.08);
+  color: inherit; transition: background 0.12s;
+}
+.csi-embed .seg-btn.seg-active .seg-badge { background: rgba(90,80,212,0.12); }
+.csi-embed .bottom-seg .seg-btn.seg-active .seg-badge { background: rgba(42,88,160,0.12); }
+.csi-embed .seg-dot {
+  display: inline-block; width: 6px; height: 6px;
+  border-radius: 50%; flex-shrink: 0;
+}
+.csi-embed .seg-more {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 11px; font-weight: 600; padding: 7px 11px;
+  border-radius: 8px; border: 1px solid #e0e0e8;
+  background: #ffffff; color: #5a5a6a; white-space: nowrap;
+  cursor: pointer; user-select: none; -webkit-user-select: none;
+  flex-shrink: 0;
+  transition: border-color 0.12s, color 0.12s, background 0.12s;
+  font-family: inherit;
+}
+.csi-embed .seg-more:hover { border-color: #5a50d4; color: #5a50d4; }
+.csi-embed .seg-more.seg-more-active {
+  background: #5a50d4; border-color: #5a50d4; color: #ffffff;
+}
+.csi-embed .bottom-seg .seg-more:hover { border-color: #2a58a0; color: #2a58a0; }
+.csi-embed .bottom-seg .seg-more.seg-more-active {
+  background: #2a58a0; border-color: #2a58a0; color: #ffffff;
+}
+.csi-embed .seg-more-caret { font-size: 9px; line-height: 1; transition: transform 0.15s; }
+.csi-embed .seg-more[aria-expanded="true"] .seg-more-caret { transform: rotate(180deg); }
+.csi-embed .seg-popover {
+  position: absolute; top: calc(100% + 6px); right: 0; z-index: 9999;
+  background: #ffffff; border: 1px solid #e0e0e8; border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.13), 0 1px 4px rgba(0,0,0,0.07);
+  padding: 6px; min-width: 180px; display: none;
+  flex-direction: column; gap: 1px;
+}
+.csi-embed .seg-popover.open { display: flex; }
+.csi-embed .seg-pop-item {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px; font-weight: 500; padding: 8px 10px;
+  border-radius: 6px; border: none; background: transparent;
+  color: #333340; cursor: pointer; text-align: left; width: 100%;
+  transition: background 0.1s; font-family: inherit;
+}
+.csi-embed .seg-pop-item:hover { background: #f4f4f8; }
+.csi-embed .seg-pop-item.seg-active {
+  background: #eeedfb; color: #5a50d4; font-weight: 600;
+}
+.csi-embed .bottom-seg .seg-pop-item.seg-active {
+  background: #e8eef8; color: #2a58a0;
+}
+.csi-embed .seg-pop-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.csi-embed .seg-pop-count {
+  margin-left: auto; font-size: 10px; font-weight: 700;
+  color: #999; background: #f0f0f4; border-radius: 10px; padding: 1px 6px;
+}
+.csi-embed .seg-pop-item.seg-active .seg-pop-count {
+  background: rgba(90,80,212,0.1); color: #5a50d4;
+}
+.csi-embed .bottom-seg .seg-pop-item.seg-active .seg-pop-count {
+  background: rgba(42,88,160,0.1); color: #2a58a0;
+}
+.csi-embed .filter-back {
+  font-size: 11px; font-weight: 500; color: #767686; cursor: pointer;
+  background: none; border: none; padding: 0 0 0 6px;
+  text-decoration: underline; white-space: nowrap; font-family: inherit;
+}
+.csi-embed .filter-back:hover { color: #333340; }
+.csi-embed .genre-card-list { display: flex; flex-direction: column; gap: 0; }
+
+/* Empty state — !important prevents WP theme overriding display:none */
+.csi-embed .filter-empty {
+  display: none !important;
+  max-width: 680px; margin: 0 auto 10px;
+  padding: 24px 20px; background: #fff;
+  border: 1px solid #e4e4e8; border-radius: 8px;
+  text-align: center; font-size: 13px; color: #767686;
+}
+.csi-embed .filter-empty.csi-visible {
+  display: block !important;
+}
+
+.csi-embed .filter-chip {
+  font-size: 10px; font-weight: 600; letter-spacing: 0.06em;
+  text-transform: uppercase; color: #5a50d4;
+  background: #eeedfb; border: 1px solid #c0bdf5;
+  border-radius: 20px; padding: 2px 9px; white-space: nowrap;
+  display: none;
+}
+.csi-embed .filter-chip.visible { display: inline-block; }
+
+/* ── Footer ─────────────────────────────────────────── */
+.csi-embed .csi-footer {
+  max-width: 680px; margin: 16px auto 0;
+  font-size: 11px; color: #767686; line-height: 1.6;
+}
+.csi-embed .csi-footer a { color: #5a50d4; text-decoration: none; }
+.csi-embed .csi-footer a:hover { text-decoration: underline; }
+
+/* ── Reduced motion ─────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .csi-embed .refresh-live-dot { animation: none; opacity: 1; }
+  .csi-embed .refresh-fill { transition: none; }
+  .csi-embed .seg-btn,
+  .csi-embed .seg-more,
+  .csi-embed .seg-pop-item { transition: none; }
+  .csi-embed .seg-more-caret { transition: none; }
+}
+
+/* ── High contrast ──────────────────────────────────── */
+@media (forced-colors: active) {
+  .csi-embed .event-card { border: 2px solid ButtonText !important; }
+  .csi-embed .score-bar-fill,
+  .csi-embed .refresh-fill { background: Highlight; }
+}
+
+/* ── Mobile ─────────────────────────────────────────── */
+@media (max-width: 640px) {
+  /* Segmented control: smaller buttons, prevent overflow */
+  .csi-embed .seg-btn {
+    font-size: 10px;
+    padding: 5px 8px;
+  }
+  .csi-embed .seg-more {
+    font-size: 10px;
+    padding: 6px 8px;
+  }
+  /* Popover: clamp to viewport so it never bleeds off-screen */
+  .csi-embed .seg-popover {
+    right: 0;
+    left: auto;
+    max-width: calc(100vw - 24px);
+    width: max-content;
+  }
+  /* Genre card list in filtered view */
+  .csi-embed .genre-card-list .event-card {
+    grid-template-columns: 28px 1fr 64px;
+    padding: 10px 12px 10px 10px;
+  }
+}
+@media (max-width: 480px) {
+  .csi-embed { padding: 16px 12px 32px; }
+  .csi-embed .event-card {
+    grid-template-columns: 28px 1fr 64px;
+    padding: 10px 12px 10px 10px;
+  }
+  .csi-embed .score-value { font-size: 26px; }
+  .csi-embed .card-title  { font-size: 13px !important; }
+  /* Genre pill on card: smaller on mobile */
+  .csi-embed .genre-pill {
+    font-size: 10px;
+    padding: 2px 7px;
+  }
+  /* Seg track: allow horizontal scroll as absolute last resort */
+  .csi-embed .seg-track {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .csi-embed .seg-track::-webkit-scrollbar { display: none; }
+  /* Seg wrap: ensure More button doesn't get cut */
+  .csi-embed .seg-wrap {
+    gap: 4px;
+  }
+  /* AMM strip: tighter on mobile */
+  .csi-embed .amm-strip {
+    gap: 7px;
+    padding: .55rem 12px;
+    margin: 6px -12px -10px;
+  }
+  .csi-embed .amm-eyebrow { display: none; }
+  .csi-embed .amm-icon { width: 24px; height: 24px; }
+  .csi-embed .amm-icon i { font-size: 12px; }
+  .csi-embed .amm-headline { font-size: 11px; }
+  .csi-embed .amm-date { display: none; }
+}
+</style>
+
+<div class="csi-embed">
+
+<a class="skip-link" href="#main-content">Skip to main content</a>
+
+
+
+
+
+<section aria-labelledby="top20-heading">
+  <div class="section-header">
+    <h2 id="top20-heading">Top 20 &#8212; Most Popular</h2>
+    <span class="section-tag tag-hot" aria-label="Top 20 high demand events">High Demand</span>
+  </div>
+  <div class="seg-wrap" id="top-seg-wrap">
+    <!-- segmented control injected by JS -->
+  </div>
+  <div class="filter-empty" id="top-empty" aria-live="polite">No events found for this genre in the current window.</div>
+
+<!-- TOP_CARDS_START -->
+  <article class="event-card" aria-labelledby="event-1-shaky-knees-2026-title" itemscope itemtype="https://schema.org/MusicEvent">
+    <meta itemprop="startDate" content="2026-09-18">
+    <div class="card-rank-wrap" aria-label="Ranked 1st, updated tonight. Unchanged.">
+      <span class="rank-num" aria-hidden="true">1</span>
+      <span class="rank-delta delta-flat" aria-hidden="true">—</span>
+    </div>
+    <div class="card-body">
+      <h3 class="card-title" id="event-1-shaky-knees-2026-title" itemprop="name">Shaky Knees Music Festival</h3>
+      <div class="card-meta">
+        <span class="card-meta-text"><time datetime="2026-09-18">Sep 18</time> &middot; <span itemprop="location" itemscope itemtype="https://schema.org/MusicVenue"><span itemprop="name">Piedmont Park</span></span></span>
+        <span class="genre-pill" style="background:#eef0ff;color:#283ab0;" itemprop="genre">Multi-Genre</span>
+      </div>
+      <ul class="card-signals" aria-label="Demand signals" role="list"><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Sentiment: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-low" aria-hidden="true"></span><span>Sales history: <strong>Low</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-high" aria-hidden="true"></span><span>Ticket demand: <strong>High</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-high" aria-hidden="true"></span><span>Local intent: <strong>High</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>SeatGeek Deal Score: <strong>44/100</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-low" aria-hidden="true"></span><span>YouTube subscribers: <strong>1,150</strong></span></li></ul>
+      <p class="card-insight" itemprop="description"></p>
+    </div>
+    <div class="card-score" aria-label="Popularity score: 92 out of 100">      <span class="score-label" aria-hidden="true">Score</span>
+      <span class="score-value" style="color:#5a50d4;" aria-hidden="true">92</span>
+      <div class="score-bar-track" style="background:#d8d6f8;" role="progressbar" aria-valuenow="92" aria-valuemin="0" aria-valuemax="100" aria-label="Score 92 out of 100">
+        <div class="score-bar-fill" style="width:92%;background:#5a50d4;"></div>
+      </div>
+    </div>
+  </article>
+  <article class="event-card" aria-labelledby="event-2-guns-n-roses-2026-title" itemscope itemtype="https://schema.org/MusicEvent">
+    <meta itemprop="startDate" content="2026-09-19">
+    <div class="card-rank-wrap" aria-label="Ranked 2nd, updated tonight. Unchanged.">
+      <span class="rank-num" aria-hidden="true">2</span>
+      <span class="rank-delta delta-flat" aria-hidden="true">—</span>
+    </div>
+    <div class="card-body">
+      <h3 class="card-title" id="event-2-guns-n-roses-2026-title" itemprop="name">Guns N’ Roses — World Tour 2026</h3>
+      <div class="card-meta">
+        <span class="card-meta-text"><time datetime="2026-09-19">Sep 19</time> &middot; <span itemprop="location" itemscope itemtype="https://schema.org/MusicVenue"><span itemprop="name">Truist Park</span></span></span>
+        <span class="genre-pill" style="background:#fdecea;color:#721a0a;" itemprop="genre">Rock</span>
+      </div>
+      <ul class="card-signals" aria-label="Demand signals" role="list"><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Sentiment: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-low" aria-hidden="true"></span><span>Sales history: <strong>Low</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-high" aria-hidden="true"></span><span>Ticket demand: <strong>High</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-high" aria-hidden="true"></span><span>Local intent: <strong>High</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>SeatGeek Deal Score: <strong>57/100</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Deezer fans: <strong>8.6M</strong></span></li></ul>
+      <p class="card-insight" itemprop="description">Last.fm: 5.3M listeners</p>
+    </div>
+    <div class="card-score" aria-label="Popularity score: 86 out of 100">      <span class="score-label" aria-hidden="true">Score</span>
+      <span class="score-value" style="color:#5a50d4;" aria-hidden="true">86</span>
+      <div class="score-bar-track" style="background:#d8d6f8;" role="progressbar" aria-valuenow="86" aria-valuemin="0" aria-valuemax="100" aria-label="Score 86 out of 100">
+        <div class="score-bar-fill" style="width:86%;background:#5a50d4;"></div>
+      </div>
+    </div>
+  </article>
+  <article class="event-card" aria-labelledby="event-3-acdc-2026-title" itemscope itemtype="https://schema.org/MusicEvent">
+    <meta itemprop="startDate" content="2026-08-27">
+    <div class="card-rank-wrap" aria-label="Ranked 3rd, updated tonight. Up 2 spots.">
+      <span class="rank-num" aria-hidden="true">3</span>
+      <span class="rank-delta delta-up" aria-hidden="true">↑2</span>
+    </div>
+    <div class="card-body">
+      <h3 class="card-title" id="event-3-acdc-2026-title" itemprop="name">AC/DC — Power Up Tour 2026</h3>
+      <div class="card-meta">
+        <span class="card-meta-text"><time datetime="2026-08-27">Aug 27</time> &middot; <span itemprop="location" itemscope itemtype="https://schema.org/MusicVenue"><span itemprop="name">Mercedes-Benz Stadium</span></span></span>
+        <span class="genre-pill" style="background:#fdecea;color:#721a0a;" itemprop="genre">Rock</span>
+      </div>
+      <ul class="card-signals" aria-label="Demand signals" role="list"><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Sentiment: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Sales history: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-high" aria-hidden="true"></span><span>Ticket demand: <strong>High</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Local intent: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-high" aria-hidden="true"></span><span>SeatGeek Deal Score: <strong>69/100</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-high" aria-hidden="true"></span><span>YouTube subscribers: <strong>11.7M</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-high" aria-hidden="true"></span><span>Wikipedia editions: <strong>97</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Deezer fans: <strong>9.9M</strong></span></li></ul>
+      <p class="card-insight" itemprop="description">19-album catalog · Touring for 53 years · Last.fm: 4.6M listeners · First ATL show in 5+ years</p>
+    </div>
+    <div class="card-score" aria-label="Popularity score: 84 out of 100">      <span class="score-label" aria-hidden="true">Score</span>
+      <span class="score-value" style="color:#5a50d4;" aria-hidden="true">84</span>
+      <div class="score-bar-track" style="background:#d8d6f8;" role="progressbar" aria-valuenow="84" aria-valuemin="0" aria-valuemax="100" aria-label="Score 84 out of 100">
+        <div class="score-bar-fill" style="width:84%;background:#5a50d4;"></div>
+      </div>
+    </div>
+  </article>
+  <article class="event-card" aria-labelledby="event-4-noah-kahan-2026-title" itemscope itemtype="https://schema.org/MusicEvent">
+    <meta itemprop="startDate" content="2026-07-27">
+    <div class="card-rank-wrap" aria-label="Ranked 4th, updated tonight. Down 1 spot.">
+      <span class="rank-num" aria-hidden="true">4</span>
+      <span class="rank-delta delta-down" aria-hidden="true">↓1</span>
+    </div>
+    <div class="card-body">
+      <h3 class="card-title" id="event-4-noah-kahan-2026-title" itemprop="name">Noah Kahan — The Great Divide Tour</h3>
+      <div class="card-meta">
+        <span class="card-meta-text"><time datetime="2026-07-27">Jul 27</time> &middot; <span itemprop="location" itemscope itemtype="https://schema.org/MusicVenue"><span itemprop="name">Truist Park</span></span></span>
+        <span class="genre-pill" style="background:#fde8f8;color:#650c5c;" itemprop="genre">Indie / Alt</span>
+      </div>
+      <ul class="card-signals" aria-label="Demand signals" role="list"><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Sentiment: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Sales history: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-high" aria-hidden="true"></span><span>Ticket demand: <strong>High</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-high" aria-hidden="true"></span><span>Local intent: <strong>High</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-high" aria-hidden="true"></span><span>SeatGeek Deal Score: <strong>84/100</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>YouTube subscribers: <strong>1.0M</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-low" aria-hidden="true"></span><span>Deezer fans: <strong>190,274</strong></span></li></ul>
+      <p class="card-insight" itemprop="description">Last.fm: 1.7M listeners · Wikipedia -22% this week</p>
+    </div>
+    <div class="card-score" aria-label="Popularity score: 84 out of 100">      <span class="score-label" aria-hidden="true">Score</span>
+      <span class="score-value" style="color:#5a50d4;" aria-hidden="true">84</span>
+      <div class="score-bar-track" style="background:#d8d6f8;" role="progressbar" aria-valuenow="84" aria-valuemin="0" aria-valuemax="100" aria-label="Score 84 out of 100">
+        <div class="score-bar-fill" style="width:84%;background:#5a50d4;"></div>
+      </div>
+    </div>
+  </article>
+  <article class="event-card" aria-labelledby="event-5-kacey-musgraves-2026-title" itemscope itemtype="https://schema.org/MusicEvent">
+    <meta itemprop="startDate" content="2026-09-30">
+    <div class="card-rank-wrap" aria-label="Ranked 5th, updated tonight. Down 1 spot.">
+      <span class="rank-num" aria-hidden="true">5</span>
+      <span class="rank-delta delta-down" aria-hidden="true">↓1</span>
+    </div>
+    <div class="card-body">
+      <h3 class="card-title" id="event-5-kacey-musgraves-2026-title" itemprop="name">Kacey Musgraves — Middle of Nowhere Tour</h3>
+      <div class="card-meta">
+        <span class="card-meta-text"><time datetime="2026-09-30">Sep 30</time> &middot; <span itemprop="location" itemscope itemtype="https://schema.org/MusicVenue"><span itemprop="name">State Farm Arena</span></span></span>
+        <span class="genre-pill" style="background:#fef6e0;color:#6a4400;" itemprop="genre">Country</span>
+      </div>
+      <ul class="card-signals" aria-label="Demand signals" role="list"><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Sentiment: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-high" aria-hidden="true"></span><span>Sales history: <strong>High</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-high" aria-hidden="true"></span><span>Ticket demand: <strong>High</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Local intent: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>SeatGeek Deal Score: <strong>51/100</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-high" aria-hidden="true"></span><span>Grammy wins: <strong>4</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-high" aria-hidden="true"></span><span>Wikipedia editions: <strong>36</strong></span></li></ul>
+      <p class="card-insight" itemprop="description">New album “Middle of Nowhere” in past year · 4-time Grammy winner · Last.fm: 1.2M listeners</p>
+    </div>
+    <div class="card-score" aria-label="Popularity score: 84 out of 100">      <span class="score-label" aria-hidden="true">Score</span>
+      <span class="score-value" style="color:#5a50d4;" aria-hidden="true">84</span>
+      <div class="score-bar-track" style="background:#d8d6f8;" role="progressbar" aria-valuenow="84" aria-valuemin="0" aria-valuemax="100" aria-label="Score 84 out of 100">
+        <div class="score-bar-fill" style="width:84%;background:#5a50d4;"></div>
+      </div>
+    </div>
+  </article>
+  <article class="event-card" aria-labelledby="event-6-usher-2026-title" itemscope itemtype="https://schema.org/MusicEvent">
+    <meta itemprop="startDate" content="2026-08-13">
+    <div class="card-rank-wrap" aria-label="Ranked 6th, updated tonight. Unchanged.">
+      <span class="rank-num" aria-hidden="true">6</span>
+      <span class="rank-delta delta-flat" aria-hidden="true">—</span>
+    </div>
+    <div class="card-body">
+      <h3 class="card-title" id="event-6-usher-2026-title" itemprop="name">Usher</h3>
+      <div class="card-meta">
+        <span class="card-meta-text"><time datetime="2026-08-13">Aug 13</time> &middot; <span itemprop="location" itemscope itemtype="https://schema.org/MusicVenue"><span itemprop="name">State Farm Arena</span></span></span>
+        <span class="genre-pill" style="background:#e8f5ee;color:#134a28;" itemprop="genre">R&B</span>
+      </div>
+      <ul class="card-signals" aria-label="Demand signals" role="list"><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Sentiment: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Sales history: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-high" aria-hidden="true"></span><span>Ticket demand: <strong>High</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Local intent: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>YouTube subscribers: <strong>3.5M</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-high" aria-hidden="true"></span><span>Grammy wins: <strong>8</strong></span></li></ul>
+      <p class="card-insight" itemprop="description">8-time Grammy winner · Last.fm: 5.1M listeners</p>
+    </div>
+    <div class="card-score" aria-label="Popularity score: 82 out of 100">      <span class="score-label" aria-hidden="true">Score</span>
+      <span class="score-value" style="color:#5a50d4;" aria-hidden="true">82</span>
+      <div class="score-bar-track" style="background:#d8d6f8;" role="progressbar" aria-valuenow="82" aria-valuemin="0" aria-valuemax="100" aria-label="Score 82 out of 100">
+        <div class="score-bar-fill" style="width:82%;background:#5a50d4;"></div>
+      </div>
+    </div>
+  </article>
+  <article class="event-card" aria-labelledby="event-7-aespa-2026-title" itemscope itemtype="https://schema.org/MusicEvent">
+    <meta itemprop="startDate" content="2026-09-24">
+    <div class="card-rank-wrap" aria-label="Ranked 7th, updated tonight. Unchanged.">
+      <span class="rank-num" aria-hidden="true">7</span>
+      <span class="rank-delta delta-flat" aria-hidden="true">—</span>
+    </div>
+    <div class="card-body">
+      <h3 class="card-title" id="event-7-aespa-2026-title" itemprop="name">aespa — SYNK: COMPLÆXITY Tour</h3>
+      <div class="card-meta">
+        <span class="card-meta-text"><time datetime="2026-09-24">Sep 24</time> &middot; <span itemprop="location" itemscope itemtype="https://schema.org/MusicVenue"><span itemprop="name">State Farm Arena</span></span></span>
+        <span class="genre-pill" style="background:#f0f0f4;color:#333340;" itemprop="genre">K-Pop</span>
+      </div>
+      <ul class="card-signals" aria-label="Demand signals" role="list"><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Sentiment: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Sales history: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-high" aria-hidden="true"></span><span>Ticket demand: <strong>High</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-high" aria-hidden="true"></span><span>Local intent: <strong>High</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>SeatGeek Deal Score: <strong>49/100</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-low" aria-hidden="true"></span><span>Deezer fans: <strong>450,850</strong></span></li></ul>
+      <p class="card-insight" itemprop="description">Last.fm: 1.4M listeners · 207 plays/fan</p>
+    </div>
+    <div class="card-score" aria-label="Popularity score: 82 out of 100">      <span class="score-label" aria-hidden="true">Score</span>
+      <span class="score-value" style="color:#5a50d4;" aria-hidden="true">82</span>
+      <div class="score-bar-track" style="background:#d8d6f8;" role="progressbar" aria-valuenow="82" aria-valuemin="0" aria-valuemax="100" aria-label="Score 82 out of 100">
+        <div class="score-bar-fill" style="width:82%;background:#5a50d4;"></div>
+      </div>
+    </div>
+  </article>
+  <article class="event-card" aria-labelledby="event-8-mumford-sons-2026-title" itemscope itemtype="https://schema.org/MusicEvent">
+    <meta itemprop="startDate" content="2026-08-04">
+    <div class="card-rank-wrap" aria-label="Ranked 8th, updated tonight. Up 2 spots.">
+      <span class="rank-num" aria-hidden="true">8</span>
+      <span class="rank-delta delta-up" aria-hidden="true">↑2</span>
+    </div>
+    <div class="card-body">
+      <h3 class="card-title" id="event-8-mumford-sons-2026-title" itemprop="name">Mumford & Sons — Prizefighter Tour</h3>
+      <div class="card-meta">
+        <span class="card-meta-text"><time datetime="2026-08-04">Aug 4</time> &middot; <span itemprop="location" itemscope itemtype="https://schema.org/MusicVenue"><span itemprop="name">State Farm Arena</span></span></span>
+        <span class="genre-pill" style="background:#fde8f8;color:#650c5c;" itemprop="genre">Indie / Alt</span>
+      </div>
+      <ul class="card-signals" aria-label="Demand signals" role="list"><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Sentiment: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Sales history: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-high" aria-hidden="true"></span><span>Ticket demand: <strong>High</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Local intent: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-high" aria-hidden="true"></span><span>SeatGeek Deal Score: <strong>66/100</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>YouTube subscribers: <strong>1.5M</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-high" aria-hidden="true"></span><span>Grammy wins: <strong>2</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-high" aria-hidden="true"></span><span>Wikipedia editions: <strong>42</strong></span></li></ul>
+      <p class="card-insight" itemprop="description">New album “Prizefighter” in past year · 2-time Grammy winner · Touring for 19 years · 38-date world tour · Last.fm: 2.7M listeners</p>
+    </div>
+    <div class="card-score" aria-label="Popularity score: 79 out of 100">      <span class="score-label" aria-hidden="true">Score</span>
+      <span class="score-value" style="color:#5a50d4;" aria-hidden="true">79</span>
+      <div class="score-bar-track" style="background:#d8d6f8;" role="progressbar" aria-valuenow="79" aria-valuemin="0" aria-valuemax="100" aria-label="Score 79 out of 100">
+        <div class="score-bar-fill" style="width:79%;background:#5a50d4;"></div>
+      </div>
+    </div>
+  </article>
+  <article class="event-card" aria-labelledby="event-9-rob-zombie-2026-title" itemscope itemtype="https://schema.org/MusicEvent">
+    <meta itemprop="startDate" content="2026-08-23">
+    <div class="card-rank-wrap" aria-label="Ranked 9th, updated tonight. Up 2 spots.">
+      <span class="rank-num" aria-hidden="true">9</span>
+      <span class="rank-delta delta-up" aria-hidden="true">↑2</span>
+    </div>
+    <div class="card-body">
+      <h3 class="card-title" id="event-9-rob-zombie-2026-title" itemprop="name">Rob Zombie & Marilyn Manson with The Hu & Orgy</h3>
+      <div class="card-meta">
+        <span class="card-meta-text"><time datetime="2026-08-23">Aug 23</time> &middot; <span itemprop="location" itemscope itemtype="https://schema.org/MusicVenue"><span itemprop="name">Ameris Bank Amphitheatre</span></span></span>
+        <span class="genre-pill" style="background:#fdecea;color:#721a0a;" itemprop="genre">Rock</span>
+      </div>
+      <ul class="card-signals" aria-label="Demand signals" role="list"><li class="signal" role="listitem"><span class="signal-dot dot-high" aria-hidden="true"></span><span>Sentiment: <strong>High</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-low" aria-hidden="true"></span><span>Sales history: <strong>Low</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-high" aria-hidden="true"></span><span>Ticket demand: <strong>High</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Local intent: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>SeatGeek Deal Score: <strong>52/100</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-low" aria-hidden="true"></span><span>Deezer fans: <strong>594,119</strong></span></li></ul>
+      <p class="card-insight" itemprop="description">Last.fm: 2.4M listeners</p>
+    </div>
+    <div class="card-score" aria-label="Popularity score: 79 out of 100">      <span class="score-label" aria-hidden="true">Score</span>
+      <span class="score-value" style="color:#5a50d4;" aria-hidden="true">79</span>
+      <div class="score-bar-track" style="background:#d8d6f8;" role="progressbar" aria-valuenow="79" aria-valuemin="0" aria-valuemax="100" aria-label="Score 79 out of 100">
+        <div class="score-bar-fill" style="width:79%;background:#5a50d4;"></div>
+      </div>
+    </div>
+  </article>
+  <article class="event-card" aria-labelledby="event-10-daniel-caesar-2026-title" itemscope itemtype="https://schema.org/MusicEvent">
+    <meta itemprop="startDate" content="2026-07-24">
+    <div class="card-rank-wrap" aria-label="Ranked 10th, updated tonight. Up 2 spots.">
+      <span class="rank-num" aria-hidden="true">10</span>
+      <span class="rank-delta delta-up" aria-hidden="true">↑2</span>
+    </div>
+    <div class="card-body">
+      <h3 class="card-title" id="event-10-daniel-caesar-2026-title" itemprop="name">Daniel Caesar — Son of Spergy Tour</h3>
+      <div class="card-meta">
+        <span class="card-meta-text"><time datetime="2026-07-24">Jul 24</time> &middot; <span itemprop="location" itemscope itemtype="https://schema.org/MusicVenue"><span itemprop="name">State Farm Arena</span></span></span>
+        <span class="genre-pill" style="background:#e8f5ee;color:#134a28;" itemprop="genre">R&B</span>
+      </div>
+      <ul class="card-signals" aria-label="Demand signals" role="list"><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Sentiment: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-low" aria-hidden="true"></span><span>Sales history: <strong>Low</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-high" aria-hidden="true"></span><span>Ticket demand: <strong>High</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Local intent: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-high" aria-hidden="true"></span><span>SeatGeek Deal Score: <strong>77/100</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-low" aria-hidden="true"></span><span>Deezer fans: <strong>404,912</strong></span></li></ul>
+      <p class="card-insight" itemprop="description">Last.fm: 2.5M listeners · Wikipedia +34% this week</p>
+    </div>
+    <div class="card-score" aria-label="Popularity score: 76 out of 100">      <span class="score-label" aria-hidden="true">Score</span>
+      <span class="score-value" style="color:#5a50d4;" aria-hidden="true">76</span>
+      <div class="score-bar-track" style="background:#d8d6f8;" role="progressbar" aria-valuenow="76" aria-valuemin="0" aria-valuemax="100" aria-label="Score 76 out of 100">
+        <div class="score-bar-fill" style="width:76%;background:#5a50d4;"></div>
+      </div>
+    </div>
+  </article>
+  <article class="event-card" aria-labelledby="event-11-olivia-dean-2026-title" itemscope itemtype="https://schema.org/MusicEvent">
+    <meta itemprop="startDate" content="2026-08-22">
+    <div class="card-rank-wrap" aria-label="Ranked 11th, updated tonight. Up 2 spots.">
+      <span class="rank-num" aria-hidden="true">11</span>
+      <span class="rank-delta delta-up" aria-hidden="true">↑2</span>
+    </div>
+    <div class="card-body">
+      <h3 class="card-title" id="event-11-olivia-dean-2026-title" itemprop="name">Olivia Dean — The Art of Loving Tour</h3>
+      <div class="card-meta">
+        <span class="card-meta-text"><time datetime="2026-08-22">Aug 22</time> &middot; <span itemprop="location" itemscope itemtype="https://schema.org/MusicVenue"><span itemprop="name">State Farm Arena</span></span></span>
+        <span class="genre-pill" style="background:#eeedfb;color:#4038b0;" itemprop="genre">Pop</span>
+      </div>
+      <ul class="card-signals" aria-label="Demand signals" role="list"><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Sentiment: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-low" aria-hidden="true"></span><span>Sales history: <strong>Low</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-high" aria-hidden="true"></span><span>Ticket demand: <strong>High</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Local intent: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-high" aria-hidden="true"></span><span>SeatGeek Deal Score: <strong>73/100</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-low" aria-hidden="true"></span><span>YouTube subscribers: <strong>224</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-low" aria-hidden="true"></span><span>Deezer fans: <strong>143,208</strong></span></li></ul>
+      <p class="card-insight" itemprop="description">Last.fm: 1.6M listeners</p>
+    </div>
+    <div class="card-score" aria-label="Popularity score: 72 out of 100">      <span class="score-label" aria-hidden="true">Score</span>
+      <span class="score-value" style="color:#5a50d4;" aria-hidden="true">72</span>
+      <div class="score-bar-track" style="background:#d8d6f8;" role="progressbar" aria-valuenow="72" aria-valuemin="0" aria-valuemax="100" aria-label="Score 72 out of 100">
+        <div class="score-bar-fill" style="width:72%;background:#5a50d4;"></div>
+      </div>
+    </div>
+  </article>
+  <article class="event-card" aria-labelledby="event-12-brooks-dunn-2026-title" itemscope itemtype="https://schema.org/MusicEvent">
+    <meta itemprop="startDate" content="2026-09-11">
+    <div class="card-rank-wrap" aria-label="Ranked 12th, updated tonight. Up 2 spots.">
+      <span class="rank-num" aria-hidden="true">12</span>
+      <span class="rank-delta delta-up" aria-hidden="true">↑2</span>
+    </div>
+    <div class="card-body">
+      <h3 class="card-title" id="event-12-brooks-dunn-2026-title" itemprop="name">Brooks & Dunn — Neon Moon Tour 2026</h3>
+      <div class="card-meta">
+        <span class="card-meta-text"><time datetime="2026-09-11">Sep 11</time> &middot; <span itemprop="location" itemscope itemtype="https://schema.org/MusicVenue"><span itemprop="name">Ameris Bank Amphitheatre</span></span></span>
+        <span class="genre-pill" style="background:#fef6e0;color:#6a4400;" itemprop="genre">Country</span>
+      </div>
+      <ul class="card-signals" aria-label="Demand signals" role="list"><li class="signal" role="listitem"><span class="signal-dot dot-high" aria-hidden="true"></span><span>Sentiment: <strong>High</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Sales history: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-high" aria-hidden="true"></span><span>Ticket demand: <strong>High</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Local intent: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>SeatGeek Deal Score: <strong>57/100</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>YouTube subscribers: <strong>1.0M</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-high" aria-hidden="true"></span><span>Grammy wins: <strong>2</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-low" aria-hidden="true"></span><span>Deezer fans: <strong>198,695</strong></span></li></ul>
+      <p class="card-insight" itemprop="description">2-time Grammy winner · Wikipedia +23% this week</p>
+    </div>
+    <div class="card-score" aria-label="Popularity score: 72 out of 100">      <span class="score-label" aria-hidden="true">Score</span>
+      <span class="score-value" style="color:#5a50d4;" aria-hidden="true">72</span>
+      <div class="score-bar-track" style="background:#d8d6f8;" role="progressbar" aria-valuenow="72" aria-valuemin="0" aria-valuemax="100" aria-label="Score 72 out of 100">
+        <div class="score-bar-fill" style="width:72%;background:#5a50d4;"></div>
+      </div>
+    </div>
+  </article>
+  <article class="event-card" aria-labelledby="event-13-lynyrd-skynyrd-2026-title" itemscope itemtype="https://schema.org/MusicEvent">
+    <meta itemprop="startDate" content="2026-07-23">
+    <div class="card-rank-wrap" aria-label="Ranked 13th, updated tonight. Up 2 spots.">
+      <span class="rank-num" aria-hidden="true">13</span>
+      <span class="rank-delta delta-up" aria-hidden="true">↑2</span>
+    </div>
+    <div class="card-body">
+      <h3 class="card-title" id="event-13-lynyrd-skynyrd-2026-title" itemprop="name">Lynyrd Skynyrd & Foreigner</h3>
+      <div class="card-meta">
+        <span class="card-meta-text"><time datetime="2026-07-23">Jul 23</time> &middot; <span itemprop="location" itemscope itemtype="https://schema.org/MusicVenue"><span itemprop="name">Ameris Bank Amphitheatre</span></span></span>
+        <span class="genre-pill" style="background:#fdecea;color:#721a0a;" itemprop="genre">Rock</span>
+      </div>
+      <ul class="card-signals" aria-label="Demand signals" role="list"><li class="signal" role="listitem"><span class="signal-dot dot-high" aria-hidden="true"></span><span>Sentiment: <strong>High</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Sales history: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-high" aria-hidden="true"></span><span>Ticket demand: <strong>High</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Local intent: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>SeatGeek Deal Score: <strong>60/100</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>YouTube subscribers: <strong>1.7M</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Deezer fans: <strong>1.0M</strong></span></li></ul>
+      <p class="card-insight" itemprop="description">Last.fm: 3.4M listeners</p>
+    </div>
+    <div class="card-score" aria-label="Popularity score: 70 out of 100">      <span class="score-label" aria-hidden="true">Score</span>
+      <span class="score-value" style="color:#5a50d4;" aria-hidden="true">70</span>
+      <div class="score-bar-track" style="background:#d8d6f8;" role="progressbar" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100" aria-label="Score 70 out of 100">
+        <div class="score-bar-fill" style="width:70%;background:#5a50d4;"></div>
+      </div>
+    </div>
+  <div class="amm-strip"><div class="amm-icon"><i class="ti ti-camera" aria-hidden="true"></i></div><div class="amm-text"><div class="amm-eyebrow">Prior Atlanta Music Magazine coverage</div><div class="amm-headline"><a href="https://atlantamusicmagazine.com/the-renegades-juke-box-heroes-tour-featuring-co-headliners-styx-and-foreigner-rolled-through-ameris-bank-amphitheatre-in-atlanta-georgia-on-wednesday-july-17-2024/" target="_blank" rel="noopener">The Renegades &amp; Juke Box Heroes Tour, Featuring Co-Headliners Styx and Foreigner, Rolled through Ameris Bank Amphitheatre in Atlanta, Georgia, on Wednesday, July 17, 2024 -</a></div></div><div class="amm-date">Jul 2024</div></div>
+  </article>
+  <article class="event-card" aria-labelledby="event-14-buju-banton-2026-title" itemscope itemtype="https://schema.org/MusicEvent">
+    <meta itemprop="startDate" content="2026-07-25">
+    <div class="card-rank-wrap" aria-label="Ranked 14th, updated tonight. Up 2 spots.">
+      <span class="rank-num" aria-hidden="true">14</span>
+      <span class="rank-delta delta-up" aria-hidden="true">↑2</span>
+    </div>
+    <div class="card-body">
+      <h3 class="card-title" id="event-14-buju-banton-2026-title" itemprop="name">Buju Banton & Stephen Marley — Roots and Rhymes Tour</h3>
+      <div class="card-meta">
+        <span class="card-meta-text"><time datetime="2026-07-25">Jul 25</time> &middot; <span itemprop="location" itemscope itemtype="https://schema.org/MusicVenue"><span itemprop="name">Lakewood Amphitheatre</span></span></span>
+        <span class="genre-pill" style="background:#eef0ff;color:#283ab0;" itemprop="genre">Reggae</span>
+      </div>
+      <ul class="card-signals" aria-label="Demand signals" role="list"><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Sentiment: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Sales history: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-high" aria-hidden="true"></span><span>Ticket demand: <strong>High</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Local intent: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>SeatGeek Deal Score: <strong>46/100</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-low" aria-hidden="true"></span><span>YouTube subscribers: <strong>671,000</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-high" aria-hidden="true"></span><span>Grammy wins: <strong>1</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-low" aria-hidden="true"></span><span>Deezer fans: <strong>251,223</strong></span></li></ul>
+      <p class="card-insight" itemprop="description">Grammy winner · Wikipedia +82% this week</p>
+    </div>
+    <div class="card-score" aria-label="Popularity score: 70 out of 100">      <span class="score-label" aria-hidden="true">Score</span>
+      <span class="score-value" style="color:#5a50d4;" aria-hidden="true">70</span>
+      <div class="score-bar-track" style="background:#d8d6f8;" role="progressbar" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100" aria-label="Score 70 out of 100">
+        <div class="score-bar-fill" style="width:70%;background:#5a50d4;"></div>
+      </div>
+    </div>
+  </article>
+  <article class="event-card" aria-labelledby="event-15-chance-rapper-2026-title" itemscope itemtype="https://schema.org/MusicEvent">
+    <meta itemprop="startDate" content="2026-09-03">
+    <div class="card-rank-wrap" aria-label="Ranked 15th, updated tonight. Up 2 spots.">
+      <span class="rank-num" aria-hidden="true">15</span>
+      <span class="rank-delta delta-up" aria-hidden="true">↑2</span>
+    </div>
+    <div class="card-body">
+      <h3 class="card-title" id="event-15-chance-rapper-2026-title" itemprop="name">Chance the Rapper</h3>
+      <div class="card-meta">
+        <span class="card-meta-text"><time datetime="2026-09-03">Sep 3</time> &middot; <span itemprop="location" itemscope itemtype="https://schema.org/MusicVenue"><span itemprop="name">Coca-Cola Roxy</span></span></span>
+        <span class="genre-pill" style="background:#e8f5ee;color:#134a28;" itemprop="genre">Hip-Hop</span>
+      </div>
+      <ul class="card-signals" aria-label="Demand signals" role="list"><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Sentiment: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-low" aria-hidden="true"></span><span>Sales history: <strong>Low</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Ticket demand: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Local intent: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>SeatGeek Deal Score: <strong>47/100</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>YouTube subscribers: <strong>1.7M</strong></span></li></ul>
+      <p class="card-insight" itemprop="description">Last.fm: 1.4M listeners · Wikipedia -19% this week</p>
+    </div>
+    <div class="card-score" aria-label="Popularity score: 70 out of 100">      <span class="score-label" aria-hidden="true">Score</span>
+      <span class="score-value" style="color:#5a50d4;" aria-hidden="true">70</span>
+      <div class="score-bar-track" style="background:#d8d6f8;" role="progressbar" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100" aria-label="Score 70 out of 100">
+        <div class="score-bar-fill" style="width:70%;background:#5a50d4;"></div>
+      </div>
+    </div>
+  </article>
+  <article class="event-card" aria-labelledby="event-16-jonas-brothers-2026-title" itemscope itemtype="https://schema.org/MusicEvent">
+    <meta itemprop="startDate" content="2026-08-20">
+    <div class="card-rank-wrap" aria-label="Ranked 16th, updated tonight. Up 2 spots.">
+      <span class="rank-num" aria-hidden="true">16</span>
+      <span class="rank-delta delta-up" aria-hidden="true">↑2</span>
+    </div>
+    <div class="card-body">
+      <h3 class="card-title" id="event-16-jonas-brothers-2026-title" itemprop="name">Jonas Brothers</h3>
+      <div class="card-meta">
+        <span class="card-meta-text"><time datetime="2026-08-20">Aug 20</time> &middot; <span itemprop="location" itemscope itemtype="https://schema.org/MusicVenue"><span itemprop="name">Ameris Bank Amphitheatre</span></span></span>
+        <span class="genre-pill" style="background:#eeedfb;color:#4038b0;" itemprop="genre">Pop</span>
+      </div>
+      <ul class="card-signals" aria-label="Demand signals" role="list"><li class="signal" role="listitem"><span class="signal-dot dot-high" aria-hidden="true"></span><span>Sentiment: <strong>High</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Sales history: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-high" aria-hidden="true"></span><span>Ticket demand: <strong>High</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Local intent: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-high" aria-hidden="true"></span><span>Wikipedia editions: <strong>67</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Deezer fans: <strong>1.7M</strong></span></li></ul>
+      <p class="card-insight" itemprop="description">Touring for 21 years · Last.fm: 2.2M listeners</p>
+    </div>
+    <div class="card-score" aria-label="Popularity score: 66 out of 100">      <span class="score-label" aria-hidden="true">Score</span>
+      <span class="score-value" style="color:#5a50d4;" aria-hidden="true">66</span>
+      <div class="score-bar-track" style="background:#d8d6f8;" role="progressbar" aria-valuenow="66" aria-valuemin="0" aria-valuemax="100" aria-label="Score 66 out of 100">
+        <div class="score-bar-fill" style="width:66%;background:#5a50d4;"></div>
+      </div>
+    </div>
+  </article>
+  <article class="event-card" aria-labelledby="event-17-gorillaz-2026-title" itemscope itemtype="https://schema.org/MusicEvent">
+    <meta itemprop="startDate" content="2026-09-20">
+    <div class="card-rank-wrap" aria-label="Ranked 17th, updated tonight. New entry.">
+      <span class="rank-num" aria-hidden="true">17</span>
+      <span class="rank-delta delta-new" aria-hidden="true">NEW</span>
+    </div>
+    <div class="card-body">
+      <h3 class="card-title" id="event-17-gorillaz-2026-title" itemprop="name">Gorillaz</h3>
+      <div class="card-meta">
+        <span class="card-meta-text"><time datetime="2026-09-20">Sep 20</time> &middot; <span itemprop="location" itemscope itemtype="https://schema.org/MusicVenue"><span itemprop="name">Ameris Bank Amphitheatre</span></span></span>
+        <span class="genre-pill" style="background:#fdecea;color:#721a0a;" itemprop="genre">Rock</span>
+      </div>
+      <ul class="card-signals" aria-label="Demand signals" role="list"><li class="signal" role="listitem"><span class="signal-dot dot-high" aria-hidden="true"></span><span>Sentiment: <strong>High</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Sales history: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-high" aria-hidden="true"></span><span>Ticket demand: <strong>High</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Local intent: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>SeatGeek Deal Score: <strong>44/100</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-high" aria-hidden="true"></span><span>Wikipedia editions: <strong>55</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Deezer fans: <strong>3.0M</strong></span></li></ul>
+      <p class="card-insight" itemprop="description">Touring for 28 years · Last.fm: 7.0M listeners</p>
+    </div>
+    <div class="card-score" aria-label="Popularity score: 66 out of 100">      <span class="score-label" aria-hidden="true">Score</span>
+      <span class="score-value" style="color:#5a50d4;" aria-hidden="true">66</span>
+      <div class="score-bar-track" style="background:#d8d6f8;" role="progressbar" aria-valuenow="66" aria-valuemin="0" aria-valuemax="100" aria-label="Score 66 out of 100">
+        <div class="score-bar-fill" style="width:66%;background:#5a50d4;"></div>
+      </div>
+    </div>
+  </article>
+  <article class="event-card" aria-labelledby="event-18-empire-of-the-sun-2026-title" itemscope itemtype="https://schema.org/MusicEvent">
+    <meta itemprop="startDate" content="2026-09-13">
+    <div class="card-rank-wrap" aria-label="Ranked 18th, updated tonight. Up 1 spot.">
+      <span class="rank-num" aria-hidden="true">18</span>
+      <span class="rank-delta delta-up" aria-hidden="true">↑1</span>
+    </div>
+    <div class="card-body">
+      <h3 class="card-title" id="event-18-empire-of-the-sun-2026-title" itemprop="name">Empire of the Sun — Ask That God Tour</h3>
+      <div class="card-meta">
+        <span class="card-meta-text"><time datetime="2026-09-13">Sep 13</time> &middot; <span itemprop="location" itemscope itemtype="https://schema.org/MusicVenue"><span itemprop="name">Ameris Bank Amphitheatre</span></span></span>
+        <span class="genre-pill" style="background:#f0f0f4;color:#333340;" itemprop="genre">Electronic</span>
+      </div>
+      <ul class="card-signals" aria-label="Demand signals" role="list"><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Sentiment: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Sales history: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-high" aria-hidden="true"></span><span>Ticket demand: <strong>High</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Local intent: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>SeatGeek Deal Score: <strong>46/100</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-low" aria-hidden="true"></span><span>YouTube subscribers: <strong>5,910</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-low" aria-hidden="true"></span><span>Deezer fans: <strong>443,865</strong></span></li></ul>
+      <p class="card-insight" itemprop="description">Last.fm: 3.2M listeners</p>
+    </div>
+    <div class="card-score" aria-label="Popularity score: 65 out of 100">      <span class="score-label" aria-hidden="true">Score</span>
+      <span class="score-value" style="color:#5a50d4;" aria-hidden="true">65</span>
+      <div class="score-bar-track" style="background:#d8d6f8;" role="progressbar" aria-valuenow="65" aria-valuemin="0" aria-valuemax="100" aria-label="Score 65 out of 100">
+        <div class="score-bar-fill" style="width:65%;background:#5a50d4;"></div>
+      </div>
+    </div>
+  </article>
+  <article class="event-card" aria-labelledby="event-19-isaiah-rashad-2026-title" itemscope itemtype="https://schema.org/MusicEvent">
+    <meta itemprop="startDate" content="2026-08-13">
+    <div class="card-rank-wrap" aria-label="Ranked 19th, updated tonight. Up 1 spot.">
+      <span class="rank-num" aria-hidden="true">19</span>
+      <span class="rank-delta delta-up" aria-hidden="true">↑1</span>
+    </div>
+    <div class="card-body">
+      <h3 class="card-title" id="event-19-isaiah-rashad-2026-title" itemprop="name">Isaiah Rashad</h3>
+      <div class="card-meta">
+        <span class="card-meta-text"><time datetime="2026-08-13">Aug 13</time> &middot; <span itemprop="location" itemscope itemtype="https://schema.org/MusicVenue"><span itemprop="name">Coca-Cola Roxy</span></span></span>
+        <span class="genre-pill" style="background:#e8f5ee;color:#134a28;" itemprop="genre">Hip-Hop</span>
+      </div>
+      <ul class="card-signals" aria-label="Demand signals" role="list"><li class="signal" role="listitem"><span class="signal-dot dot-high" aria-hidden="true"></span><span>Sentiment: <strong>High</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Sales history: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Ticket demand: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Local intent: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>SeatGeek Deal Score: <strong>42/100</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Wikipedia editions: <strong>11</strong></span></li></ul>
+      <p class="card-insight" itemprop="description">Last.fm: 1.4M listeners</p>
+    </div>
+    <div class="card-score" aria-label="Popularity score: 64 out of 100">      <span class="score-label" aria-hidden="true">Score</span>
+      <span class="score-value" style="color:#5a50d4;" aria-hidden="true">64</span>
+      <div class="score-bar-track" style="background:#d8d6f8;" role="progressbar" aria-valuenow="64" aria-valuemin="0" aria-valuemax="100" aria-label="Score 64 out of 100">
+        <div class="score-bar-fill" style="width:64%;background:#5a50d4;"></div>
+      </div>
+    </div>
+  </article>
+  <article class="event-card" aria-labelledby="event-20-malcolm-todd-2026-title" itemscope itemtype="https://schema.org/MusicEvent">
+    <meta itemprop="startDate" content="2026-09-12">
+    <div class="card-rank-wrap" aria-label="Ranked 20th, updated tonight. New entry.">
+      <span class="rank-num" aria-hidden="true">20</span>
+      <span class="rank-delta delta-new" aria-hidden="true">NEW</span>
+    </div>
+    <div class="card-body">
+      <h3 class="card-title" id="event-20-malcolm-todd-2026-title" itemprop="name">Malcolm Todd</h3>
+      <div class="card-meta">
+        <span class="card-meta-text"><time datetime="2026-09-12">Sep 12</time> &middot; <span itemprop="location" itemscope itemtype="https://schema.org/MusicVenue"><span itemprop="name">Coca-Cola Roxy</span></span></span>
+        <span class="genre-pill" style="background:#eeedfb;color:#4038b0;" itemprop="genre">Pop</span>
+      </div>
+      <ul class="card-signals" aria-label="Demand signals" role="list"><li class="signal" role="listitem"><span class="signal-dot dot-high" aria-hidden="true"></span><span>Sentiment: <strong>High</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Sales history: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Ticket demand: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Local intent: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-high" aria-hidden="true"></span><span>SeatGeek Deal Score: <strong>65/100</strong></span></li></ul>
+      <p class="card-insight" itemprop="description">Last.fm: 1.7M listeners · Wikipedia -29% this week</p>
+    </div>
+    <div class="card-score" aria-label="Popularity score: 62 out of 100">      <span class="score-label" aria-hidden="true">Score</span>
+      <span class="score-value" style="color:#5a50d4;" aria-hidden="true">62</span>
+      <div class="score-bar-track" style="background:#d8d6f8;" role="progressbar" aria-valuenow="62" aria-valuemin="0" aria-valuemax="100" aria-label="Score 62 out of 100">
+        <div class="score-bar-fill" style="width:62%;background:#5a50d4;"></div>
+      </div>
+    </div>
+  </article>
+<!-- TOP_CARDS_END -->
+
+</section>
+
+<div class="spacer"></div>
+
+<section aria-labelledby="bottom20-heading">
+  <div class="section-header">
+    <h2 id="bottom20-heading">Bottom 20 &#8212; Least Popular</h2>
+    <span class="section-tag tag-cold" aria-label="Bottom 20 soft demand events">Soft Demand</span>
+  </div>
+  <div class="seg-wrap bottom-seg" id="bottom-seg-wrap">
+    <!-- segmented control injected by JS -->
+  </div>
+  <div class="filter-empty" id="bottom-empty" aria-live="polite">No events found for this genre in the current window.</div>
+
+<!-- BOTTOM_CARDS_START -->
+  <article class="event-card bottom" aria-labelledby="event-b1-slayyyter-2026-title" itemscope itemtype="https://schema.org/MusicEvent">
+    <meta itemprop="startDate" content="2026-09-21">
+    <div class="card-rank-wrap" aria-label="Ranked 1st least popular, updated tonight. Unchanged.">
+      <span class="rank-num" aria-hidden="true">1</span>
+      <span class="rank-delta delta-flat" aria-hidden="true">—</span>
+    </div>
+    <div class="card-body">
+      <h3 class="card-title" id="event-b1-slayyyter-2026-title" itemprop="name">Slayyyter — Wor$t Girl in the World Tour</h3>
+      <div class="card-meta">
+        <span class="card-meta-text"><time datetime="2026-09-21">Sep 21</time> &middot; <span itemprop="location" itemscope itemtype="https://schema.org/MusicVenue"><span itemprop="name">The Eastern</span></span></span>
+        <span class="genre-pill" style="background:#eef0ff;color:#283ab0;" itemprop="genre">Hyperpop</span>
+      </div>
+      <ul class="card-signals" aria-label="Demand signals" role="list"><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Sentiment: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Sales history: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Ticket demand: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-low" aria-hidden="true"></span><span>Local intent: <strong>Low</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>SeatGeek Deal Score: <strong>48/100</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-low" aria-hidden="true"></span><span>YouTube subscribers: <strong>3,110</strong></span></li></ul>
+      <p class="card-insight" itemprop="description">Last.fm: 1.1M listeners</p>
+    </div>
+    <div class="card-score" aria-label="Popularity score: 23 out of 100">      <span class="score-label" aria-hidden="true">Score</span>
+      <span class="score-value" style="color:#2a58a0;" aria-hidden="true">23</span>
+      <div class="score-bar-track" style="background:#c0d0ed;" role="progressbar" aria-valuenow="23" aria-valuemin="0" aria-valuemax="100" aria-label="Score 23 out of 100">
+        <div class="score-bar-fill" style="width:23%;background:#2a58a0;"></div>
+      </div>
+    </div>
+  </article>
+  <article class="event-card bottom" aria-labelledby="event-b2-justine-skye-2026-title" itemscope itemtype="https://schema.org/MusicEvent">
+    <meta itemprop="startDate" content="2026-07-26">
+    <div class="card-rank-wrap" aria-label="Ranked 2nd least popular, updated tonight. Unchanged.">
+      <span class="rank-num" aria-hidden="true">2</span>
+      <span class="rank-delta delta-flat" aria-hidden="true">—</span>
+    </div>
+    <div class="card-body">
+      <h3 class="card-title" id="event-b2-justine-skye-2026-title" itemprop="name">Justine Skye</h3>
+      <div class="card-meta">
+        <span class="card-meta-text"><time datetime="2026-07-26">Jul 26</time> &middot; <span itemprop="location" itemscope itemtype="https://schema.org/MusicVenue"><span itemprop="name">Vinyl at Center Stage</span></span></span>
+        <span class="genre-pill" style="background:#e8f5ee;color:#134a28;" itemprop="genre">R&B</span>
+      </div>
+      <ul class="card-signals" aria-label="Demand signals" role="list"><li class="signal" role="listitem"><span class="signal-dot dot-high" aria-hidden="true"></span><span>Sentiment: <strong>High</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-low" aria-hidden="true"></span><span>Sales history: <strong>Low</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Ticket demand: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-low" aria-hidden="true"></span><span>Local intent: <strong>Low</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-low" aria-hidden="true"></span><span>SeatGeek Deal Score: <strong>32/100</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-low" aria-hidden="true"></span><span>YouTube subscribers: <strong>780,000</strong></span></li></ul>
+      <p class="card-insight" itemprop="description">Wikipedia -40% this week</p>
+    </div>
+    <div class="card-score" aria-label="Popularity score: 25 out of 100">      <span class="score-label" aria-hidden="true">Score</span>
+      <span class="score-value" style="color:#2a58a0;" aria-hidden="true">25</span>
+      <div class="score-bar-track" style="background:#c0d0ed;" role="progressbar" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100" aria-label="Score 25 out of 100">
+        <div class="score-bar-fill" style="width:25%;background:#2a58a0;"></div>
+      </div>
+    </div>
+  </article>
+  <article class="event-card bottom" aria-labelledby="event-b3-wynonna-melissa-2026-title" itemscope itemtype="https://schema.org/MusicEvent">
+    <meta itemprop="startDate" content="2026-08-07">
+    <div class="card-rank-wrap" aria-label="Ranked 3rd least popular, updated tonight. Up 1 spot.">
+      <span class="rank-num" aria-hidden="true">3</span>
+      <span class="rank-delta delta-up" aria-hidden="true">↑1</span>
+    </div>
+    <div class="card-body">
+      <h3 class="card-title" id="event-b3-wynonna-melissa-2026-title" itemprop="name">Wynonna Judd & Melissa Etheridge — Raised On Radio Tour</h3>
+      <div class="card-meta">
+        <span class="card-meta-text"><time datetime="2026-08-07">Aug 7</time> &middot; <span itemprop="location" itemscope itemtype="https://schema.org/MusicVenue"><span itemprop="name">Synovus Bank Amphitheater at Chastain Park</span></span></span>
+        <span class="genre-pill" style="background:#fef6e0;color:#6a4400;" itemprop="genre">Classic Rock</span>
+      </div>
+      <ul class="card-signals" aria-label="Demand signals" role="list"><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Sentiment: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Sales history: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Ticket demand: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-low" aria-hidden="true"></span><span>Local intent: <strong>Low</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>SeatGeek Deal Score: <strong>49/100</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-low" aria-hidden="true"></span><span>YouTube subscribers: <strong>72,100</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-high" aria-hidden="true"></span><span>Grammy wins: <strong>1</strong></span></li></ul>
+      <p class="card-insight" itemprop="description">Grammy winner · Wikipedia +18% this week</p>
+    </div>
+    <div class="card-score" aria-label="Popularity score: 27 out of 100">      <span class="score-label" aria-hidden="true">Score</span>
+      <span class="score-value" style="color:#2a58a0;" aria-hidden="true">27</span>
+      <div class="score-bar-track" style="background:#c0d0ed;" role="progressbar" aria-valuenow="27" aria-valuemin="0" aria-valuemax="100" aria-label="Score 27 out of 100">
+        <div class="score-bar-fill" style="width:27%;background:#2a58a0;"></div>
+      </div>
+    </div>
+  </article>
+  <article class="event-card bottom" aria-labelledby="event-b4-guess-who-2026-title" itemscope itemtype="https://schema.org/MusicEvent">
+    <meta itemprop="startDate" content="2026-08-06">
+    <div class="card-rank-wrap" aria-label="Ranked 4th least popular, updated tonight. Up 1 spot.">
+      <span class="rank-num" aria-hidden="true">4</span>
+      <span class="rank-delta delta-up" aria-hidden="true">↑1</span>
+    </div>
+    <div class="card-body">
+      <h3 class="card-title" id="event-b4-guess-who-2026-title" itemprop="name">The Guess Who — Takin' It Back Tour</h3>
+      <div class="card-meta">
+        <span class="card-meta-text"><time datetime="2026-08-06">Aug 6</time> &middot; <span itemprop="location" itemscope itemtype="https://schema.org/MusicVenue"><span itemprop="name">Synovus Bank Amphitheater at Chastain Park</span></span></span>
+        <span class="genre-pill" style="background:#fef6e0;color:#6a4400;" itemprop="genre">Classic Rock</span>
+      </div>
+      <ul class="card-signals" aria-label="Demand signals" role="list"><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Sentiment: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Sales history: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Ticket demand: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-low" aria-hidden="true"></span><span>Local intent: <strong>Low</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>SeatGeek Deal Score: <strong>44/100</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-low" aria-hidden="true"></span><span>YouTube subscribers: <strong>39,700</strong></span></li></ul>
+      <p class="card-insight" itemprop="description"></p>
+    </div>
+    <div class="card-score" aria-label="Popularity score: 27 out of 100">      <span class="score-label" aria-hidden="true">Score</span>
+      <span class="score-value" style="color:#2a58a0;" aria-hidden="true">27</span>
+      <div class="score-bar-track" style="background:#c0d0ed;" role="progressbar" aria-valuenow="27" aria-valuemin="0" aria-valuemax="100" aria-label="Score 27 out of 100">
+        <div class="score-bar-fill" style="width:27%;background:#2a58a0;"></div>
+      </div>
+    </div>
+  </article>
+  <article class="event-card bottom" aria-labelledby="event-b5-isley-ojays-2026-title" itemscope itemtype="https://schema.org/MusicEvent">
+    <meta itemprop="startDate" content="2026-08-22">
+    <div class="card-rank-wrap" aria-label="Ranked 5th least popular, updated tonight. Down 2 spots.">
+      <span class="rank-num" aria-hidden="true">5</span>
+      <span class="rank-delta delta-down" aria-hidden="true">↓2</span>
+    </div>
+    <div class="card-body">
+      <h3 class="card-title" id="event-b5-isley-ojays-2026-title" itemprop="name">The Isley Brothers & The O'Jays</h3>
+      <div class="card-meta">
+        <span class="card-meta-text"><time datetime="2026-08-22">Aug 22</time> &middot; <span itemprop="location" itemscope itemtype="https://schema.org/MusicVenue"><span itemprop="name">Synovus Bank Amphitheater at Chastain Park</span></span></span>
+        <span class="genre-pill" style="background:#e8f5ee;color:#134a28;" itemprop="genre">R&B</span>
+      </div>
+      <ul class="card-signals" aria-label="Demand signals" role="list"><li class="signal" role="listitem"><span class="signal-dot dot-high" aria-hidden="true"></span><span>Sentiment: <strong>High</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Sales history: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Ticket demand: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-low" aria-hidden="true"></span><span>Local intent: <strong>Low</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>SeatGeek Deal Score: <strong>44/100</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>YouTube subscribers: <strong>1.3M</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-high" aria-hidden="true"></span><span>Grammy wins: <strong>3</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-low" aria-hidden="true"></span><span>Deezer fans: <strong>454,481</strong></span></li></ul>
+      <p class="card-insight" itemprop="description">3-time Grammy winner · Last.fm: 1.6M listeners</p>
+    </div>
+    <div class="card-score" aria-label="Popularity score: 29 out of 100">      <span class="score-label" aria-hidden="true">Score</span>
+      <span class="score-value" style="color:#2a58a0;" aria-hidden="true">29</span>
+      <div class="score-bar-track" style="background:#c0d0ed;" role="progressbar" aria-valuenow="29" aria-valuemin="0" aria-valuemax="100" aria-label="Score 29 out of 100">
+        <div class="score-bar-fill" style="width:29%;background:#2a58a0;"></div>
+      </div>
+    </div>
+  </article>
+  <article class="event-card bottom" aria-labelledby="event-b6-jack-johnson-2026-title" itemscope itemtype="https://schema.org/MusicEvent">
+    <meta itemprop="startDate" content="2026-08-21">
+    <div class="card-rank-wrap" aria-label="Ranked 6th least popular, updated tonight. Unchanged.">
+      <span class="rank-num" aria-hidden="true">6</span>
+      <span class="rank-delta delta-flat" aria-hidden="true">—</span>
+    </div>
+    <div class="card-body">
+      <h3 class="card-title" id="event-b6-jack-johnson-2026-title" itemprop="name">Jack Johnson — SURFILMUSIC Tour</h3>
+      <div class="card-meta">
+        <span class="card-meta-text"><time datetime="2026-08-21">Aug 21</time> &middot; <span itemprop="location" itemscope itemtype="https://schema.org/MusicVenue"><span itemprop="name">Ameris Bank Amphitheatre</span></span></span>
+        <span class="genre-pill" style="background:#fde8f8;color:#650c5c;" itemprop="genre">Indie / Alt</span>
+      </div>
+      <ul class="card-signals" aria-label="Demand signals" role="list"><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Sentiment: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Sales history: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-high" aria-hidden="true"></span><span>Ticket demand: <strong>High</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Local intent: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>SeatGeek Deal Score: <strong>62/100</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-low" aria-hidden="true"></span><span>YouTube subscribers: <strong>956,000</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-high" aria-hidden="true"></span><span>Wikipedia editions: <strong>187</strong></span></li></ul>
+      <p class="card-insight" itemprop="description">28-album catalog · Last.fm: 3.7M listeners · First ATL show in 5+ years · Wikipedia -54% this week</p>
+    </div>
+    <div class="card-score" aria-label="Popularity score: 32 out of 100">      <span class="score-label" aria-hidden="true">Score</span>
+      <span class="score-value" style="color:#2a58a0;" aria-hidden="true">32</span>
+      <div class="score-bar-track" style="background:#c0d0ed;" role="progressbar" aria-valuenow="32" aria-valuemin="0" aria-valuemax="100" aria-label="Score 32 out of 100">
+        <div class="score-bar-fill" style="width:32%;background:#2a58a0;"></div>
+      </div>
+    </div>
+  </article>
+  <article class="event-card bottom" aria-labelledby="event-b7-john-mellencamp-2026-title" itemscope itemtype="https://schema.org/MusicEvent">
+    <meta itemprop="startDate" content="2026-08-01">
+    <div class="card-rank-wrap" aria-label="Ranked 7th least popular, updated tonight. Unchanged.">
+      <span class="rank-num" aria-hidden="true">7</span>
+      <span class="rank-delta delta-flat" aria-hidden="true">—</span>
+    </div>
+    <div class="card-body">
+      <h3 class="card-title" id="event-b7-john-mellencamp-2026-title" itemprop="name">John Mellencamp — Dancing Words Tour</h3>
+      <div class="card-meta">
+        <span class="card-meta-text"><time datetime="2026-08-01">Aug 1</time> &middot; <span itemprop="location" itemscope itemtype="https://schema.org/MusicVenue"><span itemprop="name">Ameris Bank Amphitheatre</span></span></span>
+        <span class="genre-pill" style="background:#fef6e0;color:#6a4400;" itemprop="genre">Classic Rock</span>
+      </div>
+      <ul class="card-signals" aria-label="Demand signals" role="list"><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Sentiment: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Sales history: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-high" aria-hidden="true"></span><span>Ticket demand: <strong>High</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Local intent: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>SeatGeek Deal Score: <strong>56/100</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-low" aria-hidden="true"></span><span>YouTube subscribers: <strong>346,000</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-high" aria-hidden="true"></span><span>Grammy wins: <strong>1</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-high" aria-hidden="true"></span><span>Wikipedia editions: <strong>106</strong></span></li></ul>
+      <p class="card-insight" itemprop="description">Grammy winner · Touring for 39 years · Last.fm: 1.1M listeners</p>
+    </div>
+    <div class="card-score" aria-label="Popularity score: 36 out of 100">      <span class="score-label" aria-hidden="true">Score</span>
+      <span class="score-value" style="color:#2a58a0;" aria-hidden="true">36</span>
+      <div class="score-bar-track" style="background:#c0d0ed;" role="progressbar" aria-valuenow="36" aria-valuemin="0" aria-valuemax="100" aria-label="Score 36 out of 100">
+        <div class="score-bar-fill" style="width:36%;background:#2a58a0;"></div>
+      </div>
+    </div>
+  <div class="amm-strip"><div class="amm-icon"><i class="ti ti-camera" aria-hidden="true"></i></div><div class="amm-text"><div class="amm-eyebrow">Prior Atlanta Music Magazine coverage</div><div class="amm-headline"><a href="https://atlantamusicmagazine.com/john-mellencamp-fabulous-at-the-fox-theatre-in-downtown-atlanta-georgia-on-friday-february-10-2023/" target="_blank" rel="noopener">John Mellencamp Fabulous at the Fox Theatre in Downtown Atlanta, Georgia, on Friday, February 10, 2023 -</a></div></div><div class="amm-date">Feb 2023</div></div>
+  </article>
+  <article class="event-card bottom" aria-labelledby="event-b8-hayley-williams-2026-title" itemscope itemtype="https://schema.org/MusicEvent">
+    <meta itemprop="startDate" content="2026-09-05">
+    <div class="card-rank-wrap" aria-label="Ranked 8th least popular, updated tonight. Unchanged.">
+      <span class="rank-num" aria-hidden="true">8</span>
+      <span class="rank-delta delta-flat" aria-hidden="true">—</span>
+    </div>
+    <div class="card-body">
+      <h3 class="card-title" id="event-b8-hayley-williams-2026-title" itemprop="name">The Hayley Williams Show w/ Magdalena Bay</h3>
+      <div class="card-meta">
+        <span class="card-meta-text"><time datetime="2026-09-05">Sep 5</time> &middot; <span itemprop="location" itemscope itemtype="https://schema.org/MusicVenue"><span itemprop="name">Ameris Bank Amphitheatre</span></span></span>
+        <span class="genre-pill" style="background:#fde8f8;color:#650c5c;" itemprop="genre">Indie / Alt</span>
+      </div>
+      <ul class="card-signals" aria-label="Demand signals" role="list"><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Sentiment: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-low" aria-hidden="true"></span><span>Sales history: <strong>Low</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-high" aria-hidden="true"></span><span>Ticket demand: <strong>High</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Local intent: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>SeatGeek Deal Score: <strong>61/100</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-low" aria-hidden="true"></span><span>YouTube subscribers: <strong>584,000</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-low" aria-hidden="true"></span><span>Deezer fans: <strong>507,129</strong></span></li></ul>
+      <p class="card-insight" itemprop="description"></p>
+    </div>
+    <div class="card-score" aria-label="Popularity score: 36 out of 100">      <span class="score-label" aria-hidden="true">Score</span>
+      <span class="score-value" style="color:#2a58a0;" aria-hidden="true">36</span>
+      <div class="score-bar-track" style="background:#c0d0ed;" role="progressbar" aria-valuenow="36" aria-valuemin="0" aria-valuemax="100" aria-label="Score 36 out of 100">
+        <div class="score-bar-fill" style="width:36%;background:#2a58a0;"></div>
+      </div>
+    </div>
+  </article>
+  <article class="event-card bottom" aria-labelledby="event-b9-muse-2026-title" itemscope itemtype="https://schema.org/MusicEvent">
+    <meta itemprop="startDate" content="2026-08-12">
+    <div class="card-rank-wrap" aria-label="Ranked 9th least popular, updated tonight. Up 1 spot.">
+      <span class="rank-num" aria-hidden="true">9</span>
+      <span class="rank-delta delta-up" aria-hidden="true">↑1</span>
+    </div>
+    <div class="card-body">
+      <h3 class="card-title" id="event-b9-muse-2026-title" itemprop="name">Muse — The Wow! Signal Tour</h3>
+      <div class="card-meta">
+        <span class="card-meta-text"><time datetime="2026-08-12">Aug 12</time> &middot; <span itemprop="location" itemscope itemtype="https://schema.org/MusicVenue"><span itemprop="name">Lakewood Amphitheatre</span></span></span>
+        <span class="genre-pill" style="background:#fdecea;color:#721a0a;" itemprop="genre">Rock</span>
+      </div>
+      <ul class="card-signals" aria-label="Demand signals" role="list"><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Sentiment: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Sales history: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-high" aria-hidden="true"></span><span>Ticket demand: <strong>High</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Local intent: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>SeatGeek Deal Score: <strong>57/100</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>YouTube subscribers: <strong>4.2M</strong></span></li></ul>
+      <p class="card-insight" itemprop="description">Last.fm: 6.5M listeners</p>
+    </div>
+    <div class="card-score" aria-label="Popularity score: 38 out of 100">      <span class="score-label" aria-hidden="true">Score</span>
+      <span class="score-value" style="color:#2a58a0;" aria-hidden="true">38</span>
+      <div class="score-bar-track" style="background:#c0d0ed;" role="progressbar" aria-valuenow="38" aria-valuemin="0" aria-valuemax="100" aria-label="Score 38 out of 100">
+        <div class="score-bar-fill" style="width:38%;background:#2a58a0;"></div>
+      </div>
+    </div>
+  </article>
+  <article class="event-card bottom" aria-labelledby="event-b10-band-of-horses-2026-title" itemscope itemtype="https://schema.org/MusicEvent">
+    <meta itemprop="startDate" content="2026-07-23">
+    <div class="card-rank-wrap" aria-label="Ranked 10th least popular, updated tonight. Up 2 spots.">
+      <span class="rank-num" aria-hidden="true">10</span>
+      <span class="rank-delta delta-up" aria-hidden="true">↑2</span>
+    </div>
+    <div class="card-body">
+      <h3 class="card-title" id="event-b10-band-of-horses-2026-title" itemprop="name">Band of Horses & Dinosaur Jr.</h3>
+      <div class="card-meta">
+        <span class="card-meta-text"><time datetime="2026-07-23">Jul 23</time> &middot; <span itemprop="location" itemscope itemtype="https://schema.org/MusicVenue"><span itemprop="name">The Eastern</span></span></span>
+        <span class="genre-pill" style="background:#fde8f8;color:#650c5c;" itemprop="genre">Indie / Alt</span>
+      </div>
+      <ul class="card-signals" aria-label="Demand signals" role="list"><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Sentiment: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-low" aria-hidden="true"></span><span>Sales history: <strong>Low</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Ticket demand: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Local intent: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-low" aria-hidden="true"></span><span>Deezer fans: <strong>177,336</strong></span></li></ul>
+      <p class="card-insight" itemprop="description">Last.fm: 2.3M listeners · Wikipedia +15% this week</p>
+    </div>
+    <div class="card-score" aria-label="Popularity score: 40 out of 100">      <span class="score-label" aria-hidden="true">Score</span>
+      <span class="score-value" style="color:#2a58a0;" aria-hidden="true">40</span>
+      <div class="score-bar-track" style="background:#c0d0ed;" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" aria-label="Score 40 out of 100">
+        <div class="score-bar-fill" style="width:40%;background:#2a58a0;"></div>
+      </div>
+    </div>
+  </article>
+  <article class="event-card bottom" aria-labelledby="event-b11-motley-crue-2026-title" itemscope itemtype="https://schema.org/MusicEvent">
+    <meta itemprop="startDate" content="2026-08-12">
+    <div class="card-rank-wrap" aria-label="Ranked 11th least popular, updated tonight. Unchanged.">
+      <span class="rank-num" aria-hidden="true">11</span>
+      <span class="rank-delta delta-flat" aria-hidden="true">—</span>
+    </div>
+    <div class="card-body">
+      <h3 class="card-title" id="event-b11-motley-crue-2026-title" itemprop="name">Mötley Crüe — Return of the Carnival of Sins</h3>
+      <div class="card-meta">
+        <span class="card-meta-text"><time datetime="2026-08-12">Aug 12</time> &middot; <span itemprop="location" itemscope itemtype="https://schema.org/MusicVenue"><span itemprop="name">Ameris Bank Amphitheatre</span></span></span>
+        <span class="genre-pill" style="background:#fdecea;color:#721a0a;" itemprop="genre">Rock</span>
+      </div>
+      <ul class="card-signals" aria-label="Demand signals" role="list"><li class="signal" role="listitem"><span class="signal-dot dot-high" aria-hidden="true"></span><span>Sentiment: <strong>High</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Sales history: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-high" aria-hidden="true"></span><span>Ticket demand: <strong>High</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Local intent: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>SeatGeek Deal Score: <strong>50/100</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>YouTube subscribers: <strong>1.3M</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-low" aria-hidden="true"></span><span>Deezer fans: <strong>822,514</strong></span></li></ul>
+      <p class="card-insight" itemprop="description">Last.fm: 2.0M listeners · Wikipedia +56% this week</p>
+    </div>
+    <div class="card-score" aria-label="Popularity score: 40 out of 100">      <span class="score-label" aria-hidden="true">Score</span>
+      <span class="score-value" style="color:#2a58a0;" aria-hidden="true">40</span>
+      <div class="score-bar-track" style="background:#c0d0ed;" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" aria-label="Score 40 out of 100">
+        <div class="score-bar-fill" style="width:40%;background:#2a58a0;"></div>
+      </div>
+    </div>
+  </article>
+  <article class="event-card bottom" aria-labelledby="event-b12-ella-mai-2026-title" itemscope itemtype="https://schema.org/MusicEvent">
+    <meta itemprop="startDate" content="2026-08-14">
+    <div class="card-rank-wrap" aria-label="Ranked 12th least popular, updated tonight. Up 1 spot.">
+      <span class="rank-num" aria-hidden="true">12</span>
+      <span class="rank-delta delta-up" aria-hidden="true">↑1</span>
+    </div>
+    <div class="card-body">
+      <h3 class="card-title" id="event-b12-ella-mai-2026-title" itemprop="name">Ella Mai</h3>
+      <div class="card-meta">
+        <span class="card-meta-text"><time datetime="2026-08-14">Aug 14</time> &middot; <span itemprop="location" itemscope itemtype="https://schema.org/MusicVenue"><span itemprop="name">Synovus Bank Amphitheater at Chastain Park</span></span></span>
+        <span class="genre-pill" style="background:#e8f5ee;color:#134a28;" itemprop="genre">R&B</span>
+      </div>
+      <ul class="card-signals" aria-label="Demand signals" role="list"><li class="signal" role="listitem"><span class="signal-dot dot-high" aria-hidden="true"></span><span>Sentiment: <strong>High</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-low" aria-hidden="true"></span><span>Sales history: <strong>Low</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-high" aria-hidden="true"></span><span>Ticket demand: <strong>High</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Local intent: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>SeatGeek Deal Score: <strong>60/100</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>YouTube subscribers: <strong>4.3M</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-low" aria-hidden="true"></span><span>Deezer fans: <strong>821,070</strong></span></li></ul>
+      <p class="card-insight" itemprop="description"></p>
+    </div>
+    <div class="card-score" aria-label="Popularity score: 42 out of 100">      <span class="score-label" aria-hidden="true">Score</span>
+      <span class="score-value" style="color:#2a58a0;" aria-hidden="true">42</span>
+      <div class="score-bar-track" style="background:#c0d0ed;" role="progressbar" aria-valuenow="42" aria-valuemin="0" aria-valuemax="100" aria-label="Score 42 out of 100">
+        <div class="score-bar-fill" style="width:42%;background:#2a58a0;"></div>
+      </div>
+    </div>
+  </article>
+  <article class="event-card bottom" aria-labelledby="event-b13-franz-ferdinand-2026-title" itemscope itemtype="https://schema.org/MusicEvent">
+    <meta itemprop="startDate" content="2026-08-12">
+    <div class="card-rank-wrap" aria-label="Ranked 13th least popular, updated tonight. Up 3 spots.">
+      <span class="rank-num" aria-hidden="true">13</span>
+      <span class="rank-delta delta-up" aria-hidden="true">↑3</span>
+    </div>
+    <div class="card-body">
+      <h3 class="card-title" id="event-b13-franz-ferdinand-2026-title" itemprop="name">Franz Ferdinand</h3>
+      <div class="card-meta">
+        <span class="card-meta-text"><time datetime="2026-08-12">Aug 12</time> &middot; <span itemprop="location" itemscope itemtype="https://schema.org/MusicVenue"><span itemprop="name">Buckhead Theatre</span></span></span>
+        <span class="genre-pill" style="background:#fde8f8;color:#650c5c;" itemprop="genre">Indie / Alt</span>
+      </div>
+      <ul class="card-signals" aria-label="Demand signals" role="list"><li class="signal" role="listitem"><span class="signal-dot dot-high" aria-hidden="true"></span><span>Sentiment: <strong>High</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-low" aria-hidden="true"></span><span>Sales history: <strong>Low</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Ticket demand: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Local intent: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-low" aria-hidden="true"></span><span>SeatGeek Deal Score: <strong>25/100</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-low" aria-hidden="true"></span><span>YouTube subscribers: <strong>569,000</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Deezer fans: <strong>1.1M</strong></span></li></ul>
+      <p class="card-insight" itemprop="description">Last.fm: 5.0M listeners</p>
+    </div>
+    <div class="card-score" aria-label="Popularity score: 42 out of 100">      <span class="score-label" aria-hidden="true">Score</span>
+      <span class="score-value" style="color:#2a58a0;" aria-hidden="true">42</span>
+      <div class="score-bar-track" style="background:#c0d0ed;" role="progressbar" aria-valuenow="42" aria-valuemin="0" aria-valuemax="100" aria-label="Score 42 out of 100">
+        <div class="score-bar-fill" style="width:42%;background:#2a58a0;"></div>
+      </div>
+    </div>
+  </article>
+  <article class="event-card bottom" aria-labelledby="event-b14-dogstar-2026-title" itemscope itemtype="https://schema.org/MusicEvent">
+    <meta itemprop="startDate" content="2026-08-04">
+    <div class="card-rank-wrap" aria-label="Ranked 14th least popular, updated tonight. Unchanged.">
+      <span class="rank-num" aria-hidden="true">14</span>
+      <span class="rank-delta delta-flat" aria-hidden="true">—</span>
+    </div>
+    <div class="card-body">
+      <h3 class="card-title" id="event-b14-dogstar-2026-title" itemprop="name">Dogstar — All In Now Tour</h3>
+      <div class="card-meta">
+        <span class="card-meta-text"><time datetime="2026-08-04">Aug 4</time> &middot; <span itemprop="location" itemscope itemtype="https://schema.org/MusicVenue"><span itemprop="name">The Tabernacle</span></span></span>
+        <span class="genre-pill" style="background:#fdecea;color:#721a0a;" itemprop="genre">Rock</span>
+      </div>
+      <ul class="card-signals" aria-label="Demand signals" role="list"><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Sentiment: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-low" aria-hidden="true"></span><span>Sales history: <strong>Low</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Ticket demand: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Local intent: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>SeatGeek Deal Score: <strong>37/100</strong></span></li></ul>
+      <p class="card-insight" itemprop="description">Wikipedia +49% this week</p>
+    </div>
+    <div class="card-score" aria-label="Popularity score: 42 out of 100">      <span class="score-label" aria-hidden="true">Score</span>
+      <span class="score-value" style="color:#2a58a0;" aria-hidden="true">42</span>
+      <div class="score-bar-track" style="background:#c0d0ed;" role="progressbar" aria-valuenow="42" aria-valuemin="0" aria-valuemax="100" aria-label="Score 42 out of 100">
+        <div class="score-bar-fill" style="width:42%;background:#2a58a0;"></div>
+      </div>
+    </div>
+  </article>
+  <article class="event-card bottom" aria-labelledby="event-b15-squeeze-2026-title" itemscope itemtype="https://schema.org/MusicEvent">
+    <meta itemprop="startDate" content="2026-08-22">
+    <div class="card-rank-wrap" aria-label="Ranked 15th least popular, updated tonight. Up 2 spots.">
+      <span class="rank-num" aria-hidden="true">15</span>
+      <span class="rank-delta delta-up" aria-hidden="true">↑2</span>
+    </div>
+    <div class="card-body">
+      <h3 class="card-title" id="event-b15-squeeze-2026-title" itemprop="name">Squeeze — Tried, Tested and Trixies Tour</h3>
+      <div class="card-meta">
+        <span class="card-meta-text"><time datetime="2026-08-22">Aug 22</time> &middot; <span itemprop="location" itemscope itemtype="https://schema.org/MusicVenue"><span itemprop="name">Fabulous Fox Theatre</span></span></span>
+        <span class="genre-pill" style="background:#fdecea;color:#721a0a;" itemprop="genre">Rock</span>
+      </div>
+      <ul class="card-signals" aria-label="Demand signals" role="list"><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Sentiment: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Sales history: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Ticket demand: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Local intent: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>SeatGeek Deal Score: <strong>48/100</strong></span></li></ul>
+      <p class="card-insight" itemprop="description"></p>
+    </div>
+    <div class="card-score" aria-label="Popularity score: 42 out of 100">      <span class="score-label" aria-hidden="true">Score</span>
+      <span class="score-value" style="color:#2a58a0;" aria-hidden="true">42</span>
+      <div class="score-bar-track" style="background:#c0d0ed;" role="progressbar" aria-valuenow="42" aria-valuemin="0" aria-valuemax="100" aria-label="Score 42 out of 100">
+        <div class="score-bar-fill" style="width:42%;background:#2a58a0;"></div>
+      </div>
+    </div>
+  </article>
+  <article class="event-card bottom" aria-labelledby="event-b16-311-dirty-heads-2026-title" itemscope itemtype="https://schema.org/MusicEvent">
+    <meta itemprop="startDate" content="2026-08-28">
+    <div class="card-rank-wrap" aria-label="Ranked 16th least popular, updated tonight. Up 2 spots.">
+      <span class="rank-num" aria-hidden="true">16</span>
+      <span class="rank-delta delta-up" aria-hidden="true">↑2</span>
+    </div>
+    <div class="card-body">
+      <h3 class="card-title" id="event-b16-311-dirty-heads-2026-title" itemprop="name">311 and Dirty Heads — So Glad You Made It Tour</h3>
+      <div class="card-meta">
+        <span class="card-meta-text"><time datetime="2026-08-28">Aug 28</time> &middot; <span itemprop="location" itemscope itemtype="https://schema.org/MusicVenue"><span itemprop="name">Ameris Bank Amphitheatre</span></span></span>
+        <span class="genre-pill" style="background:#fdecea;color:#721a0a;" itemprop="genre">Rock</span>
+      </div>
+      <ul class="card-signals" aria-label="Demand signals" role="list"><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Sentiment: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Sales history: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-high" aria-hidden="true"></span><span>Ticket demand: <strong>High</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Local intent: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>SeatGeek Deal Score: <strong>47/100</strong></span></li></ul>
+      <p class="card-insight" itemprop="description">Last.fm: 1.7M listeners · Wikipedia +20% this week</p>
+    </div>
+    <div class="card-score" aria-label="Popularity score: 42 out of 100">      <span class="score-label" aria-hidden="true">Score</span>
+      <span class="score-value" style="color:#2a58a0;" aria-hidden="true">42</span>
+      <div class="score-bar-track" style="background:#c0d0ed;" role="progressbar" aria-valuenow="42" aria-valuemin="0" aria-valuemax="100" aria-label="Score 42 out of 100">
+        <div class="score-bar-fill" style="width:42%;background:#2a58a0;"></div>
+      </div>
+    </div>
+  </article>
+  <article class="event-card bottom" aria-labelledby="event-b17-social-distortion-2026-title" itemscope itemtype="https://schema.org/MusicEvent">
+    <meta itemprop="startDate" content="2026-09-01">
+    <div class="card-rank-wrap" aria-label="Ranked 17th least popular, updated tonight. Up 3 spots.">
+      <span class="rank-num" aria-hidden="true">17</span>
+      <span class="rank-delta delta-up" aria-hidden="true">↑3</span>
+    </div>
+    <div class="card-body">
+      <h3 class="card-title" id="event-b17-social-distortion-2026-title" itemprop="name">Social Distortion — with Descendents</h3>
+      <div class="card-meta">
+        <span class="card-meta-text"><time datetime="2026-09-01">Sep 1</time> &middot; <span itemprop="location" itemscope itemtype="https://schema.org/MusicVenue"><span itemprop="name">Coca-Cola Roxy</span></span></span>
+        <span class="genre-pill" style="background:#fdecea;color:#721a0a;" itemprop="genre">Rock</span>
+      </div>
+      <ul class="card-signals" aria-label="Demand signals" role="list"><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Sentiment: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Sales history: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Ticket demand: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Local intent: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>SeatGeek Deal Score: <strong>41/100</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-low" aria-hidden="true"></span><span>Deezer fans: <strong>105,707</strong></span></li></ul>
+      <p class="card-insight" itemprop="description"></p>
+    </div>
+    <div class="card-score" aria-label="Popularity score: 42 out of 100">      <span class="score-label" aria-hidden="true">Score</span>
+      <span class="score-value" style="color:#2a58a0;" aria-hidden="true">42</span>
+      <div class="score-bar-track" style="background:#c0d0ed;" role="progressbar" aria-valuenow="42" aria-valuemin="0" aria-valuemax="100" aria-label="Score 42 out of 100">
+        <div class="score-bar-fill" style="width:42%;background:#2a58a0;"></div>
+      </div>
+    </div>
+  </article>
+  <article class="event-card bottom" aria-labelledby="event-b18-theory-deadman-sevendust-2026-title" itemscope itemtype="https://schema.org/MusicEvent">
+    <meta itemprop="startDate" content="2026-09-05">
+    <div class="card-rank-wrap" aria-label="Ranked 18th least popular, updated tonight. Unchanged.">
+      <span class="rank-num" aria-hidden="true">18</span>
+      <span class="rank-delta delta-flat" aria-hidden="true">—</span>
+    </div>
+    <div class="card-body">
+      <h3 class="card-title" id="event-b18-theory-deadman-sevendust-2026-title" itemprop="name">Theory of a Deadman & Sevendust</h3>
+      <div class="card-meta">
+        <span class="card-meta-text"><time datetime="2026-09-05">Sep 5</time> &middot; <span itemprop="location" itemscope itemtype="https://schema.org/MusicVenue"><span itemprop="name">The Tabernacle</span></span></span>
+        <span class="genre-pill" style="background:#fdecea;color:#721a0a;" itemprop="genre">Rock</span>
+      </div>
+      <ul class="card-signals" aria-label="Demand signals" role="list"><li class="signal" role="listitem"><span class="signal-dot dot-high" aria-hidden="true"></span><span>Sentiment: <strong>High</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Sales history: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Ticket demand: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Local intent: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-low" aria-hidden="true"></span><span>SeatGeek Deal Score: <strong>34/100</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-low" aria-hidden="true"></span><span>Deezer fans: <strong>216,727</strong></span></li></ul>
+      <p class="card-insight" itemprop="description">Last.fm: 1.3M listeners</p>
+    </div>
+    <div class="card-score" aria-label="Popularity score: 43 out of 100">      <span class="score-label" aria-hidden="true">Score</span>
+      <span class="score-value" style="color:#2a58a0;" aria-hidden="true">43</span>
+      <div class="score-bar-track" style="background:#c0d0ed;" role="progressbar" aria-valuenow="43" aria-valuemin="0" aria-valuemax="100" aria-label="Score 43 out of 100">
+        <div class="score-bar-fill" style="width:43%;background:#2a58a0;"></div>
+      </div>
+    </div>
+  <div class="amm-strip"><div class="amm-icon"><i class="ti ti-camera" aria-hidden="true"></i></div><div class="amm-text"><div class="amm-eyebrow">Prior Atlanta Music Magazine coverage</div><div class="amm-headline"><a href="https://atlantamusicmagazine.com/heavy-storms-couldnt-stop-sevendust-from-shredding-up-the-eastern-in-atlanta-georgia-on-wednesday-september-25-2024/" target="_blank" rel="noopener">Heavy Storms Couldn&#039;t Stop Sevendust From Shredding Up The Eastern in Atlanta, Georgia, on Wednesday, September 25, 2024 -</a></div></div><div class="amm-date">Sep 2024</div></div>
+  </article>
+  <article class="event-card bottom" aria-labelledby="event-b19-toto-2026-title" itemscope itemtype="https://schema.org/MusicEvent">
+    <meta itemprop="startDate" content="2026-08-02">
+    <div class="card-rank-wrap" aria-label="Ranked 19th least popular, updated tonight. Unchanged.">
+      <span class="rank-num" aria-hidden="true">19</span>
+      <span class="rank-delta delta-flat" aria-hidden="true">—</span>
+    </div>
+    <div class="card-body">
+      <h3 class="card-title" id="event-b19-toto-2026-title" itemprop="name">Toto, Christopher Cross & The Romantics</h3>
+      <div class="card-meta">
+        <span class="card-meta-text"><time datetime="2026-08-02">Aug 2</time> &middot; <span itemprop="location" itemscope itemtype="https://schema.org/MusicVenue"><span itemprop="name">Ameris Bank Amphitheatre</span></span></span>
+        <span class="genre-pill" style="background:#fef6e0;color:#6a4400;" itemprop="genre">Classic Rock</span>
+      </div>
+      <ul class="card-signals" aria-label="Demand signals" role="list"><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Sentiment: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-low" aria-hidden="true"></span><span>Sales history: <strong>Low</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-high" aria-hidden="true"></span><span>Ticket demand: <strong>High</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Local intent: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>SeatGeek Deal Score: <strong>52/100</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-low" aria-hidden="true"></span><span>Deezer fans: <strong>972,715</strong></span></li></ul>
+      <p class="card-insight" itemprop="description">Last.fm: 3.2M listeners · Wikipedia +34% this week</p>
+    </div>
+    <div class="card-score" aria-label="Popularity score: 43 out of 100">      <span class="score-label" aria-hidden="true">Score</span>
+      <span class="score-value" style="color:#2a58a0;" aria-hidden="true">43</span>
+      <div class="score-bar-track" style="background:#c0d0ed;" role="progressbar" aria-valuenow="43" aria-valuemin="0" aria-valuemax="100" aria-label="Score 43 out of 100">
+        <div class="score-bar-fill" style="width:43%;background:#2a58a0;"></div>
+      </div>
+    </div>
+  </article>
+  <article class="event-card bottom" aria-labelledby="event-b20-lord-huron-2026-title" itemscope itemtype="https://schema.org/MusicEvent">
+    <meta itemprop="startDate" content="2026-08-01">
+    <div class="card-rank-wrap" aria-label="Ranked 20th least popular, updated tonight. Down 4 spots.">
+      <span class="rank-num" aria-hidden="true">20</span>
+      <span class="rank-delta delta-down" aria-hidden="true">↓4</span>
+    </div>
+    <div class="card-body">
+      <h3 class="card-title" id="event-b20-lord-huron-2026-title" itemprop="name">Lord Huron</h3>
+      <div class="card-meta">
+        <span class="card-meta-text"><time datetime="2026-08-01">Aug 1</time> &middot; <span itemprop="location" itemscope itemtype="https://schema.org/MusicVenue"><span itemprop="name">Coca-Cola Roxy</span></span></span>
+        <span class="genre-pill" style="background:#fde8f8;color:#650c5c;" itemprop="genre">Indie / Alt</span>
+      </div>
+      <ul class="card-signals" aria-label="Demand signals" role="list"><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Sentiment: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Sales history: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Ticket demand: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>Local intent: <strong>Medium</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-medium" aria-hidden="true"></span><span>SeatGeek Deal Score: <strong>57/100</strong></span></li><li class="signal" role="listitem"><span class="signal-dot dot-low" aria-hidden="true"></span><span>Deezer fans: <strong>117,899</strong></span></li></ul>
+      <p class="card-insight" itemprop="description">Last.fm: 2.4M listeners · Wikipedia +21% this week</p>
+    </div>
+    <div class="card-score" aria-label="Popularity score: 44 out of 100">      <span class="score-label" aria-hidden="true">Score</span>
+      <span class="score-value" style="color:#2a58a0;" aria-hidden="true">44</span>
+      <div class="score-bar-track" style="background:#c0d0ed;" role="progressbar" aria-valuenow="44" aria-valuemin="0" aria-valuemax="100" aria-label="Score 44 out of 100">
+        <div class="score-bar-fill" style="width:44%;background:#2a58a0;"></div>
+      </div>
+    </div>
+  </article>
+<!-- BOTTOM_CARDS_END -->
+
+</section>
+
+<hr class="section-break" aria-hidden="true">
+
+<aside class="refresh-bar" aria-label="Data refresh information">
+  <div class="refresh-window-row">
+    <span class="refresh-window-label">Data window</span>
+    <span class="refresh-window-range" id="window-range" aria-live="polite" aria-atomic="true">&#8212;</span>
+    <span class="refresh-window-chip">90-day rolling</span>
+    <span class="filter-chip" id="filter-status-chip"></span>
+  </div>
+  <div class="refresh-bar-inner">
+    <div class="refresh-left">
+      <span class="refresh-live-dot" aria-hidden="true"></span>
+      <span class="refresh-label">Next refresh</span>
+      <span class="refresh-clock" id="next-update-clock" aria-live="off" aria-label="Countdown to next data refresh">&#8212;</span>
+    </div>
+    <div class="refresh-center" aria-hidden="true">
+      <div class="refresh-track">
+        <div class="refresh-fill" id="prog-fill" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Day progress to next nightly refresh"></div>
+      </div>
+      <span class="refresh-track-label">Day progress to next refresh</span>
+    </div>
+  </div>
+  <!-- sources-row hidden -->
+</aside>
+
+
+<footer role="contentinfo" style="max-width:680px;margin:24px auto 0;font-size:11px;color:#767686;line-height:1.7;">
+  <p>Scores are composite model estimates updated nightly. Not financial or ticket purchasing advice. Events within 100 miles of Atlanta, GA metropolitan DMA only.
+  <a href="https://atlantamusicmagazine.com/" style="color:#2a58a0;">Atlanta Music Magazine</a> &#183;
+  <time datetime="2026-07-23">Last updated July 23, 2026</time></p>
+</footer>
+
+<script>
+function tick() {
+  /* All math in UTC to avoid browser-timezone contamination.
+     ET = UTC-5 standard, UTC-4 DST (Mar 2nd Sun → Nov 1st Sun). */
+  var nowUTC = Date.now();                          // ms since epoch, always UTC
+  var etOff  = getETOffsetMs();                     // negative ms to subtract
+  var etMs   = nowUTC + etOff;                      // epoch ms expressed as ET wall time
+
+  /* 3 AM ET tonight = next 3 AM boundary in ET-space */
+  var etThreeAm = Math.floor(etMs / 86400000) * 86400000 + 3 * 3600000;
+  if (etThreeAm <= etMs) etThreeAm += 86400000;    // already past 3 AM — target tomorrow
+  var diff = etThreeAm - etMs;
+
+  var h = Math.floor(diff / 3600000);
+  var m = Math.floor((diff % 3600000) / 60000);
+  var s = Math.floor((diff % 60000) / 1000);
+  document.getElementById("next-update-clock").textContent =
+    String(h).padStart(2,"0")+":"+String(m).padStart(2,"0")+":"+String(s).padStart(2,"0")+" ET";
+  var pct = Math.round((86400000 - diff) / 86400000 * 100);
+  var fill = document.getElementById("prog-fill");
+  fill.style.width = pct + "%";
+  fill.setAttribute("aria-valuenow", pct);
+}
+function getETOffsetMs() {
+  /* Returns the UTC offset for US Eastern Time in milliseconds.
+     DST: second Sunday of March → first Sunday of November. */
+  var now = new Date();
+  var yr  = now.getUTCFullYear();
+  /* Second Sunday of March */
+  var dstStart = new Date(Date.UTC(yr, 2, 1));
+  dstStart.setUTCDate(1 + (7 - dstStart.getUTCDay()) % 7 + 7);
+  /* First Sunday of November */
+  var dstEnd = new Date(Date.UTC(yr, 10, 1));
+  dstEnd.setUTCDate(1 + (7 - dstEnd.getUTCDay()) % 7);
+  var isDST = (Date.now() >= dstStart.getTime() && Date.now() < dstEnd.getTime());
+  return isDST ? -4 * 3600000 : -5 * 3600000;
+}
+function scheduleRefresh() {
+  var etMs      = Date.now() + getETOffsetMs();
+  var et3am     = Math.floor(etMs / 86400000) * 86400000 + 3 * 3600000;
+  if (et3am <= etMs) et3am += 86400000;
+  var ms = et3am - etMs;
+  setTimeout(function() {
+    location.reload();
+    setInterval(function() { location.reload(); }, 86400000);
+  }, ms);
+}
+function setWindowRange() {
+  var now = new Date();
+  var end = new Date(now); end.setDate(end.getDate() + 90);
+  var fmt = function(d) {
+    return d.toLocaleDateString("en-US", {month:"short", day:"numeric", year:"numeric"});
+  };
+  var el = document.getElementById("window-range");
+  if (el) el.textContent = fmt(now) + " \u2013 " + fmt(end);
+}
+setInterval(tick,1000);
+setWindowRange();
+scheduleRefresh();
+
+/* ── iframe height reporter ─────────────────────────────────────
+   When embedded as an iframe in WordPress, posts the document's
+   scroll height to the parent so the iframe resizes to fit exactly,
+   eliminating empty space below the countdown clock module.      */
+function reportHeight() {
+  var h = document.documentElement.scrollHeight || document.body.scrollHeight;
+  window.parent.postMessage({ iframeHeight: h }, "*");
+}
+if (window.parent !== window) {
+  reportHeight();
+  window.addEventListener("resize", reportHeight);
+  /* Re-report after genre filter renders (may change height) */
+  setTimeout(reportHeight, 800);
+  setTimeout(reportHeight, 2000);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   GENRE FILTER  —  pill-triggered view-swap with 10-result cap
+   ═══════════════════════════════════════════════════════════════
+
+   Architecture:
+   • Genre pills are built from itemprop="genre" tags on existing cards.
+   • Selecting a genre REPLACES the card list with a rendered 10-result
+     view drawn from GENRE_POOL_TOP / GENRE_POOL_BOTTOM data stores.
+   • "All" restores the original 15 DOM cards.
+   • Section h2 updates to reflect the active genre.
+   • A filter-chip in the countdown bar shows genre + result count.
+   • Both panels operate independently.
+   ─────────────────────────────────────────────────────────────── */
+(function () {
+
+  var LIMIT = 10;
+
+  /* ── Genre pill colour map ──────────────────────────────────── */
+  var GENRE_STYLE = {
+    "Pop":           {bg:"#eeedfb", fg:"#4038b0"},
+    "Pop / Soul":    {bg:"#eeedfb", fg:"#4038b0"},
+    "Pop / Rock":    {bg:"#eeedfb", fg:"#4038b0"},
+    "Latin Pop":     {bg:"#fef6e0", fg:"#6a4400"},
+    "Multi-Genre":   {bg:"#eef0ff", fg:"#283ab0"},
+    "Hip-Hop":       {bg:"#e8f5ee", fg:"#134a28"},
+    "R&B":           {bg:"#e8f5ee", fg:"#134a28"},
+    "R&B / Pop":     {bg:"#e8f5ee", fg:"#134a28"},
+    "Alt / R&B":     {bg:"#eef0ff", fg:"#283ab0"},
+    "Alt / Rock":    {bg:"#fdecea", fg:"#721a0a"},
+    "Rock":          {bg:"#fdecea", fg:"#721a0a"},
+    "Rock / Metal":  {bg:"#fdecea", fg:"#721a0a"},
+    "Rock / Pop":    {bg:"#fdecea", fg:"#721a0a"},
+    "Indie / Psych": {bg:"#fde8f8", fg:"#650c5c"},
+    "Indie / Folk":  {bg:"#fde8f8", fg:"#650c5c"},
+    "Indie / Alt":   {bg:"#fde8f8", fg:"#650c5c"},
+    "Classic Rock":  {bg:"#fef6e0", fg:"#6a4400"},
+    "Country":       {bg:"#fef6e0", fg:"#6a4400"},
+    "Reggae":        {bg:"#eef0ff", fg:"#283ab0"},
+    "Country / Pop": {bg:"#fef6e0", fg:"#6a4400"},
+    "Metalcore":     {bg:"#f2f2f4", fg:"#36363e"},
+    "Hyperpop":      {bg:"#eef0ff", fg:"#283ab0"},
+    "Festival":      {bg:"#eef0ff", fg:"#283ab0"}
+  };
+
+  /* ── Genre event pools — 180-day window (Jun 8 – Dec 5, 2026) ──────
+     All events confirmed via Ticketmaster / venue calendars / Songkick.
+     Both panels share this pool. Top panel sorts DESC, bottom ASC.
+     In production replace with:
+       fetch('/api/events/scores?dma=atlanta&radius_mi=100&window_days=180&genre='+g)
+  ─────────────────────────────────────────────────────────────────── */
+  /* ── Card HTML builder ──────────────────────────────────────── */
+  function buildCard(ev, rank, isBottom) {
+    var sc  = isBottom ? "#2a58a0" : "#5a50d4";
+    var tbg = isBottom ? "#c0d0ed" : "#d8d6f8";
+    var bc  = isBottom ? "#2a58a0" : "#5a50d4";
+    var gs  = GENRE_STYLE[ev.genre] || {bg:"#f0f0f4", fg:"#333340"};
+    var sigs = ev.signals.map(function(s) {
+      return '<li class="signal" role="listitem"><span class="signal-dot dot-' + s[0] +
+             '" aria-hidden="true"></span><span>' + s[1] + ': <strong>' + s[2] + '</strong></span></li>';
+    }).join("");
+    var risk = ev.risk
+      ? '\n      <p class="card-risk">' + ev.risk + '</p>'
+      : "";
+    var ammStrip = (ev.ammTitle && ev.ammUrl)
+      ? '\n  <div class="amm-strip">' +
+        '<div class="amm-icon"><i class="ti ti-camera" aria-hidden="true"></i></div>' +
+        '<div class="amm-text">' +
+        '<div class="amm-eyebrow">Prior Atlanta Music Magazine coverage</div>' +
+        '<div class="amm-headline"><a href="' + ev.ammUrl + '" target="_blank" rel="noopener">' + ev.ammTitle + '</a></div>' +
+        '</div>' +
+        '<div class="amm-date">' + (ev.ammDate || "") + '</div>' +
+        '</div>'
+      : "";
+    return (
+      '  <article class="event-card' + (isBottom ? ' bottom' : '') +
+      '" style="border-left-color:' + bc + ';"' +
+      ' aria-labelledby="gv-' + rank + '-title" itemscope itemtype="https://schema.org/MusicEvent">\n' +
+      '    <div class="card-rank-wrap" aria-label="Ranked ' + rank + ' in genre view">\n' +
+      '      <span class="rank-num" aria-hidden="true">' + rank + '</span>\n' +
+      '      <span class="rank-delta delta-' + (ev.deltaClass||"flat") + '" aria-hidden="true">' + (ev.deltaLabel||"\u2014") + '</span>\n' +
+      '    </div>\n' +
+      '    <div class="card-body">\n' +
+      '      <h3 class="card-title" id="gv-' + rank + '-title" itemprop="name">' + ev.name + '</h3>\n' +
+      '      <div class="card-meta">\n' +
+      '        <span class="card-meta-text">' + ev.date + ' \u00b7 ' +
+      '<span itemprop="location" itemscope itemtype="https://schema.org/MusicVenue">' +
+      '<span itemprop="name">' + ev.venue + '</span></span></span>\n' +
+      '        <span class="genre-pill" style="background:' + gs.bg + ';color:' + gs.fg + ';" itemprop="genre">' + ev.genre + '</span>\n' +
+      '      </div>\n' +
+      '      <ul class="card-signals" aria-label="Demand signals" role="list">' + sigs + '</ul>\n' +
+      '      <p class="card-insight" itemprop="description">' + ev.insight + '</p>' +
+      risk + '\n' +
+      '    </div>\n' +
+      '    <div class="card-score" aria-label="Popularity score: ' + ev.score + ' out of 100">\n' +
+      '      <span class="score-label" aria-hidden="true">Score</span>\n' +
+      '      <span class="score-value" style="color:' + sc + ';" aria-hidden="true">' + ev.score + '</span>\n' +
+      '      <div class="score-bar-track" style="background:' + tbg + ';" role="progressbar"' +
+      ' aria-valuenow="' + ev.score + '" aria-valuemin="0" aria-valuemax="100"' +
+      ' aria-label="Score ' + ev.score + ' out of 100">\n' +
+      '        <div class="score-bar-fill" style="width:' + ev.score + '%;background:' + sc + ';"></div>\n' +
+      '      </div>\n' +
+      '    </div>' + ammStrip + '\n' +
+      '  </article>'
+    );
+  }
+
+  /* ── Normalise genre text (decode HTML entities) ─────────────── */
+  function norm(raw) {
+    var t = document.createElement("span");
+    t.innerHTML = raw;
+    return t.textContent.trim();
+  }
+
+  /* ── Update the shared filter status chip ────────────────────── */
+  var filterChip = document.getElementById("filter-status-chip");
+  var activeFilters = {top: "All", bottom: "All"};
+
+  function updateFilterChip() {
+    var top = activeFilters.top, bot = activeFilters.bottom;
+    if (top === "All" && bot === "All") {
+      filterChip.textContent = "";
+      filterChip.classList.remove("visible");
+    } else {
+      var parts = [];
+      if (top !== "All") parts.push("Top: " + top);
+      if (bot !== "All") parts.push("Bottom: " + bot);
+      filterChip.textContent = parts.join("  \u00b7  ");
+      filterChip.classList.add("visible");
+    }
+  }
+
+  /* ── Panel setup — Option 4: Segmented control + overflow popover ── */
+  function setupPanel(sectionId, wrapId, emptyId, isBottom, pool) {
+    var section  = document.querySelector('section[aria-labelledby="' + sectionId + '"]');
+    if (!section) return;
+    var h2       = section.querySelector("h2");
+    var wrap     = document.getElementById(wrapId);
+    var emptyEl  = document.getElementById(emptyId);
+    var domCards = Array.from(section.querySelectorAll("article.event-card"));
+
+    var accentActive = isBottom ? "#2a58a0" : "#5a50d4";
+
+    /* Tag DOM cards with genre */
+    domCards.forEach(function(c) {
+      var gp = c.querySelector("[itemprop='genre']");
+      if (gp) c.setAttribute("data-genre", norm(gp.innerHTML));
+    });
+
+    /* Build ordered genre list: count per genre across pool */
+    var genreCount = {}, genreOrder = [];
+    pool.forEach(function(ev) {
+      genreCount[ev.genre] = (genreCount[ev.genre] || 0) + 1;
+    });
+    /* Sort genres by pool count descending — top genres get primary segments */
+    genreOrder = Object.keys(genreCount).sort(function(a, b) {
+      return genreCount[b] - genreCount[a];
+    });
+
+    /* Decide split: top 4 genres → primary segments; rest → overflow popover
+       "All" always occupies the first segment slot.
+       Max primary genre segments = 4 (so 5 total including All). */
+    /* Responsive MAX_PRIMARY: fewer primary tabs on narrow screens */
+    function getMaxPrimary() {
+      var w = window.innerWidth || document.documentElement.clientWidth;
+      if (w <= 400) return 1;   /* phone portrait: All + 1 genre max */
+      if (w <= 540) return 2;   /* phone landscape / small phone */
+      if (w <= 680) return 3;   /* large phone / small tablet */
+      return 4;                  /* desktop default */
+    }
+    var MAX_PRIMARY    = getMaxPrimary();
+    var primaryGenres  = genreOrder.slice(0, MAX_PRIMARY);
+    var overflowGenres = genreOrder.slice(MAX_PRIMARY).sort();
+
+    /* ── Genre view container ─────────────────────────────────────── */
+    var genreView = document.createElement("div");
+    genreView.className = "genre-card-list";
+    genreView.id = wrapId + "-view";
+    genreView.style.display = "none";
+    emptyEl.parentNode.insertBefore(genreView, emptyEl.nextSibling);
+
+    var originalH2 = h2.innerHTML;
+    var active     = "All";
+
+    /* ── Build the segmented control track ───────────────────────── */
+    var track = document.createElement("div");
+    track.className = "seg-track" + (isBottom ? " bottom-seg" : "");
+    track.setAttribute("role", "group");
+    track.setAttribute("aria-label", (isBottom ? "Bottom" : "Top") + " results genre filter");
+
+    /* ── Build overflow popover ──────────────────────────────────── */
+    var popover = document.createElement("div");
+    popover.className = "seg-popover";
+    popover.setAttribute("role", "listbox");
+    popover.setAttribute("aria-label", "More genres");
+
+    /* ── More button (only when overflow genres exist) ───────────── */
+    var moreBtn = null;
+    if (overflowGenres.length > 0) {
+      moreBtn = document.createElement("button");
+      moreBtn.type = "button";
+      moreBtn.className = "seg-more";
+      moreBtn.setAttribute("aria-haspopup", "listbox");
+      moreBtn.setAttribute("aria-expanded", "false");
+      moreBtn.innerHTML = 'More <span class="seg-more-caret">&#9660;</span>';
+
+      moreBtn.addEventListener("click", function(e) {
+        e.stopPropagation();
+        var open = popover.classList.toggle("open");
+        moreBtn.setAttribute("aria-expanded", open ? "true" : "false");
+      });
+
+      /* Close popover when clicking outside */
+      document.addEventListener("click", function() {
+        popover.classList.remove("open");
+        if (moreBtn) moreBtn.setAttribute("aria-expanded", "false");
+      });
+      popover.addEventListener("click", function(e) { e.stopPropagation(); });
+    }
+
+    /* ── Shared state updaters ────────────────────────────────────── */
+    function setH2(genre) {
+      if (genre === "All") {
+        h2.innerHTML = originalH2;
+      } else {
+        var cnt   = pool.filter(function(e) { return e.genre === genre; }).length;
+        var shown = Math.min(cnt, LIMIT);
+        h2.innerHTML =
+          (isBottom ? "Bottom " : "Top ") + shown +
+          " \u2014 " + genre +
+          ' <button class="filter-back" aria-label="Clear genre filter">\u00d7 Clear</button>';
+        section.querySelector(".filter-back").addEventListener("click", resetToAll);
+      }
+    }
+
+    function updateControls() {
+      /* Update segment buttons */
+      Array.from(track.querySelectorAll(".seg-btn")).forEach(function(btn) {
+        var val = btn.getAttribute("data-value");
+        var isAct = val === active;
+        btn.classList.toggle("seg-active", isAct);
+        btn.setAttribute("aria-pressed", isAct ? "true" : "false");
+      });
+
+      /* Update popover items */
+      Array.from(popover.querySelectorAll(".seg-pop-item")).forEach(function(item) {
+        var val = item.getAttribute("data-value");
+        var isAct = val === active;
+        item.classList.toggle("seg-active", isAct);
+        item.setAttribute("aria-selected", isAct ? "true" : "false");
+      });
+
+      /* Update More button state — active when overflow genre is selected */
+      if (moreBtn) {
+        var overflowActive = overflowGenres.indexOf(active) !== -1;
+        moreBtn.classList.toggle("seg-more-active", overflowActive);
+        if (overflowActive) {
+          /* Show active genre name inside More button */
+          var cnt = pool.filter(function(e) { return e.genre === active; }).length;
+          moreBtn.innerHTML =
+            active + ' <span class="seg-badge">' + Math.min(cnt, LIMIT) + '</span>' +
+            ' <span class="seg-more-caret">&#9660;</span>';
+        } else {
+          moreBtn.innerHTML = 'More <span class="seg-more-caret">&#9660;</span>';
+        }
+      }
+
+      updateFilterChip();
+    }
+
+    function showDomCards() {
+      domCards.forEach(function(c) { c.style.display = ""; });
+      genreView.innerHTML = "";
+      genreView.style.display = "none";
+      emptyEl.classList.remove("csi-visible");
+    }
+
+    function renderGenreView(genre) {
+      var matches = pool.filter(function(e) { return e.genre === genre; });
+      matches.sort(isBottom
+        ? function(a, b) { return a.score - b.score; }
+        : function(a, b) { return b.score - a.score; }
+      );
+      var results = matches.slice(0, LIMIT);
+
+      domCards.forEach(function(c) { c.style.display = "none"; });
+
+      if (results.length === 0) {
+        genreView.innerHTML = "";
+        genreView.style.display = "none";
+        emptyEl.classList.add("csi-visible");
+      } else {
+        emptyEl.classList.remove("csi-visible");
+        genreView.innerHTML = results.map(function(ev, i) {
+          return buildCard(ev, i + 1, isBottom);
+        }).join("\n");
+        genreView.style.display = "block";
+      }
+    }
+
+    function selectGenre(g) {
+      /* "All" always resets — never treated as a genre to render */
+      if (g === "All" || active === g) { resetToAll(); return; }
+      active = g;
+      activeFilters[isBottom ? "bottom" : "top"] = g;
+      renderGenreView(g);
+      setH2(g);
+      updateControls();
+      /* Close popover after selection */
+      popover.classList.remove("open");
+      if (moreBtn) moreBtn.setAttribute("aria-expanded", "false");
+    }
+
+    function resetToAll() {
+      active = "All";
+      activeFilters[isBottom ? "bottom" : "top"] = "All";
+      /* Explicitly clear empty state first, regardless of prior path */
+      emptyEl.classList.remove("csi-visible");
+      showDomCards();
+      setH2("All");
+      updateControls();
+      popover.classList.remove("open");
+      if (moreBtn) moreBtn.setAttribute("aria-expanded", "false");
+    }
+
+    /* ── Build "All" segment ─────────────────────────────────────── */
+    function makeSegBtn(label, value, badge, dotColor) {
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "seg-btn" + (value === "All" ? " seg-active" : "");
+      btn.setAttribute("data-value", value);
+      btn.setAttribute("aria-pressed", value === "All" ? "true" : "false");
+      var inner = "";
+      if (dotColor) {
+        inner += '<span class="seg-dot" style="background:' + dotColor + ';" aria-hidden="true"></span>';
+      }
+      inner += label;
+      if (badge !== null) {
+        inner += ' <span class="seg-badge">' + badge + '</span>';
+      }
+      btn.innerHTML = inner;
+      btn.addEventListener("click", function() { selectGenre(value); });
+      return btn;
+    }
+
+    track.appendChild(makeSegBtn("All", "All", 20, null));
+
+    /* ── Build primary genre segments ────────────────────────────── */
+    primaryGenres.forEach(function(g) {
+      var gs    = GENRE_STYLE[g] || {bg:"#f0f0f4", fg:"#333340"};
+      var cnt   = genreCount[g];
+      var shown = Math.min(cnt, LIMIT);
+      track.appendChild(makeSegBtn(g, g, shown, gs.fg));
+    });
+
+    /* ── Build overflow popover items ────────────────────────────── */
+    if (overflowGenres.length > 0) {
+      overflowGenres.forEach(function(g) {
+        var gs  = GENRE_STYLE[g] || {bg:"#f0f0f4", fg:"#333340"};
+        var cnt = genreCount[g];
+        var item = document.createElement("button");
+        item.type = "button";
+        item.className = "seg-pop-item";
+        item.setAttribute("role", "option");
+        item.setAttribute("data-value", g);
+        item.setAttribute("aria-selected", "false");
+        item.innerHTML =
+          '<span class="seg-pop-dot" style="background:' + gs.fg + ';" aria-hidden="true"></span>' +
+          g +
+          '<span class="seg-pop-count">' + Math.min(cnt, LIMIT) + '</span>';
+        item.addEventListener("click", function() { selectGenre(g); });
+        popover.appendChild(item);
+      });
+    }
+
+    /* ── Assemble: track + optional [More btn + popover] ─────────── */
+    wrap.appendChild(track);
+    if (moreBtn) {
+      var moreWrap = document.createElement("div");
+      moreWrap.style.cssText = "position:relative;flex-shrink:0;";
+      moreWrap.appendChild(moreBtn);
+      moreWrap.appendChild(popover);
+      wrap.appendChild(moreWrap);
+    }
+
+    /* ── Keyboard nav: left/right across seg-btn items ──────────── */
+    track.addEventListener("keydown", function(e) {
+      var btns = Array.from(track.querySelectorAll(".seg-btn"));
+      var idx  = btns.indexOf(document.activeElement);
+      if (idx === -1) return;
+      if (e.key === "ArrowRight") { e.preventDefault(); btns[(idx+1) % btns.length].focus(); }
+      if (e.key === "ArrowLeft")  { e.preventDefault(); btns[(idx-1+btns.length) % btns.length].focus(); }
+    });
+
+    /* Keyboard: Escape closes popover */
+    document.addEventListener("keydown", function(e) {
+      if (e.key === "Escape" && popover.classList.contains("open")) {
+        popover.classList.remove("open");
+        if (moreBtn) { moreBtn.setAttribute("aria-expanded", "false"); moreBtn.focus(); }
+      }
+    });
+  }
+
+  /* Pool data injected by pipeline as <script type="application/json" id="csi-pool-data">
+     Reads from that element to avoid WordPress encoding the large JS object literal. */
+  /* Pool data embedded inline — markers are stripped before JSON.parse */
+  var GENRE_POOL_TOP = (function() {
+    var _s = '/*CSI_POOL_DATA_START*/[    {"name": "Shaky Knees Music Festival", "date": "Sep 18", "venue": "Piedmont Park", "genre": "Multi-Genre", "score": 92, "deltaClass": "flat", "deltaLabel": "—", "signals": [["medium", "Sentiment", "Medium"], ["low", "Sales history", "Low"], ["high", "Ticket demand", "High"], ["high", "Local intent", "High"], ["medium", "Wikipedia 7-day", "-11%"], ["medium", "Score confidence", "Seed 91"]], "insight": "Wikipedia -11%"},    {"name": "Guns N’ Roses — World Tour 2026", "date": "Sep 19", "venue": "Truist Park", "genre": "Rock", "score": 86, "deltaClass": "flat", "deltaLabel": "—", "signals": [["medium", "Sentiment", "Medium"], ["low", "Sales history", "Low"], ["high", "Ticket demand", "High"], ["high", "Local intent", "High"], ["medium", "Wikipedia 7-day", "-9%"], ["medium", "Last.fm listeners", "5.3M"]], "insight": "Wikipedia -9%"},    {"name": "AC/DC — Power Up Tour 2026", "date": "Aug 27", "venue": "Mercedes-Benz Stadium", "genre": "Rock", "score": 84, "deltaClass": "up", "deltaLabel": "↑2", "signals": [["medium", "Sentiment", "Medium"], ["medium", "Sales history", "Medium"], ["high", "Ticket demand", "High"], ["medium", "Local intent", "Medium"], ["medium", "Venue capacity", "71,000"], ["medium", "Last.fm listeners", "4.6M"]], "insight": "35 days to show · Genre ATL index 56/100"},    {"name": "Noah Kahan — The Great Divide Tour", "date": "Jul 27", "venue": "Truist Park", "genre": "Indie / Alt", "score": 84, "deltaClass": "down", "deltaLabel": "↓1", "signals": [["medium", "Sentiment", "Medium"], ["medium", "Sales history", "Medium"], ["high", "Ticket demand", "High"], ["high", "Local intent", "High"], ["medium", "Wikipedia 7-day", "-22%"], ["medium", "Last.fm listeners", "1.7M"]], "insight": "Wikipedia -22%"},    {"name": "Kacey Musgraves — Middle of Nowhere Tour", "date": "Sep 30", "venue": "State Farm Arena", "genre": "Country", "score": 84, "deltaClass": "down", "deltaLabel": "↓1", "signals": [["medium", "Sentiment", "Medium"], ["high", "Sales history", "High"], ["high", "Ticket demand", "High"], ["medium", "Local intent", "Medium"], ["medium", "Wikipedia 7-day", "-10%"], ["medium", "Last.fm listeners", "1.2M"]], "insight": "New album “Middle of Nowhere” · Wikipedia -10%"},    {"name": "Usher", "date": "Aug 13", "venue": "State Farm Arena", "genre": "R&B", "score": 82, "deltaClass": "flat", "deltaLabel": "—", "signals": [["medium", "Sentiment", "Medium"], ["medium", "Sales history", "Medium"], ["high", "Ticket demand", "High"], ["medium", "Local intent", "Medium"], ["medium", "Wikipedia 7-day", "-1%"], ["medium", "Last.fm listeners", "5.1M"]], "insight": "Wikipedia -1%"},    {"name": "aespa — SYNK: COMPLÆXITY Tour", "date": "Sep 24", "venue": "State Farm Arena", "genre": "K-Pop", "score": 82, "deltaClass": "flat", "deltaLabel": "—", "signals": [["medium", "Sentiment", "Medium"], ["medium", "Sales history", "Medium"], ["high", "Ticket demand", "High"], ["high", "Local intent", "High"], ["medium", "Wikipedia 7-day", "-5%"], ["medium", "Last.fm listeners", "1.4M"]], "insight": "Wikipedia -5%"},    {"name": "Mumford & Sons — Prizefighter Tour", "date": "Aug 4", "venue": "State Farm Arena", "genre": "Indie / Alt", "score": 79, "deltaClass": "up", "deltaLabel": "↑2", "signals": [["medium", "Sentiment", "Medium"], ["medium", "Sales history", "Medium"], ["high", "Ticket demand", "High"], ["medium", "Local intent", "Medium"], ["medium", "Wikipedia 7-day", "-30%"], ["medium", "Last.fm listeners", "2.7M"]], "insight": "New album “Prizefighter” · Wikipedia -30%"},    {"name": "Rob Zombie & Marilyn Manson with The Hu & Orgy", "date": "Aug 23", "venue": "Ameris Bank Amphitheatre", "genre": "Rock", "score": 79, "deltaClass": "up", "deltaLabel": "↑2", "signals": [["high", "Sentiment", "High"], ["low", "Sales history", "Low"], ["high", "Ticket demand", "High"], ["medium", "Local intent", "Medium"], ["medium", "Wikipedia 7-day", "+1%"], ["medium", "Last.fm listeners", "2.4M"]], "insight": "Wikipedia +1%"},    {"name": "Daniel Caesar — Son of Spergy Tour", "date": "Jul 24", "venue": "State Farm Arena", "genre": "R&B", "score": 76, "deltaClass": "up", "deltaLabel": "↑2", "signals": [["medium", "Sentiment", "Medium"], ["low", "Sales history", "Low"], ["high", "Ticket demand", "High"], ["medium", "Local intent", "Medium"], ["medium", "Wikipedia 7-day", "+34%"], ["medium", "Last.fm listeners", "2.5M"]], "insight": "Wikipedia +34%"},    {"name": "Buddy Guy 90 Tour", "date": "Sep 12", "venue": "Atlanta Symphony Hall", "genre": "Blues", "score": 48, "deltaClass": "flat", "deltaLabel": "—", "signals": [["medium", "Sentiment", "Medium"], ["medium", "Sales history", "Medium"], ["medium", "Ticket demand", "Medium"], ["medium", "Local intent", "Medium"], ["medium", "Wikipedia 7-day", "-2%"], ["medium", "Last.fm listeners", "754,496"]], "insight": "Wikipedia -2%"},    {"name": "BABYMETAL World Tour 2026", "date": "Sep 16", "venue": "Ameris Bank Amphitheatre", "genre": "Rock", "score": 48, "deltaClass": "flat", "deltaLabel": "—", "signals": [["high", "Sentiment", "High"], ["medium", "Sales history", "Medium"], ["high", "Ticket demand", "High"], ["medium", "Local intent", "Medium"], ["medium", "Wikipedia 7-day", "-3%"], ["medium", "Last.fm listeners", "997,005"]], "insight": "Wikipedia -3%"},    {"name": "Olivia Dean — The Art of Loving Tour", "date": "Aug 22", "venue": "State Farm Arena", "genre": "Pop", "score": 72, "deltaClass": "up", "deltaLabel": "↑2", "signals": [["medium", "Sentiment", "Medium"], ["low", "Sales history", "Low"], ["high", "Ticket demand", "High"], ["medium", "Local intent", "Medium"], ["medium", "Wikipedia 7-day", "-7%"], ["medium", "Last.fm listeners", "1.6M"]], "insight": "Wikipedia -7%"},    {"name": "Brooks & Dunn — Neon Moon Tour 2026", "date": "Sep 11", "venue": "Ameris Bank Amphitheatre", "genre": "Country", "score": 72, "deltaClass": "up", "deltaLabel": "↑2", "signals": [["high", "Sentiment", "High"], ["medium", "Sales history", "Medium"], ["high", "Ticket demand", "High"], ["medium", "Local intent", "Medium"], ["medium", "Wikipedia 7-day", "+23%"], ["medium", "Last.fm listeners", "984,738"]], "insight": "Wikipedia +23%"},    {"name": "Yeat", "date": "Sep 22", "venue": "Coca-Cola Roxy", "genre": "Hip-Hop", "score": 47, "deltaClass": "flat", "deltaLabel": "—", "signals": [["high", "Sentiment", "High"], ["medium", "Sales history", "Medium"], ["medium", "Ticket demand", "Medium"], ["medium", "Local intent", "Medium"], ["medium", "Wikipedia 7-day", "-36%"], ["medium", "Last.fm listeners", "1.7M"]], "insight": "New album “ADL” · Wikipedia -36%"},    {"name": "Lynyrd Skynyrd & Foreigner", "date": "Jul 23", "venue": "Ameris Bank Amphitheatre", "genre": "Rock", "score": 70, "deltaClass": "up", "deltaLabel": "↑2", "signals": [["high", "Sentiment", "High"], ["medium", "Sales history", "Medium"], ["high", "Ticket demand", "High"], ["medium", "Local intent", "Medium"], ["medium", "Wikipedia 7-day", "+1%"], ["medium", "Last.fm listeners", "3.4M"]], "insight": "Wikipedia +1%", "ammTitle": "The Renegades &amp; Juke Box Heroes Tour, Featuring Co-Headliners Styx and Foreigner, Rolled through Ameris Bank Amphitheatre in Atlanta, Georgia, on Wednesday, July 17, 2024 -", "ammUrl": "https://atlantamusicmagazine.com/the-renegades-juke-box-heroes-tour-featuring-co-headliners-styx-and-foreigner-rolled-through-ameris-bank-amphitheatre-in-atlanta-georgia-on-wednesday-july-17-2024/", "ammDate": "Jul 2024"},    {"name": "Buju Banton & Stephen Marley — Roots and Rhymes Tour", "date": "Jul 25", "venue": "Lakewood Amphitheatre", "genre": "Reggae", "score": 70, "deltaClass": "up", "deltaLabel": "↑2", "signals": [["medium", "Sentiment", "Medium"], ["medium", "Sales history", "Medium"], ["high", "Ticket demand", "High"], ["medium", "Local intent", "Medium"], ["medium", "Wikipedia 7-day", "+82%"], ["medium", "Last.fm listeners", "500,984"]], "insight": "Wikipedia +82%"},    {"name": "Chance the Rapper", "date": "Sep 3", "venue": "Coca-Cola Roxy", "genre": "Hip-Hop", "score": 70, "deltaClass": "up", "deltaLabel": "↑2", "signals": [["medium", "Sentiment", "Medium"], ["low", "Sales history", "Low"], ["medium", "Ticket demand", "Medium"], ["medium", "Local intent", "Medium"], ["medium", "Wikipedia 7-day", "-19%"], ["medium", "Last.fm listeners", "1.4M"]], "insight": "Wikipedia -19%"},    {"name": "Jack Harlow", "date": "Sep 4", "venue": "Coca-Cola Roxy", "genre": "Hip-Hop", "score": 46, "deltaClass": "flat", "deltaLabel": "—", "signals": [["high", "Sentiment", "High"], ["low", "Sales history", "Low"], ["medium", "Ticket demand", "Medium"], ["medium", "Local intent", "Medium"], ["medium", "Wikipedia 7-day", "-11%"], ["medium", "Last.fm listeners", "1.9M"]], "insight": "Wikipedia -11%"},    {"name": "Dominic Fike", "date": "Aug 16", "venue": "Coca-Cola Roxy", "genre": "Pop", "score": 46, "deltaClass": "flat", "deltaLabel": "—", "signals": [["high", "Sentiment", "High"], ["medium", "Sales history", "Medium"], ["medium", "Ticket demand", "Medium"], ["medium", "Local intent", "Medium"], ["medium", "Wikipedia 7-day", "+12%"], ["medium", "Last.fm listeners", "2.7M"]], "insight": "Wikipedia +12%"},    {"name": "Metric — All The Feelings Tour", "date": "Aug 3", "venue": "The Tabernacle", "genre": "Indie / Alt", "score": 45, "deltaClass": "flat", "deltaLabel": "—", "signals": [["medium", "Sentiment", "Medium"], ["medium", "Sales history", "Medium"], ["medium", "Ticket demand", "Medium"], ["medium", "Local intent", "Medium"], ["medium", "Wikipedia 7-day", "+11%"], ["medium", "Last.fm listeners", "3.0M"]], "insight": "Wikipedia +11%"},    {"name": "Juanes", "date": "Sep 9", "venue": "Coca-Cola Roxy", "genre": "Latin Pop", "score": 45, "deltaClass": "flat", "deltaLabel": "—", "signals": [["high", "Sentiment", "High"], ["low", "Sales history", "Low"], ["medium", "Ticket demand", "Medium"], ["medium", "Local intent", "Medium"], ["medium", "Wikipedia 7-day", "+12%"], ["medium", "Last.fm listeners", "1.2M"]], "insight": "Wikipedia +12%"},    {"name": "Tomahawk with Melvins — A Huge Waste of Your Time and Money Tour", "date": "Jul 24", "venue": "Buckhead Theatre", "genre": "Rock", "score": 45, "deltaClass": "flat", "deltaLabel": "—", "signals": [["medium", "Sentiment", "Medium"], ["medium", "Sales history", "Medium"], ["medium", "Ticket demand", "Medium"], ["medium", "Local intent", "Medium"], ["medium", "Wikipedia 7-day", "+210%"], ["medium", "Last.fm listeners", "308,932"]], "insight": "Wikipedia +210%"},    {"name": "NEEDTOBREATHE — The Long Surrender Tour", "date": "Sep 19", "venue": "Ameris Bank Amphitheatre", "genre": "Rock", "score": 45, "deltaClass": "flat", "deltaLabel": "—", "signals": [["medium", "Sentiment", "Medium"], ["low", "Sales history", "Low"], ["medium", "Ticket demand", "Medium"], ["medium", "Local intent", "Medium"], ["medium", "Wikipedia 7-day", "-47%"], ["medium", "Last.fm listeners", "453,286"]], "insight": "Wikipedia -47%"},    {"name": "Lord Huron", "date": "Aug 1", "venue": "Coca-Cola Roxy", "genre": "Indie / Alt", "score": 44, "deltaClass": "down", "deltaLabel": "↓4", "signals": [["medium", "Sentiment", "Medium"], ["medium", "Sales history", "Medium"], ["medium", "Ticket demand", "Medium"], ["medium", "Local intent", "Medium"], ["medium", "Wikipedia 7-day", "+21%"], ["medium", "Last.fm listeners", "2.4M"]], "insight": "Wikipedia +21%"},    {"name": "Koe Wetzel — The Night of Champion Tour", "date": "Sep 17", "venue": "Ameris Bank Amphitheatre", "genre": "Country", "score": 44, "deltaClass": "flat", "deltaLabel": "—", "signals": [["medium", "Sentiment", "Medium"], ["low", "Sales history", "Low"], ["high", "Ticket demand", "High"], ["medium", "Local intent", "Medium"], ["medium", "Wikipedia 7-day", "-9%"], ["medium", "Last.fm listeners", "179,598"]], "insight": "Wikipedia -9%"},    {"name": "Theory of a Deadman & Sevendust", "date": "Sep 5", "venue": "The Tabernacle", "genre": "Rock", "score": 43, "deltaClass": "flat", "deltaLabel": "—", "signals": [["high", "Sentiment", "High"], ["medium", "Sales history", "Medium"], ["medium", "Ticket demand", "Medium"], ["medium", "Local intent", "Medium"], ["medium", "Wikipedia 7-day", "+12%"], ["medium", "Last.fm listeners", "1.3M"]], "insight": "Wikipedia +12%", "ammTitle": "Heavy Storms Couldn&#039;t Stop Sevendust From Shredding Up The Eastern in Atlanta, Georgia, on Wednesday, September 25, 2024 -", "ammUrl": "https://atlantamusicmagazine.com/heavy-storms-couldnt-stop-sevendust-from-shredding-up-the-eastern-in-atlanta-georgia-on-wednesday-september-25-2024/", "ammDate": "Sep 2024"},    {"name": "Toto, Christopher Cross & The Romantics", "date": "Aug 2", "venue": "Ameris Bank Amphitheatre", "genre": "Classic Rock", "score": 43, "deltaClass": "flat", "deltaLabel": "—", "signals": [["medium", "Sentiment", "Medium"], ["low", "Sales history", "Low"], ["high", "Ticket demand", "High"], ["medium", "Local intent", "Medium"], ["medium", "Wikipedia 7-day", "+34%"], ["medium", "Last.fm listeners", "3.2M"]], "insight": "Wikipedia +34%"},    {"name": "Jonas Brothers", "date": "Aug 20", "venue": "Ameris Bank Amphitheatre", "genre": "Pop", "score": 66, "deltaClass": "up", "deltaLabel": "↑2", "signals": [["high", "Sentiment", "High"], ["medium", "Sales history", "Medium"], ["high", "Ticket demand", "High"], ["medium", "Local intent", "Medium"], ["medium", "Wikipedia 7-day", "+8%"], ["medium", "Last.fm listeners", "2.2M"]], "insight": "Wikipedia +8%"},    {"name": "Gorillaz", "date": "Sep 20", "venue": "Ameris Bank Amphitheatre", "genre": "Rock", "score": 66, "deltaClass": "new", "deltaLabel": "NEW", "signals": [["high", "Sentiment", "High"], ["medium", "Sales history", "Medium"], ["high", "Ticket demand", "High"], ["medium", "Local intent", "Medium"], ["medium", "Wikipedia 7-day", "+0%"], ["medium", "Last.fm listeners", "7.0M"]], "insight": "Wikipedia +0%"},    {"name": "Empire of the Sun — Ask That God Tour", "date": "Sep 13", "venue": "Ameris Bank Amphitheatre", "genre": "Electronic", "score": 65, "deltaClass": "up", "deltaLabel": "↑1", "signals": [["medium", "Sentiment", "Medium"], ["medium", "Sales history", "Medium"], ["high", "Ticket demand", "High"], ["medium", "Local intent", "Medium"], ["medium", "Wikipedia 7-day", "-7%"], ["medium", "Last.fm listeners", "3.2M"]], "insight": "Wikipedia -7%"},    {"name": "Social Distortion — with Descendents", "date": "Sep 1", "venue": "Coca-Cola Roxy", "genre": "Rock", "score": 42, "deltaClass": "up", "deltaLabel": "↑3", "signals": [["medium", "Sentiment", "Medium"], ["medium", "Sales history", "Medium"], ["medium", "Ticket demand", "Medium"], ["medium", "Local intent", "Medium"], ["medium", "Wikipedia 7-day", "+9%"], ["medium", "Last.fm listeners", "878,543"]], "insight": "Wikipedia +9%"},    {"name": "Ella Mai", "date": "Aug 14", "venue": "Synovus Bank Amphitheater at Chastain Park", "genre": "R&B", "score": 42, "deltaClass": "up", "deltaLabel": "↑1", "signals": [["high", "Sentiment", "High"], ["low", "Sales history", "Low"], ["high", "Ticket demand", "High"], ["medium", "Local intent", "Medium"], ["medium", "Wikipedia 7-day", "-14%"], ["medium", "Last.fm listeners", "830,449"]], "insight": "Wikipedia -14%"},    {"name": "Franz Ferdinand", "date": "Aug 12", "venue": "Buckhead Theatre", "genre": "Indie / Alt", "score": 42, "deltaClass": "up", "deltaLabel": "↑3", "signals": [["high", "Sentiment", "High"], ["low", "Sales history", "Low"], ["medium", "Ticket demand", "Medium"], ["medium", "Local intent", "Medium"], ["medium", "Wikipedia 7-day", "-6%"], ["medium", "Last.fm listeners", "5.0M"]], "insight": "Wikipedia -6%"},    {"name": "Dogstar — All In Now Tour", "date": "Aug 4", "venue": "The Tabernacle", "genre": "Rock", "score": 42, "deltaClass": "flat", "deltaLabel": "—", "signals": [["medium", "Sentiment", "Medium"], ["low", "Sales history", "Low"], ["medium", "Ticket demand", "Medium"], ["medium", "Local intent", "Medium"], ["medium", "Wikipedia 7-day", "+49%"], ["medium", "Last.fm listeners", "53,914"]], "insight": "Wikipedia +49%"},    {"name": "Squeeze — Tried, Tested and Trixies Tour", "date": "Aug 22", "venue": "Fabulous Fox Theatre", "genre": "Rock", "score": 42, "deltaClass": "up", "deltaLabel": "↑2", "signals": [["medium", "Sentiment", "Medium"], ["medium", "Sales history", "Medium"], ["medium", "Ticket demand", "Medium"], ["medium", "Local intent", "Medium"], ["medium", "Wikipedia 7-day", "-11%"], ["medium", "Last.fm listeners", "728,644"]], "insight": "Wikipedia -11%"},    {"name": "311 and Dirty Heads — So Glad You Made It Tour", "date": "Aug 28", "venue": "Ameris Bank Amphitheatre", "genre": "Rock", "score": 42, "deltaClass": "up", "deltaLabel": "↑2", "signals": [["medium", "Sentiment", "Medium"], ["medium", "Sales history", "Medium"], ["high", "Ticket demand", "High"], ["medium", "Local intent", "Medium"], ["medium", "Wikipedia 7-day", "+20%"], ["medium", "Last.fm listeners", "1.7M"]], "insight": "Wikipedia +20%"},    {"name": "Isaiah Rashad", "date": "Aug 13", "venue": "Coca-Cola Roxy", "genre": "Hip-Hop", "score": 64, "deltaClass": "up", "deltaLabel": "↑1", "signals": [["high", "Sentiment", "High"], ["medium", "Sales history", "Medium"], ["medium", "Ticket demand", "Medium"], ["medium", "Local intent", "Medium"], ["medium", "Wikipedia 7-day", "+11%"], ["medium", "Last.fm listeners", "1.4M"]], "insight": "Wikipedia +11%"},    {"name": "Mötley Crüe — Return of the Carnival of Sins", "date": "Aug 12", "venue": "Ameris Bank Amphitheatre", "genre": "Rock", "score": 40, "deltaClass": "flat", "deltaLabel": "—", "signals": [["high", "Sentiment", "High"], ["medium", "Sales history", "Medium"], ["high", "Ticket demand", "High"], ["medium", "Local intent", "Medium"], ["medium", "Wikipedia 7-day", "+56%"], ["medium", "Last.fm listeners", "2.0M"]], "insight": "Wikipedia +56%"},    {"name": "Malcolm Todd", "date": "Sep 12", "venue": "Coca-Cola Roxy", "genre": "Pop", "score": 62, "deltaClass": "new", "deltaLabel": "NEW", "signals": [["high", "Sentiment", "High"], ["medium", "Sales history", "Medium"], ["medium", "Ticket demand", "Medium"], ["medium", "Local intent", "Medium"], ["medium", "Wikipedia 7-day", "-29%"], ["medium", "Last.fm listeners", "1.7M"]], "insight": "Wikipedia -29%"},    {"name": "Bryson Tiller", "date": "Sep 2", "venue": "Ameris Bank Amphitheatre", "genre": "Hip-Hop", "score": 62, "deltaClass": "flat", "deltaLabel": "—", "signals": [["high", "Sentiment", "High"], ["low", "Sales history", "Low"], ["high", "Ticket demand", "High"], ["medium", "Local intent", "Medium"], ["medium", "Wikipedia 7-day", "-0%"], ["medium", "Last.fm listeners", "1.8M"]], "insight": "Wikipedia -0%"},    {"name": "Foster the People", "date": "Oct 14", "venue": "Coca-Cola Roxy", "genre": "Rock", "score": 62, "deltaClass": "flat", "deltaLabel": "—", "signals": [["high", "Sentiment", "High"], ["medium", "Sales history", "Medium"], ["medium", "Ticket demand", "Medium"], ["medium", "Local intent", "Medium"], ["medium", "Wikipedia 7-day", "+29%"], ["medium", "Last.fm listeners", "3.8M"]], "insight": "Wikipedia +29%"},    {"name": "Band of Horses & Dinosaur Jr.", "date": "Jul 23", "venue": "The Eastern", "genre": "Indie / Alt", "score": 40, "deltaClass": "up", "deltaLabel": "↑2", "signals": [["medium", "Sentiment", "Medium"], ["low", "Sales history", "Low"], ["medium", "Ticket demand", "Medium"], ["medium", "Local intent", "Medium"], ["medium", "Wikipedia 7-day", "+15%"], ["medium", "Last.fm listeners", "2.3M"]], "insight": "Wikipedia +15%"},    {"name": "Loathe", "date": "Sep 28", "venue": "The Tabernacle", "genre": "Rock", "score": 61, "deltaClass": "flat", "deltaLabel": "—", "signals": [["high", "Sentiment", "High"], ["medium", "Sales history", "Medium"], ["medium", "Ticket demand", "Medium"], ["medium", "Local intent", "Medium"], ["medium", "Wikipedia 7-day", "+339%"], ["medium", "Last.fm listeners", "910,799"]], "insight": "Wikipedia +339%"},    {"name": "Vince Staples", "date": "Oct 19", "venue": "The Tabernacle", "genre": "Hip-Hop", "score": 61, "deltaClass": "flat", "deltaLabel": "—", "signals": [["high", "Sentiment", "High"], ["medium", "Sales history", "Medium"], ["medium", "Ticket demand", "Medium"], ["medium", "Local intent", "Medium"], ["medium", "Wikipedia 7-day", "+27%"], ["medium", "Last.fm listeners", "1.5M"]], "insight": "Wikipedia +27%"},    {"name": "Hermanos Espinoza", "date": "Jul 31", "venue": "Coca-Cola Roxy", "genre": "Latin Pop", "score": 60, "deltaClass": "flat", "deltaLabel": "—", "signals": [["medium", "Sentiment", "Medium"], ["medium", "Sales history", "Medium"], ["medium", "Ticket demand", "Medium"], ["medium", "Local intent", "Medium"], ["medium", "Venue capacity", "3,600"], ["medium", "Last.fm listeners", "37,028"]], "insight": "8 days to show · Genre ATL index 76/100"},    {"name": "Billy Currington", "date": "Aug 7", "venue": "Coca-Cola Roxy", "genre": "Country", "score": 60, "deltaClass": "flat", "deltaLabel": "—", "signals": [["medium", "Sentiment", "Medium"], ["medium", "Sales history", "Medium"], ["medium", "Ticket demand", "Medium"], ["medium", "Local intent", "Medium"], ["medium", "Wikipedia 7-day", "+1%"], ["medium", "Last.fm listeners", "811,922"]], "insight": "Wikipedia +1%"},    {"name": "Masego", "date": "Aug 15", "venue": "Coca-Cola Roxy", "genre": "Hip-Hop", "score": 60, "deltaClass": "flat", "deltaLabel": "—", "signals": [["high", "Sentiment", "High"], ["low", "Sales history", "Low"], ["medium", "Ticket demand", "Medium"], ["medium", "Local intent", "Medium"], ["medium", "Wikipedia 7-day", "+47%"], ["medium", "Last.fm listeners", "1.1M"]], "insight": "Wikipedia +47%"},    {"name": "Poppy", "date": "Aug 16", "venue": "The Tabernacle", "genre": "Rock", "score": 60, "deltaClass": "flat", "deltaLabel": "—", "signals": [["medium", "Sentiment", "Medium"], ["medium", "Sales history", "Medium"], ["medium", "Ticket demand", "Medium"], ["medium", "Local intent", "Medium"], ["medium", "Wikipedia 7-day", "-4%"], ["medium", "Last.fm listeners", "1.2M"]], "insight": "Wikipedia -4%"},    {"name": "El Tri", "date": "Aug 21", "venue": "The Tabernacle", "genre": "Latin Pop", "score": 60, "deltaClass": "flat", "deltaLabel": "—", "signals": [["high", "Sentiment", "High"], ["medium", "Sales history", "Medium"], ["medium", "Ticket demand", "Medium"], ["medium", "Local intent", "Medium"], ["medium", "Wikipedia 7-day", "-30%"], ["medium", "Last.fm listeners", "158,610"]], "insight": "Wikipedia -30%"},    {"name": "Cameron Whitcomb", "date": "Sep 25", "venue": "The Tabernacle", "genre": "Country", "score": 60, "deltaClass": "flat", "deltaLabel": "—", "signals": [["medium", "Sentiment", "Medium"], ["medium", "Sales history", "Medium"], ["medium", "Ticket demand", "Medium"], ["medium", "Local intent", "Medium"], ["medium", "Wikipedia 7-day", "+88%"], ["medium", "Last.fm listeners", "178,438"]], "insight": "Wikipedia +88%"},    {"name": "Suki Waterhouse", "date": "Sep 29", "venue": "Coca-Cola Roxy", "genre": "Rock", "score": 60, "deltaClass": "flat", "deltaLabel": "—", "signals": [["medium", "Sentiment", "Medium"], ["medium", "Sales history", "Medium"], ["medium", "Ticket demand", "Medium"], ["medium", "Local intent", "Medium"], ["medium", "Wikipedia 7-day", "+87%"], ["medium", "Last.fm listeners", "1.9M"]], "insight": "Wikipedia +87%"},    {"name": "Wave To Earth", "date": "Oct 6", "venue": "Coca-Cola Roxy", "genre": "Pop", "score": 60, "deltaClass": "flat", "deltaLabel": "—", "signals": [["high", "Sentiment", "High"], ["low", "Sales history", "Low"], ["medium", "Ticket demand", "Medium"], ["medium", "Local intent", "Medium"], ["medium", "Venue capacity", "3,600"], ["medium", "Last.fm listeners", "905,431"]], "insight": "75 days to show · Genre ATL index 70/100"},    {"name": "Freya Skye", "date": "Oct 12", "venue": "Coca-Cola Roxy", "genre": "Pop", "score": 60, "deltaClass": "flat", "deltaLabel": "—", "signals": [["medium", "Sentiment", "Medium"], ["medium", "Sales history", "Medium"], ["medium", "Ticket demand", "Medium"], ["medium", "Local intent", "Medium"], ["medium", "Wikipedia 7-day", "+59%"], ["medium", "Last.fm listeners", "98,248"]], "insight": "Wikipedia +59%"},    {"name": "Cavetown", "date": "Oct 18", "venue": "The Tabernacle", "genre": "Rock", "score": 60, "deltaClass": "flat", "deltaLabel": "—", "signals": [["high", "Sentiment", "High"], ["medium", "Sales history", "Medium"], ["medium", "Ticket demand", "Medium"], ["medium", "Local intent", "Medium"], ["medium", "Wikipedia 7-day", "+1%"], ["medium", "Last.fm listeners", "1.7M"]], "insight": "Wikipedia +1%"},    {"name": "Muse — The Wow! Signal Tour", "date": "Aug 12", "venue": "Lakewood Amphitheatre", "genre": "Rock", "score": 38, "deltaClass": "up", "deltaLabel": "↑1", "signals": [["medium", "Sentiment", "Medium"], ["medium", "Sales history", "Medium"], ["high", "Ticket demand", "High"], ["medium", "Local intent", "Medium"], ["medium", "Wikipedia 7-day", "-8%"], ["medium", "Last.fm listeners", "6.5M"]], "insight": "Wikipedia -8%"},    {"name": "The Red Clay Strays", "date": "Oct 15", "venue": "Ameris Bank Amphitheatre", "genre": "Country", "score": 59, "deltaClass": "flat", "deltaLabel": "—", "signals": [["medium", "Sentiment", "Medium"], ["low", "Sales history", "Low"], ["medium", "Ticket demand", "Medium"], ["medium", "Local intent", "Medium"], ["medium", "Wikipedia 7-day", "-2%"], ["medium", "Last.fm listeners", "325,836"]], "insight": "Wikipedia -2%"},    {"name": "ISOxo", "date": "Sep 4", "venue": "The Tabernacle", "genre": "Pop", "score": 59, "deltaClass": "flat", "deltaLabel": "—", "signals": [["medium", "Sentiment", "Medium"], ["medium", "Sales history", "Medium"], ["medium", "Ticket demand", "Medium"], ["medium", "Local intent", "Medium"], ["medium", "Venue capacity", "2,600"], ["medium", "Last.fm listeners", "152,800"]], "insight": "43 days to show · Genre ATL index 70/100"},    {"name": "Kany Garcia", "date": "Oct 1", "venue": "Coca-Cola Roxy", "genre": "Pop", "score": 59, "deltaClass": "flat", "deltaLabel": "—", "signals": [["high", "Sentiment", "High"], ["medium", "Sales history", "Medium"], ["medium", "Ticket demand", "Medium"], ["medium", "Local intent", "Medium"], ["medium", "Wikipedia 7-day", "+24%"], ["medium", "Last.fm listeners", "131,796"]], "insight": "Wikipedia +24%"},    {"name": "Grupo Duelo", "date": "Oct 3", "venue": "Coca-Cola Roxy", "genre": "Latin Pop", "score": 59, "deltaClass": "flat", "deltaLabel": "—", "signals": [["high", "Sentiment", "High"], ["low", "Sales history", "Low"], ["medium", "Ticket demand", "Medium"], ["medium", "Local intent", "Medium"], ["medium", "Wikipedia 7-day", "+54%"], ["medium", "Last.fm listeners", "86,395"]], "insight": "Wikipedia +54%"},    {"name": "Bleachers", "date": "Oct 5", "venue": "Coca-Cola Roxy", "genre": "Rock", "score": 59, "deltaClass": "flat", "deltaLabel": "—", "signals": [["medium", "Sentiment", "Medium"], ["medium", "Sales history", "Medium"], ["medium", "Ticket demand", "Medium"], ["medium", "Local intent", "Medium"], ["medium", "Wikipedia 7-day", "+6%"], ["medium", "Last.fm listeners", "1.3M"]], "insight": "Wikipedia +6%"},    {"name": "Mt. Joy", "date": "Sep 17", "venue": "Ameris Bank Amphitheatre", "genre": "Folk", "score": 59, "deltaClass": "flat", "deltaLabel": "—", "signals": [["medium", "Sentiment", "Medium"], ["low", "Sales history", "Low"], ["high", "Ticket demand", "High"], ["medium", "Local intent", "Medium"], ["medium", "Wikipedia 7-day", "-19%"], ["medium", "Last.fm listeners", "713,270"]], "insight": "Wikipedia -19%"},    {"name": "Arcángel", "date": "Oct 15", "venue": "Coca-Cola Roxy", "genre": "Hip-Hop", "score": 59, "deltaClass": "flat", "deltaLabel": "—", "signals": [["medium", "Sentiment", "Medium"], ["medium", "Sales history", "Medium"], ["medium", "Ticket demand", "Medium"], ["medium", "Local intent", "Medium"], ["medium", "Wikipedia 7-day", "-3%"], ["medium", "Last.fm listeners", "470,890"]], "insight": "Wikipedia -3%"},    {"name": "San Holo", "date": "Oct 16", "venue": "The Tabernacle", "genre": "Pop", "score": 59, "deltaClass": "flat", "deltaLabel": "—", "signals": [["high", "Sentiment", "High"], ["medium", "Sales history", "Medium"], ["medium", "Ticket demand", "Medium"], ["medium", "Local intent", "Medium"], ["medium", "Wikipedia 7-day", "-6%"], ["medium", "Last.fm listeners", "495,303"]], "insight": "Wikipedia -6%"},    {"name": "Polyphia", "date": "Oct 17", "venue": "Coca-Cola Roxy", "genre": "Rock", "score": 59, "deltaClass": "flat", "deltaLabel": "—", "signals": [["high", "Sentiment", "High"], ["medium", "Sales history", "Medium"], ["medium", "Ticket demand", "Medium"], ["medium", "Local intent", "Medium"], ["medium", "Wikipedia 7-day", "-4%"], ["medium", "Last.fm listeners", "636,318"]], "insight": "Wikipedia -4%"},    {"name": "Myles Smith", "date": "Sep 10", "venue": "Coca-Cola Roxy", "genre": "Rock", "score": 58, "deltaClass": "flat", "deltaLabel": "—", "signals": [["medium", "Sentiment", "Medium"], ["medium", "Sales history", "Medium"], ["medium", "Ticket demand", "Medium"], ["medium", "Local intent", "Medium"], ["medium", "Wikipedia 7-day", "+48%"], ["medium", "Last.fm listeners", "640,497"]], "insight": "Wikipedia +48%"},    {"name": "Linea Personal", "date": "Sep 11", "venue": "The Tabernacle", "genre": "Latin Pop", "score": 58, "deltaClass": "flat", "deltaLabel": "—", "signals": [["medium", "Sentiment", "Medium"], ["medium", "Sales history", "Medium"], ["medium", "Ticket demand", "Medium"], ["medium", "Local intent", "Medium"], ["medium", "Venue capacity", "2,600"], ["medium", "Last.fm listeners", "34,900"]], "insight": "50 days to show · Genre ATL index 76/100"},    {"name": "Thee Sacred Souls", "date": "Sep 15", "venue": "Coca-Cola Roxy", "genre": "R&B", "score": 58, "deltaClass": "flat", "deltaLabel": "—", "signals": [["medium", "Sentiment", "Medium"], ["low", "Sales history", "Low"], ["medium", "Ticket demand", "Medium"], ["medium", "Local intent", "Medium"], ["medium", "Wikipedia 7-day", "+4%"], ["medium", "Last.fm listeners", "1.3M"]], "insight": "Wikipedia +4%"},    {"name": "Amyl and the Sniffers", "date": "Oct 4", "venue": "Coca-Cola Roxy", "genre": "Rock", "score": 58, "deltaClass": "flat", "deltaLabel": "—", "signals": [["medium", "Sentiment", "Medium"], ["medium", "Sales history", "Medium"], ["medium", "Ticket demand", "Medium"], ["medium", "Local intent", "Medium"], ["medium", "Wikipedia 7-day", "-3%"], ["medium", "Last.fm listeners", "427,905"]], "insight": "Wikipedia -3%"},    {"name": "Artemas", "date": "Oct 7", "venue": "The Tabernacle", "genre": "Pop", "score": 58, "deltaClass": "flat", "deltaLabel": "—", "signals": [["high", "Sentiment", "High"], ["low", "Sales history", "Low"], ["medium", "Ticket demand", "Medium"], ["medium", "Local intent", "Medium"], ["medium", "Wikipedia 7-day", "-10%"], ["medium", "Last.fm listeners", "1.7M"]], "insight": "Wikipedia -10%"},    {"name": "Trampled By Turtles", "date": "Oct 9", "venue": "The Tabernacle", "genre": "Folk", "score": 58, "deltaClass": "flat", "deltaLabel": "—", "signals": [["medium", "Sentiment", "Medium"], ["medium", "Sales history", "Medium"], ["medium", "Ticket demand", "Medium"], ["medium", "Local intent", "Medium"], ["medium", "Wikipedia 7-day", "+57%"], ["medium", "Last.fm listeners", "375,659"]], "insight": "Wikipedia +57%"},    {"name": "Gov\'t Mule", "date": "Oct 10", "venue": "Coca-Cola Roxy", "genre": "Rock", "score": 58, "deltaClass": "flat", "deltaLabel": "—", "signals": [["medium", "Sentiment", "Medium"], ["medium", "Sales history", "Medium"], ["medium", "Ticket demand", "Medium"], ["medium", "Local intent", "Medium"], ["medium", "Wikipedia 7-day", "+17%"], ["medium", "Last.fm listeners", "300,564"]], "insight": "Wikipedia +17%"},    {"name": "The Hayley Williams Show w/ Magdalena Bay", "date": "Sep 5", "venue": "Ameris Bank Amphitheatre", "genre": "Indie / Alt", "score": 36, "deltaClass": "flat", "deltaLabel": "—", "signals": [["medium", "Sentiment", "Medium"], ["low", "Sales history", "Low"], ["high", "Ticket demand", "High"], ["medium", "Local intent", "Medium"], ["medium", "Wikipedia 7-day", "+9%"], ["medium", "Last.fm listeners", "866,689"]], "insight": "Wikipedia +9%"},    {"name": "Ammy Virk", "date": "Aug 21", "venue": "Coca-Cola Roxy", "genre": "World", "score": 56, "deltaClass": "flat", "deltaLabel": "—", "signals": [["medium", "Sentiment", "Medium"], ["low", "Sales history", "Low"], ["medium", "Ticket demand", "Medium"], ["medium", "Local intent", "Medium"], ["medium", "Wikipedia 7-day", "-14%"], ["medium", "Last.fm listeners", "25,478"]], "insight": "Wikipedia -14%"},    {"name": "Houndmouth", "date": "Sep 24", "venue": "The Tabernacle", "genre": "Rock", "score": 56, "deltaClass": "flat", "deltaLabel": "—", "signals": [["medium", "Sentiment", "Medium"], ["medium", "Sales history", "Medium"], ["medium", "Ticket demand", "Medium"], ["medium", "Local intent", "Medium"], ["medium", "Wikipedia 7-day", "-17%"], ["medium", "Last.fm listeners", "473,988"]], "insight": "Wikipedia -17%"},    {"name": "Hulvey", "date": "Sep 27", "venue": "The Tabernacle", "genre": "Hip-Hop", "score": 56, "deltaClass": "flat", "deltaLabel": "—", "signals": [["medium", "Sentiment", "Medium"], ["low", "Sales history", "Low"], ["medium", "Ticket demand", "Medium"], ["medium", "Local intent", "Medium"], ["medium", "Wikipedia 7-day", "+13%"], ["medium", "Last.fm listeners", "89,620"]], "insight": "Wikipedia +13%"},    {"name": "Alicia Villarreal", "date": "Oct 4", "venue": "The Tabernacle", "genre": "Latin Pop", "score": 56, "deltaClass": "flat", "deltaLabel": "—", "signals": [["medium", "Sentiment", "Medium"], ["low", "Sales history", "Low"], ["medium", "Ticket demand", "Medium"], ["medium", "Local intent", "Medium"], ["medium", "Wikipedia 7-day", "+2%"], ["medium", "Last.fm listeners", "58,737"]], "insight": "Wikipedia +2%"},    {"name": "JOHNNYSWIM", "date": "Oct 11", "venue": "The Tabernacle", "genre": "Rock", "score": 56, "deltaClass": "flat", "deltaLabel": "—", "signals": [["medium", "Sentiment", "Medium"], ["medium", "Sales history", "Medium"], ["medium", "Ticket demand", "Medium"], ["medium", "Local intent", "Medium"], ["medium", "Wikipedia 7-day", "-12%"], ["medium", "Last.fm listeners", "215,409"]], "insight": "Wikipedia -12%"},    {"name": "John Mellencamp — Dancing Words Tour", "date": "Aug 1", "venue": "Ameris Bank Amphitheatre", "genre": "Classic Rock", "score": 36, "deltaClass": "flat", "deltaLabel": "—", "signals": [["medium", "Sentiment", "Medium"], ["medium", "Sales history", "Medium"], ["high", "Ticket demand", "High"], ["medium", "Local intent", "Medium"], ["medium", "Wikipedia 7-day", "+3%"], ["medium", "Last.fm listeners", "1.1M"]], "insight": "Wikipedia +3%", "ammTitle": "John Mellencamp Fabulous at the Fox Theatre in Downtown Atlanta, Georgia, on Friday, February 10, 2023 -", "ammUrl": "https://atlantamusicmagazine.com/john-mellencamp-fabulous-at-the-fox-theatre-in-downtown-atlanta-georgia-on-friday-february-10-2023/", "ammDate": "Feb 2023"},    {"name": "Jack Johnson — SURFILMUSIC Tour", "date": "Aug 21", "venue": "Ameris Bank Amphitheatre", "genre": "Indie / Alt", "score": 32, "deltaClass": "flat", "deltaLabel": "—", "signals": [["medium", "Sentiment", "Medium"], ["medium", "Sales history", "Medium"], ["high", "Ticket demand", "High"], ["medium", "Local intent", "Medium"], ["medium", "Wikipedia 7-day", "-54%"], ["medium", "Last.fm listeners", "3.7M"]], "insight": "Wikipedia -54%"},    {"name": "The Isley Brothers & The O\'Jays", "date": "Aug 22", "venue": "Synovus Bank Amphitheater at Chastain Park", "genre": "R&B", "score": 29, "deltaClass": "down", "deltaLabel": "↓2", "signals": [["high", "Sentiment", "High"], ["medium", "Sales history", "Medium"], ["medium", "Ticket demand", "Medium"], ["low", "Local intent", "Low"], ["medium", "Wikipedia 7-day", "+1%"], ["medium", "Last.fm listeners", "1.6M"]], "insight": "Wikipedia +1%"},    {"name": "Wynonna Judd & Melissa Etheridge — Raised On Radio Tour", "date": "Aug 7", "venue": "Synovus Bank Amphitheater at Chastain Park", "genre": "Classic Rock", "score": 27, "deltaClass": "up", "deltaLabel": "↑1", "signals": [["medium", "Sentiment", "Medium"], ["medium", "Sales history", "Medium"], ["medium", "Ticket demand", "Medium"], ["low", "Local intent", "Low"], ["medium", "Wikipedia 7-day", "+18%"], ["medium", "Last.fm listeners", "59,829"]], "insight": "Wikipedia +18%"},    {"name": "The Guess Who — Takin\' It Back Tour", "date": "Aug 6", "venue": "Synovus Bank Amphitheater at Chastain Park", "genre": "Classic Rock", "score": 27, "deltaClass": "up", "deltaLabel": "↑1", "signals": [["medium", "Sentiment", "Medium"], ["medium", "Sales history", "Medium"], ["medium", "Ticket demand", "Medium"], ["low", "Local intent", "Low"], ["medium", "Wikipedia 7-day", "+11%"], ["medium", "Last.fm listeners", "818,852"]], "insight": "Wikipedia +11%"},    {"name": "Justine Skye", "date": "Jul 26", "venue": "Vinyl at Center Stage", "genre": "R&B", "score": 25, "deltaClass": "flat", "deltaLabel": "—", "signals": [["high", "Sentiment", "High"], ["low", "Sales history", "Low"], ["medium", "Ticket demand", "Medium"], ["low", "Local intent", "Low"], ["medium", "Wikipedia 7-day", "-40%"], ["medium", "Last.fm listeners", "737,602"]], "insight": "Wikipedia -40%"},    {"name": "Slayyyter — Wor$t Girl in the World Tour", "date": "Sep 21", "venue": "The Eastern", "genre": "Hyperpop", "score": 23, "deltaClass": "flat", "deltaLabel": "—", "signals": [["medium", "Sentiment", "Medium"], ["medium", "Sales history", "Medium"], ["medium", "Ticket demand", "Medium"], ["low", "Local intent", "Low"], ["medium", "Wikipedia 7-day", "-1%"], ["medium", "Last.fm listeners", "1.1M"]], "insight": "Wikipedia -1%"}  ]/*CSI_POOL_DATA_END*/';
+    var _a = _s.indexOf('['), _b = _s.lastIndexOf(']') + 1;
+    try { return JSON.parse(_s.slice(_a, _b)); } catch(e) { return []; }
+  })();
+  var GENRE_POOL_BOTTOM = GENRE_POOL_TOP.slice();
+
+  /* ── Boot ─────────────────────────────────────────────────────── */
+  requestAnimationFrame(function() {
+    setupPanel("top20-heading",    "top-seg-wrap",    "top-empty",    false, GENRE_POOL_TOP);
+    setupPanel("bottom20-heading", "bottom-seg-wrap", "bottom-empty", true,  GENRE_POOL_BOTTOM);
+  });
+
+})();
+
+</script>
+</div>

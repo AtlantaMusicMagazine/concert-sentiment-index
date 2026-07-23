@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Most Popular Atlanta Event — Concert Sentiment Index</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Inter",-apple-system,BlinkMacSystemFont,sans-serif;background:transparent}
+.card{border:1px solid #e4e4e8;border-radius:12px;overflow:hidden;width:100%;background:#fff}
+.eyebrow{display:flex;align-items:center;gap:6px;padding:9px 14px;background:#f8f8fb;border-bottom:1px solid #e4e4e8;font-size:10px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:#767686}
+.eyebrow-dot{width:7px;height:7px;border-radius:50%;background:#5a50d4;flex-shrink:0}
+.body{padding:14px;display:flex;gap:14px;align-items:flex-start}
+.rank{display:flex;flex-direction:column;align-items:center;flex-shrink:0;min-width:36px}
+.rank-num{font-size:30px;font-weight:600;color:#5a50d4;line-height:1}
+.rank-lbl{font-size:8px;font-weight:500;color:#767686;letter-spacing:.07em;text-transform:uppercase;margin-top:2px}
+.info{flex:1;min-width:0}
+.name{font-size:15px;font-weight:600;color:#1a1a2e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}
+.pill{display:inline-block;font-size:9px;font-weight:600;padding:2px 8px;border-radius:20px;background:#eeedfb;color:#4038b0;margin-left:6px;vertical-align:middle;letter-spacing:.02em}
+.meta{font-size:11px;color:#767686;margin-bottom:9px;font-weight:400}
+.sigs{display:flex;flex-wrap:wrap;gap:4px 14px;margin-bottom:9px}
+.sig{display:flex;align-items:center;gap:4px;font-size:11px;color:#4a4a58;font-weight:400}
+.sig strong{font-weight:500;color:#1a1a2e}
+.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.insight{font-size:10px;color:#767686;font-style:italic;border-left:2px solid #e4e4e8;padding-left:7px;margin-bottom:10px;line-height:1.5}
+.score-row{display:flex;align-items:center;gap:10px}
+.bar-wrap{flex:1;height:4px;background:#f0f0f4;border-radius:2px;overflow:hidden}
+.bar-fill{height:100%;border-radius:2px;background:#5a50d4;width:92%}
+.score-num{font-size:22px;font-weight:600;color:#5a50d4;line-height:1}
+.score-sub{font-size:10px;color:#a0a0b0;line-height:1}
+.footer{padding:8px 14px;border-top:1px solid #e4e4e8;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px;background:#fff}
+.upd{font-size:9px;color:#a0a0b0;display:flex;align-items:center;gap:4px}
+.cta{font-size:10px;color:#5a50d4;text-decoration:none;font-weight:500;display:flex;align-items:center;gap:3px;white-space:nowrap}
+.cta:hover{text-decoration:underline}
+@media(max-width:300px){.footer{flex-direction:column;align-items:flex-start}.name{font-size:13px}}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="eyebrow">
+    <span class="eyebrow-dot"></span>
+    Top Trending Atlanta Event
+  </div>
+  <div class="body">
+    <div class="rank">
+      <span class="rank-num">1</span>
+      <span class="rank-lbl">rank</span>
+    </div>
+    <div class="info">
+      <div class="name">Shaky Knees Music Festival<span class="pill">Multi-Genre</span></div>
+      <div class="meta">Sep 18 &middot; Piedmont Park</div>
+      <div class="sigs">
+<span class="sig"><span class="dot" style="background:#1a9e6e"></span>Ticket demand: <strong>High</strong></span>
+<span class="sig"><span class="dot" style="background:#c9820a"></span>Sentiment: <strong>Medium</strong></span>
+<span class="sig"><span class="dot" style="background:#1a9e6e"></span>Local intent: <strong>High</strong></span>
+<span class="sig"><span class="dot" style="background:#c0392b"></span>Sales history: <strong>Low</strong></span>
+      </div>
+<div class="insight">SeatGeek demand score: 44/100</div>
+      <div class="score-row">
+        <div class="bar-wrap"><div class="bar-fill"></div></div>
+        <div style="display:flex;align-items:baseline;gap:3px">
+          <span class="score-num">92</span>
+          <span class="score-sub">/ 100</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="footer">
+    <span class="upd"><i class="ti ti-refresh" style="font-size:11px"></i> Updated nightly &middot; rolling 90-day window</span>
+    <a class="cta" href="https://atlantamusicmagazine.com/concert-sentiment-index/" target="_blank" rel="noopener">
+      Concert Sentiment Index <i class="ti ti-arrow-right" style="font-size:10px"></i>
+    </a>
+  </div>
+</div>
+</body>
+</html>
