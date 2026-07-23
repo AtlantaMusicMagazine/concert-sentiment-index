@@ -748,5 +748,50 @@
     "seatgeek_performer_slug": "polyphia",
     "wikipedia_title": "Polyphia",
     "bandsintown_artist": "Polyphia"
+  },
+  {
+    "id": "gorillaz-2026",
+    "seed_score": 50,
+    "name": "Gorillaz",
+    "artist": "Gorillaz",
+    "venue": "Ameris Bank Amphitheatre",
+    "date": "2026-09-29",
+    "genre": "Rock",
+    "spotify_artist_id": "",
+    "musicbrainz_mbid": "",
+    "tm_attraction_id": "K8vZ9171zxV",
+    "seatgeek_performer_slug": "gorillaz",
+    "wikipedia_title": "Gorillaz",
+    "bandsintown_artist": "Gorillaz"
+  },
+  {
+    "id": "cavetown-2026",
+    "seed_score": 50,
+    "name": "Cavetown",
+    "artist": "Cavetown",
+    "venue": "The Tabernacle",
+    "date": "2026-10-18",
+    "genre": "Rock",
+    "spotify_artist_id": "",
+    "musicbrainz_mbid": "",
+    "tm_attraction_id": "K8vZ91792L7",
+    "seatgeek_performer_slug": "cavetown",
+    "wikipedia_title": "Cavetown",
+    "bandsintown_artist": "Cavetown"
+  },
+  {
+    "id": "vince-staples-2026",
+    "seed_score": 50,
+    "name": "Vince Staples",
+    "artist": "Vince Staples",
+    "venue": "The Tabernacle",
+    "date": "2026-10-19",
+    "genre": "Hip-Hop",
+    "spotify_artist_id": "",
+    "musicbrainz_mbid": "",
+    "tm_attraction_id": "K8vZ9172yo0",
+    "seatgeek_performer_slug": "vince-staples",
+    "wikipedia_title": "Vince_Staples",
+    "bandsintown_artist": "Vince Staples"
   }
 ]

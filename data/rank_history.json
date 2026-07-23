@@ -25,7 +25,7 @@
     "first_seen": "2026-06-16"
   },
   "acdc-2026": {
-    "rank": 5,
+    "rank": 3,
     "panel": "top",
     "first_seen": "2026-06-16"
   },
@@ -35,12 +35,12 @@
     "first_seen": "2026-06-16"
   },
   "noah-kahan-2026": {
-    "rank": 3,
+    "rank": 4,
     "panel": "top",
     "first_seen": "2026-06-16"
   },
   "mumford-sons-2026": {
-    "rank": 10,
+    "rank": 8,
     "panel": "top",
     "first_seen": "2026-06-16"
   },
@@ -50,12 +50,12 @@
     "first_seen": "2026-06-16"
   },
   "olivia-dean-2026": {
-    "rank": 13,
+    "rank": 11,
     "panel": "top",
     "first_seen": "2026-06-16"
   },
   "lynyrd-skynyrd-2026": {
-    "rank": 15,
+    "rank": 13,
     "panel": "top",
     "first_seen": "2026-06-16"
   },
@@ -75,17 +75,17 @@
     "first_seen": "2026-06-16"
   },
   "buju-banton-2026": {
-    "rank": 16,
-    "panel": "top",
-    "first_seen": "2026-06-16"
-  },
-  "brooks-dunn-2026": {
     "rank": 14,
     "panel": "top",
     "first_seen": "2026-06-16"
   },
+  "brooks-dunn-2026": {
+    "rank": 12,
+    "panel": "top",
+    "first_seen": "2026-06-16"
+  },
   "empire-of-the-sun-2026": {
-    "rank": 19,
+    "rank": 18,
     "panel": "top",
     "first_seen": "2026-06-16"
   },
@@ -105,17 +105,17 @@
     "first_seen": "2026-06-16"
   },
   "isley-ojays-2026": {
-    "rank": 3,
+    "rank": 5,
     "panel": "bottom",
     "first_seen": "2026-06-16"
   },
   "wynonna-melissa-2026": {
-    "rank": 4,
+    "rank": 3,
     "panel": "bottom",
     "first_seen": "2026-06-16"
   },
   "guess-who-2026": {
-    "rank": 5,
+    "rank": 4,
     "panel": "bottom",
     "first_seen": "2026-06-16"
   },
@@ -175,7 +175,7 @@
     "first_seen": "2026-06-16"
   },
   "muse-2026": {
-    "rank": 10,
+    "rank": 9,
     "panel": "bottom",
     "first_seen": "2026-06-16"
   },
@@ -185,7 +185,7 @@
     "first_seen": "2026-06-16"
   },
   "ella-mai-2026": {
-    "rank": 13,
+    "rank": 12,
     "panel": "bottom",
     "first_seen": "2026-06-16"
   },
@@ -200,12 +200,12 @@
     "first_seen": "2026-06-22"
   },
   "chance-rapper-2026": {
-    "rank": 17,
+    "rank": 15,
     "panel": "top",
     "first_seen": "2026-06-22"
   },
   "social-distortion-2026": {
-    "rank": 20,
+    "rank": 17,
     "panel": "bottom",
     "first_seen": "2026-06-22"
   },
@@ -215,7 +215,7 @@
     "first_seen": "2026-06-22"
   },
   "lord-huron-2026": {
-    "rank": 16,
+    "rank": 20,
     "panel": "bottom",
     "first_seen": "2026-06-23"
   },
@@ -260,7 +260,7 @@
     "first_seen": "2026-07-02"
   },
   "rob-zombie-2026": {
-    "rank": 11,
+    "rank": 9,
     "panel": "top",
     "first_seen": "2026-07-03"
   },
@@ -275,12 +275,12 @@
     "first_seen": "2026-07-03"
   },
   "franz-ferdinand-2026": {
-    "rank": 16,
+    "rank": 13,
     "panel": "bottom",
     "first_seen": "2026-07-03"
   },
   "kacey-musgraves-2026": {
-    "rank": 4,
+    "rank": 5,
     "panel": "top",
     "first_seen": "2026-07-04"
   },
@@ -310,7 +310,7 @@
     "first_seen": "2026-07-04"
   },
   "daniel-caesar-2026": {
-    "rank": 12,
+    "rank": 10,
     "panel": "top",
     "first_seen": "2026-07-04"
   },
@@ -320,12 +320,12 @@
     "first_seen": "2026-07-04"
   },
   "band-of-horses-2026": {
-    "rank": 12,
+    "rank": 10,
     "panel": "bottom",
     "first_seen": "2026-07-04"
   },
   "squeeze-2026": {
-    "rank": 17,
+    "rank": 15,
     "panel": "bottom",
     "first_seen": "2026-07-12"
   },
@@ -340,7 +340,7 @@
     "first_seen": "2026-07-12"
   },
   "jonas-brothers-2026": {
-    "rank": 18,
+    "rank": 16,
     "panel": "top",
     "first_seen": "2026-07-13"
   },
@@ -350,12 +350,12 @@
     "first_seen": "2026-07-13"
   },
   "311-dirty-heads-2026": {
-    "rank": 18,
+    "rank": 16,
     "panel": "bottom",
     "first_seen": "2026-07-18"
   },
   "isaiah-rashad-2026": {
-    "rank": 20,
+    "rank": 19,
     "panel": "top",
     "first_seen": "2026-07-19"
   },
@@ -363,5 +363,15 @@
     "rank": 19,
     "panel": "bottom",
     "first_seen": "2026-07-19"
+  },
+  "gorillaz-2026": {
+    "rank": 17,
+    "panel": "top",
+    "first_seen": "2026-07-23"
+  },
+  "malcolm-todd-2026": {
+    "rank": 20,
+    "panel": "top",
+    "first_seen": "2026-07-23"
   }
 }
