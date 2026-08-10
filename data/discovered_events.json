@@ -913,5 +913,20 @@
     "seatgeek_performer_slug": "fetty-wap",
     "wikipedia_title": "Fetty_Wap",
     "bandsintown_artist": "Fetty Wap"
+  },
+  {
+    "id": "movements-2026",
+    "seed_score": 50,
+    "name": "Movements",
+    "artist": "Movements",
+    "venue": "The Tabernacle",
+    "date": "2026-11-07",
+    "genre": "Rock",
+    "spotify_artist_id": "",
+    "musicbrainz_mbid": "",
+    "tm_attraction_id": "K8vZ917fJzf",
+    "seatgeek_performer_slug": "movements",
+    "wikipedia_title": "Movements",
+    "bandsintown_artist": "Movements"
   }
 ]

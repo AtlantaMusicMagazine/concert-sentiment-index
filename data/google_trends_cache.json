@@ -141,7 +141,7 @@
   },
   "m\u00f6tley cr\u00fce": {
     "value": 0,
-    "fetched_at": "2026-07-12"
+    "fetched_at": "2026-08-10"
   },
   "ella mai": {
     "value": 81,
@@ -192,8 +192,8 @@
     "fetched_at": "2026-08-09"
   },
   "tomahawk": {
-    "value": 20,
-    "fetched_at": "2026-07-12"
+    "value": 37,
+    "fetched_at": "2026-08-10"
   },
   "franz ferdinand": {
     "value": 0,
@@ -345,7 +345,7 @@
   },
   "artemas": {
     "value": 0,
-    "fetched_at": "2026-07-12"
+    "fetched_at": "2026-08-10"
   },
   "bryson tiller": {
     "value": 88,
@@ -385,7 +385,7 @@
   },
   "shaky knees music festival": {
     "value": 0,
-    "fetched_at": "2026-07-14"
+    "fetched_at": "2026-08-10"
   },
   "kany garcia": {
     "value": 0,
@@ -470,5 +470,13 @@
   "fetty wap": {
     "value": 31,
     "fetched_at": "2026-08-09"
+  },
+  "gorillaz": {
+    "value": 41,
+    "fetched_at": "2026-08-10"
+  },
+  "movements": {
+    "value": 67,
+    "fetched_at": "2026-08-10"
   }
 }

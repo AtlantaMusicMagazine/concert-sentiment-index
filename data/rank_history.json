@@ -1,6 +1,6 @@
 {
   "shaky-knees-2026": {
-    "rank": 1,
+    "rank": 2,
     "panel": "top",
     "first_seen": "2026-06-16"
   },
@@ -25,12 +25,12 @@
     "first_seen": "2026-06-16"
   },
   "acdc-2026": {
-    "rank": 2,
+    "rank": 1,
     "panel": "top",
     "first_seen": "2026-06-16"
   },
   "usher-2026": {
-    "rank": 6,
+    "rank": 5,
     "panel": "top",
     "first_seen": "2026-06-16"
   },
@@ -85,7 +85,7 @@
     "first_seen": "2026-06-16"
   },
   "empire-of-the-sun-2026": {
-    "rank": 10,
+    "rank": 11,
     "panel": "top",
     "first_seen": "2026-06-16"
   },
@@ -180,12 +180,12 @@
     "first_seen": "2026-06-16"
   },
   "motley-crue-2026": {
-    "rank": 8,
+    "rank": 5,
     "panel": "bottom",
     "first_seen": "2026-06-16"
   },
   "ella-mai-2026": {
-    "rank": 16,
+    "rank": 15,
     "panel": "bottom",
     "first_seen": "2026-06-16"
   },
@@ -205,12 +205,12 @@
     "first_seen": "2026-06-22"
   },
   "social-distortion-2026": {
-    "rank": 5,
+    "rank": 6,
     "panel": "bottom",
     "first_seen": "2026-06-22"
   },
   "theory-deadman-sevendust-2026": {
-    "rank": 6,
+    "rank": 8,
     "panel": "bottom",
     "first_seen": "2026-06-22"
   },
@@ -280,7 +280,7 @@
     "first_seen": "2026-07-03"
   },
   "kacey-musgraves-2026": {
-    "rank": 5,
+    "rank": 6,
     "panel": "top",
     "first_seen": "2026-07-04"
   },
@@ -340,7 +340,7 @@
     "first_seen": "2026-07-12"
   },
   "jonas-brothers-2026": {
-    "rank": 11,
+    "rank": 10,
     "panel": "top",
     "first_seen": "2026-07-13"
   },
@@ -410,7 +410,7 @@
     "first_seen": "2026-08-09"
   },
   "buddy-guy-2026": {
-    "rank": 15,
+    "rank": 16,
     "panel": "bottom",
     "first_seen": "2026-08-09"
   },
@@ -425,7 +425,7 @@
     "first_seen": "2026-08-09"
   },
   "dominic-fike-2026": {
-    "rank": 19,
+    "rank": 20,
     "panel": "bottom",
     "first_seen": "2026-08-09"
   },
@@ -433,5 +433,10 @@
     "rank": 20,
     "panel": "bottom",
     "first_seen": "2026-08-09"
+  },
+  "yeat-2026": {
+    "rank": 19,
+    "panel": "bottom",
+    "first_seen": "2026-08-10"
   }
 }
