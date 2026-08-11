@@ -313,7 +313,7 @@
   },
   "thee sacred souls": {
     "value": 0,
-    "fetched_at": "2026-07-12"
+    "fetched_at": "2026-08-11"
   },
   "cameron whitcomb": {
     "value": 0,
@@ -369,7 +369,7 @@
   },
   "jinjer": {
     "value": 0,
-    "fetched_at": "2026-07-13"
+    "fetched_at": "2026-08-11"
   },
   "dogstar": {
     "value": 0,
@@ -393,7 +393,7 @@
   },
   "mt. joy": {
     "value": 0,
-    "fetched_at": "2026-07-14"
+    "fetched_at": "2026-08-11"
   },
   "ammy virk": {
     "value": 0,
@@ -478,5 +478,21 @@
   "movements": {
     "value": 67,
     "fetched_at": "2026-08-10"
+  },
+  "linea personal": {
+    "value": 0,
+    "fetched_at": "2026-08-11"
+  },
+  "alvaro diaz": {
+    "value": 0,
+    "fetched_at": "2026-08-11"
+  },
+  "trap karaoke": {
+    "value": 0,
+    "fetched_at": "2026-08-11"
+  },
+  "catch your breath": {
+    "value": 0,
+    "fetched_at": "2026-08-11"
   }
 }

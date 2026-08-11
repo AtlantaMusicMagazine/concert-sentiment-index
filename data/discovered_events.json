@@ -928,5 +928,35 @@
     "seatgeek_performer_slug": "movements",
     "wikipedia_title": "Movements",
     "bandsintown_artist": "Movements"
+  },
+  {
+    "id": "trap-karaoke-2026",
+    "seed_score": 50,
+    "name": "Trap Karaoke",
+    "artist": "Trap Karaoke",
+    "venue": "Coca-Cola Roxy",
+    "date": "2026-10-16",
+    "genre": "Hip-Hop",
+    "spotify_artist_id": "",
+    "musicbrainz_mbid": "",
+    "tm_attraction_id": "K8vZ917pFOf",
+    "seatgeek_performer_slug": "trap-karaoke",
+    "wikipedia_title": "Trap_Karaoke",
+    "bandsintown_artist": "Trap Karaoke"
+  },
+  {
+    "id": "catch-your-breath-2026",
+    "seed_score": 50,
+    "name": "Catch Your Breath",
+    "artist": "Catch Your Breath",
+    "venue": "The Tabernacle",
+    "date": "2026-11-08",
+    "genre": "Rock",
+    "spotify_artist_id": "",
+    "musicbrainz_mbid": "",
+    "tm_attraction_id": "K8vZ917haF7",
+    "seatgeek_performer_slug": "catch-your-breath",
+    "wikipedia_title": "Catch_Your_Breath",
+    "bandsintown_artist": "Catch Your Breath"
   }
 ]
