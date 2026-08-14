@@ -958,5 +958,35 @@
     "seatgeek_performer_slug": "catch-your-breath",
     "wikipedia_title": "Catch_Your_Breath",
     "bandsintown_artist": "Catch Your Breath"
+  },
+  {
+    "id": "r-b-only-2026",
+    "seed_score": 50,
+    "name": "R&B ONLY",
+    "artist": "R&B ONLY",
+    "venue": "The Tabernacle",
+    "date": "2026-09-19",
+    "genre": "R&B",
+    "spotify_artist_id": "",
+    "musicbrainz_mbid": "",
+    "tm_attraction_id": "K8vZ917bcfV",
+    "seatgeek_performer_slug": "r-b-only",
+    "wikipedia_title": "R&B_ONLY",
+    "bandsintown_artist": "R&B ONLY"
+  },
+  {
+    "id": "whitechapel-2026",
+    "seed_score": 50,
+    "name": "Whitechapel",
+    "artist": "Whitechapel",
+    "venue": "The Tabernacle",
+    "date": "2026-11-11",
+    "genre": "Rock",
+    "spotify_artist_id": "",
+    "musicbrainz_mbid": "",
+    "tm_attraction_id": "K8vZ917Gi3f",
+    "seatgeek_performer_slug": "whitechapel",
+    "wikipedia_title": "Whitechapel",
+    "bandsintown_artist": "Whitechapel"
   }
 ]
