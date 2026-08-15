@@ -988,5 +988,35 @@
     "seatgeek_performer_slug": "whitechapel",
     "wikipedia_title": "Whitechapel",
     "bandsintown_artist": "Whitechapel"
+  },
+  {
+    "id": "judah-the-lion-2026",
+    "seed_score": 50,
+    "name": "Judah & the Lion",
+    "artist": "Judah & the Lion",
+    "venue": "The Tabernacle",
+    "date": "2026-11-12",
+    "genre": "Folk",
+    "spotify_artist_id": "",
+    "musicbrainz_mbid": "",
+    "tm_attraction_id": "K8vZ9173Z60",
+    "seatgeek_performer_slug": "judah-the-lion",
+    "wikipedia_title": "Judah_&_the_Lion",
+    "bandsintown_artist": "Judah & the Lion"
+  },
+  {
+    "id": "dave-matthews-band-2026",
+    "seed_score": 50,
+    "name": "Dave Matthews Band",
+    "artist": "Dave Matthews Band",
+    "venue": "Ameris Bank Amphitheatre",
+    "date": "2026-11-12",
+    "genre": "Rock",
+    "spotify_artist_id": "",
+    "musicbrainz_mbid": "",
+    "tm_attraction_id": "K8vZ91713NV",
+    "seatgeek_performer_slug": "dave-matthews-band",
+    "wikipedia_title": "Dave_Matthews_Band",
+    "bandsintown_artist": "Dave Matthews Band"
   }
 ]
