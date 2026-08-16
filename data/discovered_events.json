@@ -1018,5 +1018,35 @@
     "seatgeek_performer_slug": "dave-matthews-band",
     "wikipedia_title": "Dave_Matthews_Band",
     "bandsintown_artist": "Dave Matthews Band"
+  },
+  {
+    "id": "orville-peck-2026",
+    "seed_score": 50,
+    "name": "Orville Peck",
+    "artist": "Orville Peck",
+    "venue": "The Tabernacle",
+    "date": "2026-11-13",
+    "genre": "Country",
+    "spotify_artist_id": "",
+    "musicbrainz_mbid": "",
+    "tm_attraction_id": "K8vZ9179fwV",
+    "seatgeek_performer_slug": "orville-peck",
+    "wikipedia_title": "Orville_Peck",
+    "bandsintown_artist": "Orville Peck"
+  },
+  {
+    "id": "carl-cox-2026",
+    "seed_score": 50,
+    "name": "Carl Cox",
+    "artist": "Carl Cox",
+    "venue": "Coca-Cola Roxy",
+    "date": "2026-11-13",
+    "genre": "Dance/Electronic",
+    "spotify_artist_id": "",
+    "musicbrainz_mbid": "",
+    "tm_attraction_id": "K8vZ9175vGf",
+    "seatgeek_performer_slug": "carl-cox",
+    "wikipedia_title": "Carl_Cox",
+    "bandsintown_artist": "Carl Cox"
   }
 ]
