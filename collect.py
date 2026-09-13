@@ -38,6 +38,7 @@ BANDSINTOWN_KEY     = os.environ.get("BANDSINTOWN_KEY", "")
 SETLISTFM_KEY       = os.environ.get("SETLISTFM_KEY", "")
 LASTFM_KEY          = os.environ.get("LASTFM_KEY", "")
 YOUTUBE_API_KEY     = os.environ.get("YOUTUBE_API_KEY", "")
+_YOUTUBE_QUOTA_EXHAUSTED = False  # set True on first quota exhaustion; skips all further YT calls
 EVENTBRITE_TOKEN    = os.environ.get("EVENTBRITE_TOKEN", "")
 WIKIPEDIA_USER      = os.environ.get("WIKIPEDIA_USER", "atlanta-music-magazine/1.0 (contact@atlantamusicmagazine.com)")
 
@@ -790,14 +791,13 @@ EVENTS = [
         "name": "Yeat",
         "artist": "Yeat",
         "venue": "Coca-Cola Roxy",
-        "date": "2026-09-22",
+        "date": "2026-07-30",
         "genre": "Hip-Hop",
         "spotify_artist_id": "6GQaJFCQsU0V6p3pzOcR3M",
-        "musicbrainz_mbid": "9e6a6a2f-f696-4cc0-87f1-e4f712e46802",
+        "musicbrainz_mbid": "1d60df67-cda4-4c4b-8e12-11ea1f55b60e",
         "tm_attraction_id": "K8vZ9178B17",
-        "tm_event_id": "0E00647A8D2E5C28",
         "seatgeek_performer_slug": "yeat",
-        "wikipedia_title": "Yeat",
+        "wikipedia_title": "Yeat_(rapper)",
         "bandsintown_artist": "Yeat",
     },
     {
@@ -1338,26 +1338,16 @@ def safe_get(url, params=None, headers=None, label="", timeout=10):
                 print(f"  [WARN] {label} rate limited — retrying in {wait}s")
                 time.sleep(wait)
                 continue
-            # The generic HTTPError string (e.g. "400 Client Error: Bad
-            # Request for url: ...") doesn't include WHY the request was
-            # rejected. Most JSON APIs — including SerpApi — return a
-            # specific "error" field in the response body explaining the
-            # real cause (bad param, invalid key, out of quota, etc).
-            # Without this, a 400 tells us nothing actionable.
-            detail = ""
-            try:
-                body = r.json()
-                detail = body.get("error", "") or str(body)[:300]
-            except Exception:
-                detail = (r.text or "")[:300]
             print(f"  [WARN] {label} failed: {e}")
-            if detail:
-                print(f"  [WARN] {label} response body: {detail}")
             return None
         except Exception as e:
             print(f"  [WARN] {label} failed: {e}")
             return None
     print(f"  [WARN] {label} gave up after 3 attempts (rate limited)")
+    if "youtube" in label.lower() or "googleapis" in url.lower():
+        global _YOUTUBE_QUOTA_EXHAUSTED
+        _YOUTUBE_QUOTA_EXHAUSTED = True
+        print(f"  [WARN] YouTube quota exhausted — skipping YouTube for remaining events")
     return None
 
 
@@ -1515,107 +1505,29 @@ def fetch_musicbrainz(event):
 def fetch_ticketmaster(event):
     if not TICKETMASTER_KEY:
         return {}
-
-    attraction_id = event.get("tm_attraction_id", "")
-    event_id      = event.get("tm_event_id", "")
-    if not attraction_id and not event_id:
+    data = safe_get(
+        "https://app.ticketmaster.com/discovery/v2/events",
+        params={
+            "apikey":          TICKETMASTER_KEY,
+            "attractionId":    event.get("tm_attraction_id", ""),
+            "city":            "Atlanta",
+            "startDateTime":   event["date"] + "T00:00:00Z",
+            "endDateTime":     event["date"] + "T23:59:59Z",
+            "size":            1,
+        },
+        label="Ticketmaster",
+    )
+    if not data or "_embedded" not in data:
         return {}
-
-    ev = None
-
-    # Path 1: attraction-ID search across a wide forward-looking window
-    # rather than the exact stored `event["date"]`. If an artist reschedules,
-    # a query locked to the old date returns zero results — the show
-    # silently vanishes from this run instead of surfacing the date change.
-    # Searching broadly for this attraction's next ~18 months of Georgia
-    # dates means we find the real upcoming show regardless of whether it's
-    # moved, and can then detect + correct the mismatch below.
-    if attraction_id:
-        today      = datetime.date.today()
-        far_future = today + datetime.timedelta(days=548)  # ~18 months
-        data = safe_get(
-            "https://app.ticketmaster.com/discovery/v2/events",
-            params={
-                "apikey":        TICKETMASTER_KEY,
-                "attractionId":  attraction_id,
-                # Was "city": "Atlanta" — likely why Yeat's Coca-Cola Roxy show
-                # returned zero results. That venue is technically in Cumberland/
-                # Smyrna, GA (part of The Battery Atlanta complex), and Ticketmaster's
-                # own venue record may use that city name rather than "Atlanta",
-                # making an exact "city" match silently fail for this and possibly
-                # other metro-Atlanta venues outside the city limits proper.
-                # stateCode avoids exact-city-string matching entirely.
-                "stateCode":     "GA",
-                "startDateTime": today.isoformat() + "T00:00:00Z",
-                "endDateTime":   far_future.isoformat() + "T23:59:59Z",
-                "sort":          "date,asc",
-                "size":          5,
-            },
-            label="Ticketmaster",
-        )
-        if data and "_embedded" in data:
-            events = data["_embedded"].get("events", [])
-            if events:
-                ev = events[0]   # soonest upcoming Georgia date on file
-        if ev is None:
-            print(f"    [Ticketmaster] {event.get('name','')[:50]}: attraction search "
-                  f"found nothing for attractionId={attraction_id}"
-                  + (" — trying direct event ID fallback" if event_id else
-                     " (no tm_event_id fallback available)"))
-
-    # Path 2: direct event-ID lookup, bypassing attraction search entirely.
-    # Useful when we have a SPECIFIC confirmed Ticketmaster event ID (e.g.
-    # pulled from a venue's own announcement page, as with Yeat's Coca-Cola
-    # Roxy show) but the broader attraction-ID search isn't surfacing it —
-    # whether because that ID is stale or for some other reason we can't
-    # diagnose from outside Ticketmaster's own system.
-    if ev is None and event_id:
-        direct = safe_get(
-            f"https://app.ticketmaster.com/discovery/v2/events/{event_id}",
-            params={"apikey": TICKETMASTER_KEY},
-            label="Ticketmaster direct event",
-        )
-        if direct:
-            ev = direct
-            print(f"    [Ticketmaster] {event.get('name','')[:50]}: found via direct "
-                  f"event ID fallback ({event_id})")
-
-    if ev is None:
-        print(f"    [Ticketmaster] {event.get('name','')[:50]}: no data found via "
-              f"attraction ID or direct event ID lookup")
+    events = data["_embedded"].get("events", [])
+    if not events:
         return {}
-
-    status   = ev.get("dates", {}).get("status", {}).get("code", "")
-    tm_date  = ev.get("dates", {}).get("start", {}).get("localDate", "")
-    old_date = event.get("date", "")
-
-    # Reschedule detection: Ticketmaster's actual date differs from ours.
-    # Correct `event["date"]` in place — event is the same dict referenced
-    # by signals["event_meta"], so this fixes scoring/display for the rest
-    # of this run automatically. The original curated date is preserved
-    # under date_originally_scheduled for reference. This does NOT edit the
-    # hardcoded EVENTS entry in this file — do that separately once confirmed,
-    # or the next run will just re-detect the same mismatch again.
-    if tm_date and old_date and tm_date != old_date:
-        print(f"    [RESCHEDULE DETECTED] {event.get('name','')[:50]}: "
-              f"{old_date} -> {tm_date} (Ticketmaster status: {status or 'unknown'}). "
-              f"Using {tm_date} for this run — update the EVENTS entry in "
-              f"collect.py to make this permanent.")
-        event["date_originally_scheduled"] = old_date
-        event["date"] = tm_date
-        event["rescheduled"] = True
-    elif status in ("cancelled", "offsale") and old_date:
-        print(f"    [WARN] {event.get('name','')[:50]}: Ticketmaster status "
-              f"is '{status}' — may need to be blocklisted rather than rescheduled.")
-    else:
-        print(f"    [Ticketmaster] {event.get('name','')[:50]}: confirmed {tm_date or old_date} "
-              f"(status: {status or 'unknown'}) — matches stored date, no reschedule.")
-
+    ev     = events[0]
     ranges = ev.get("priceRanges", [])
     floor  = min((p.get("min", 9999) for p in ranges), default=None)
     return {
         "tm_floor_price": floor,
-        "tm_status":      status,
+        "tm_status":      ev.get("dates", {}).get("status", {}).get("code", ""),
     }
 
 
@@ -1624,34 +1536,29 @@ def fetch_seatgeek(event):
         print("  [SeatGeek] SKIPPED — SEATGEEK_CLIENT_ID not set")
         return {}
 
-    artist = event.get("artist", "") or event.get("name", "")
+    artist   = event.get("artist", "") or event.get("name", "")
+    date_str = event["date"]
 
-    # Was: ±1 day around the stored event["date"]. If a show reschedules
-    # months out (see fetch_ticketmaster's RESCHEDULE DETECTED case), that
-    # narrow window returns zero results — same failure mode, same fix:
-    # search broadly for this artist's next ~18 months of dates instead of
-    # trusting our own possibly-stale stored date, then filter to Atlanta.
+    # Widen date window ±1 day — SeatGeek sometimes indexes events
+    # on adjacent dates due to timezone handling
     import datetime as _dt
-    today      = _dt.date.today()
-    far_future = today + _dt.timedelta(days=548)  # ~18 months
-    gte = today.isoformat()
-    lte = far_future.isoformat()
+    d = _dt.date.fromisoformat(date_str)
+    gte = (d - _dt.timedelta(days=1)).isoformat()
+    lte = (d + _dt.timedelta(days=1)).isoformat()
 
     base_params = {
         "client_id":          SEATGEEK_CLIENT_ID,
         "client_secret":      SEATGEEK_SECRET,
         "datetime_local.gte": gte,
         "datetime_local.lte": lte,
-        "sort":               "datetime_local.asc",
-        "per_page":           25,
+        "per_page":           5,
     }
 
     def is_atlanta(ev):
         city  = ev.get("venue", {}).get("city",  "").lower()
         state = ev.get("venue", {}).get("state", "").lower()
         atl_cities = {"atlanta", "alpharetta", "marietta", "kennesaw",
-                      "duluth", "college park", "cobb", "gwinnett",
-                      "smyrna", "cumberland"}
+                      "duluth", "college park", "cobb", "gwinnett"}
         return any(a in city for a in atl_cities) or (
             "georgia" in state and any(a in city for a in atl_cities))
 
@@ -1673,7 +1580,7 @@ def fetch_seatgeek(event):
         elif data is not None:
             print(f"  [SeatGeek] slug miss: {slug} ({data.get('meta', {}).get('total', 0)} results)")
 
-    # Try 2: free-text search with artist name
+    # Try 2: free-text search with artist name + date
     if ev is None:
         data2 = safe_get(
             "https://api.seatgeek.com/2/events",
@@ -1912,12 +1819,7 @@ def fetch_wikipedia_pageviews(event):
     if not title:
         return {}
     today = datetime.date.today()
-    # Widened from 30 to ~194 days so we can compute a 90-day trend
-    # (comparing two full non-overlapping 90-day windows) alongside the
-    # original 7-day trend. A 7-day window alone can't tell a genuine
-    # ascending/declining trajectory apart from a one-off news spike or
-    # a quiet week — it's the same keyless endpoint, just a wider range.
-    start = (today - datetime.timedelta(days=194)).strftime("%Y%m%d")
+    start = (today - datetime.timedelta(days=30)).strftime("%Y%m%d")
     end   = today.strftime("%Y%m%d")
     data  = safe_get(
         f"https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/"
@@ -1927,97 +1829,27 @@ def fetch_wikipedia_pageviews(event):
     )
     if not data or "items" not in data:
         return {}
-    views = [item["views"] for item in data["items"]]
+    views  = [item["views"] for item in data["items"]]
     if len(views) < 14:
         return {}
-
-    recent7 = sum(views[-7:])
-    prior7  = sum(views[-14:-7]) or 1
-    trend7  = round((recent7 - prior7) / prior7 * 100, 1)
-
-    result = {
-        "wikipedia_30d_views":    sum(views[-30:]),
-        "wikipedia_7d_trend_pct": trend7,
+    recent = sum(views[-7:])
+    prior  = sum(views[-14:-7]) or 1
+    trend  = round((recent - prior) / prior * 100, 1)
+    return {
+        "wikipedia_30d_views":    sum(views),
+        "wikipedia_7d_trend_pct": trend,
     }
 
-    # Medium-term (90-day) trajectory signal — needs a full 180 days of
-    # history to compare two non-overlapping 90-day windows. Falls back
-    # to absent (None downstream) if the article is too new to have that
-    # much pageview history yet.
-    if len(views) >= 180:
-        recent90 = sum(views[-90:])
-        prior90  = sum(views[-180:-90]) or 1
-        trend90  = round((recent90 - prior90) / prior90 * 100, 1)
-        result["wikipedia_90d_trend_pct"] = trend90
 
-    return result
-
-
-GOOGLE_TRENDS_CACHE_PATH     = "data/google_trends_cache.json"
-GOOGLE_TRENDS_CACHE_MAX_AGE_DAYS = 4
-
-
-def load_google_trends_cache():
-    """
-    Load the rolling Google Trends cache from disk. Keyed by lowercased
-    artist name -> {"value": int, "fetched_at": "YYYY-MM-DD"}.
-
-    SerpApi's Google Trends engine runs a live scrape rather than serving
-    a cached lookup, making it one of the slowest calls in the whole
-    pipeline. Re-running it for every one of the ~100+ tracked events each
-    night was pushing total runtime right up against (and eventually over)
-    the GitHub Actions timeout. Trend interest doesn't meaningfully shift
-    day to day, so reusing a value for a few days trades a small amount of
-    freshness for a large amount of wall-clock time back.
-    """
-    try:
-        with open(GOOGLE_TRENDS_CACHE_PATH) as f:
-            return json.load(f)
-    except (FileNotFoundError, json.JSONDecodeError):
-        return {}
-
-
-def save_google_trends_cache(cache):
-    """
-    Write the updated cache back to disk after all events are collected.
-    GitHub Actions cache@v4 persists this file between runs (added to
-    nightly.yml's cache path list alongside youtube_cache.json).
-    """
-    with open(GOOGLE_TRENDS_CACHE_PATH, "w") as f:
-        json.dump(cache, f, indent=2)
-
-
-def fetch_google_trends(event, cache):
+def fetch_google_trends(event):
     if not SERPAPI_KEY:
         return {}
-
-    artist_key = event.get("artist", "").strip().lower()
-    if not artist_key:
-        return {}
-
-    cached = cache.get(artist_key)
-    if cached:
-        try:
-            fetched_at = datetime.date.fromisoformat(cached.get("fetched_at", ""))
-            age_days   = (datetime.date.today() - fetched_at).days
-            if age_days < GOOGLE_TRENDS_CACHE_MAX_AGE_DAYS:
-                return {"google_trends_atl": cached.get("value")}
-        except (ValueError, TypeError):
-            pass  # malformed/legacy cache entry — fall through and refetch
-
     data = safe_get(
         "https://serpapi.com/search",
         params={
             "engine":    "google_trends",
             "q":         event["artist"],
-            # DMA-style "US-GA-524" (Atlanta metro) is REJECTED by SerpApi
-            # for TIMESERIES — confirmed via the actual error body:
-            # "Unsupported `US-GA-524` geographic location." SerpApi's
-            # DMA/metro-level "region" targeting is only usable with the
-            # GEO_MAP/GEO_MAP_0 data types, not TIMESERIES. Falling back to
-            # state-level "US-GA", which IS supported — trades Atlanta-metro
-            # precision for actually getting data instead of a guaranteed 400.
-            "geo":       "US-GA",
+            "geo":       "US-GA-524",
             "data_type": "TIMESERIES",
             "date":      "today 1-m",
             "api_key":   SERPAPI_KEY,
@@ -2030,11 +1862,6 @@ def fetch_google_trends(event, cache):
     if not timeline:
         return {}
     latest = timeline[-1].get("values", [{}])[0].get("extracted_value", 0)
-
-    cache[artist_key] = {
-        "value":      latest,
-        "fetched_at": datetime.date.today().isoformat(),
-    }
     return {"google_trends_atl": latest}
 
 
@@ -2363,23 +2190,12 @@ def match_amm_article(artist_name, catalog):
     Find the most recent atlantamusicmagazine.com article for a given artist.
 
     Matching requires ALL significant artist name words to appear in
-    the article slug AS A CONTIGUOUS SEQUENCE (in order, no gaps) —
-    not just present anywhere in the slug. This prevents false matches
+    the article slug — not just any one word. This prevents false matches
     like "summer" matching "Bret Michaels Summer tour" for Summer Walker,
-    "john" matching "John Corabi" for John Mellencamp, or (the contiguity
-    requirement specifically) "horses" alone matching a "Stone Horses"
-    article for "Band of Horses" once short connector words are stripped.
-
-    NOTE: "band" is intentionally NOT a stopword. Stripping it left only
-    "horses" for "Band of Horses", which happily matched any slug containing
-    "horses" — including unrelated ones like "stone-horses". Keeping "band"
-    avoids collapsing multi-word act names down to an over-generic remainder.
+    or "john" matching "John Corabi" for John Mellencamp.
 
     Single-word artists (e.g. "Usher", "Santana") match on that one word.
-    Multi-word artists (e.g. "John Mellencamp") require ALL words to match,
-    in order, contiguously. A trailing possessive apostrophe-s ("Train's")
-    is also matched against slugs that collapsed it into a plain "s"
-    ("trains-am-gold-tour-...") during URL slugification.
+    Multi-word artists (e.g. "John Mellencamp") require ALL words to match.
 
     Returns: dict {title, link, date, display_date} or None
     """
@@ -2389,8 +2205,7 @@ def match_amm_article(artist_name, catalog):
     def norm_words(s):
         s = s.lower()
         s = re.sub(r"[^a-z0-9\s]", " ", s)
-        # Broader stopword list to avoid false matches on common words.
-        # "band" removed — see docstring note above.
+        # Broader stopword list to avoid false matches on common words
         stopwords = {
             "and", "the", "with", "feat", "from", "live", "tour",
             "featuring", "presents", "world", "2026", "2025", "2024",
@@ -2399,49 +2214,6 @@ def match_amm_article(artist_name, catalog):
             "new", "old", "all", "one", "two", "rock", "pop", "hip", "hop",
         }
         return [w for w in s.split() if len(w) > 2 and w not in stopwords]
-
-    def words_match(artist_word, slug_word):
-        """
-        True if artist_word and slug_word should be treated as the same
-        token. Handles the case where a possessive ("Train's") loses its
-        apostrophe during URL slugification and collapses into the slug
-        as the plain word plus a trailing "s" ("trains"). Exact equality
-        still covers the overwhelming majority of cases; this only adds
-        the one-directional possessive check on top.
-        """
-        if artist_word == slug_word:
-            return True
-        if slug_word == artist_word + "s":
-            return True
-        return False
-
-    def is_contiguous_subsequence(needle, haystack):
-        """True if `needle` (list) appears in `haystack` (list) as a
-        contiguous, in-order run.
-
-        Two passes:
-        1. Exact match, anywhere in the slug — the well-tested general case.
-        2. Possessive apostrophe-s fallback (artist_word + "s" == slug_word),
-           but ONLY at position 0 of the slug. Real article titles almost
-           always open with the artist's name, so a genuine possessive
-           collapse ("Train's" -> "trains" in "trains-am-gold-tour-...")
-           shows up at the front. Without this positional restriction, a
-           single remaining word like "dinosaur" (from "Dinosaur Jr." once
-           "Jr." is dropped by the length filter) would also match "dinosaurs"
-           anywhere it happens to appear — e.g. an unrelated co-billed act
-           called "Last Dinosaurs" buried mid-slug in a multi-artist article.
-
-        Empty needle never matches.
-        """
-        n, h = len(needle), len(haystack)
-        if n == 0:
-            return False
-        for start in range(h - n + 1):
-            if haystack[start:start + n] == needle:
-                return True
-        if h >= n and all(words_match(needle[i], haystack[i]) for i in range(n)):
-            return True
-        return False
 
     # Primary artist name: strip everything after " — " or " - " (tour names)
     primary = re.split(r'\s+[—\-]\s+', artist_name)[0].strip()
@@ -2459,9 +2231,21 @@ def match_amm_article(artist_name, catalog):
             continue
         for post in catalog:
             slug_words = norm_words(post["slug"])
-            # All words of this partner must appear in the slug as a
-            # contiguous, ordered run — not just scattered anywhere.
-            if is_contiguous_subsequence(artist_words, slug_words):
+            # ALL words of this partner must appear in the slug
+            # AND verify the raw artist name appears in the slug to prevent
+            # false matches like "horses" matching "stone-horses" for "Band of Horses"
+            if all(w in slug_words for w in artist_words):
+                raw_slug = re.sub(r'[^a-z0-9]+', '-', partner.lower()).strip('-')
+                # Primary: full raw artist slug must appear in article slug
+                if raw_slug in post["slug"].lower():
+                    pass  # good match
+                # Secondary: joined significant words (only if >1 significant word OR word is long/unique)
+                elif artist_words and len(artist_words) > 1 and '-'.join(artist_words) in post["slug"].lower():
+                    pass  # good multi-word match
+                elif artist_words and len(artist_words) == 1 and len(artist_words[0]) >= 6 and artist_words[0] in post["slug"].lower():
+                    pass  # long single word — specific enough
+                else:
+                    continue  # not specific enough match
                 if post not in matches:
                     matches.append(post)
 
@@ -2632,7 +2416,8 @@ def fetch_youtube(event, cache):
     Rate budget: ~4 units per event (1 search + 1 videos.list).
     At 42 events = 168 units/night. Free quota = 10,000 units/day.
     """
-    if not YOUTUBE_API_KEY:
+    global _YOUTUBE_QUOTA_EXHAUSTED
+    if not YOUTUBE_API_KEY or _YOUTUBE_QUOTA_EXHAUSTED:
         return {}
 
     eid         = event["id"]
@@ -3397,12 +3182,6 @@ def collect_all():
     yt_cache = load_youtube_cache()
     print(f"[collect] YouTube cache loaded: {len(yt_cache)} cached entries")
 
-    # Load Google Trends cache from previous run — same persistence
-    # mechanism, same rationale: avoid re-running SerpApi's slow live
-    # scrape for every event every night when a few days old is fine.
-    gtrends_cache = load_google_trends_cache()
-    print(f"[collect] Google Trends cache loaded: {len(gtrends_cache)} cached entries")
-
     # Fetch AMM article catalog once (weekly refresh via local cache)
     amm_catalog = fetch_amm_catalog()
 
@@ -3465,7 +3244,7 @@ def collect_all():
 
         try:
             # 20% — Local Intent
-            signals.update(fetch_google_trends(event, gtrends_cache)); time.sleep(0.5)
+            signals.update(fetch_google_trends(event)); time.sleep(0.5)
             signals.update(fetch_bandsintown(event));   time.sleep(0.2)
         except Exception as e:
             print(f"    [WARN] Local intent fetch failed: {e}")
@@ -3476,11 +3255,6 @@ def collect_all():
     save_youtube_cache(yt_cache)
     cached_count = sum(1 for v in yt_cache.values() if v.get("view_count"))
     print(f"[collect] YouTube cache saved: {cached_count} entries")
-
-    # Persist updated Google Trends cache — most entries will be reused
-    # (not refetched) for up to GOOGLE_TRENDS_CACHE_MAX_AGE_DAYS days
-    save_google_trends_cache(gtrends_cache)
-    print(f"[collect] Google Trends cache saved: {len(gtrends_cache)} entries")
 
     output_path = "data/raw_signals.json"
     with open(output_path, "w") as f:
