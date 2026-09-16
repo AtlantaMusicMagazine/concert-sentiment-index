@@ -1408,5 +1408,50 @@
     "seatgeek_performer_slug": "underoath",
     "wikipedia_title": "Underoath",
     "bandsintown_artist": "Underoath"
+  },
+  {
+    "id": "karan-aujla-2026",
+    "seed_score": 50,
+    "name": "Karan Aujla",
+    "artist": "Karan Aujla",
+    "venue": "Ameris Bank Amphitheatre",
+    "date": "2026-11-18",
+    "genre": "Hip-Hop",
+    "spotify_artist_id": "",
+    "musicbrainz_mbid": "",
+    "tm_attraction_id": "K8vZ917bVYf",
+    "seatgeek_performer_slug": "karan-aujla",
+    "wikipedia_title": "Karan_Aujla",
+    "bandsintown_artist": "Karan Aujla"
+  },
+  {
+    "id": "syd-2026",
+    "seed_score": 50,
+    "name": "Syd",
+    "artist": "Syd",
+    "venue": "The Tabernacle",
+    "date": "2026-11-24",
+    "genre": "Hip-Hop",
+    "spotify_artist_id": "",
+    "musicbrainz_mbid": "",
+    "tm_attraction_id": "K8vZ9178nYV",
+    "seatgeek_performer_slug": "syd",
+    "wikipedia_title": "Syd",
+    "bandsintown_artist": "Syd"
+  },
+  {
+    "id": "jason-bonham-s-led-zeppelin-evening-2026",
+    "seed_score": 50,
+    "name": "Jason Bonham's Led Zeppelin Evening",
+    "artist": "Jason Bonham's Led Zeppelin Evening",
+    "venue": "Coca-Cola Roxy",
+    "date": "2026-12-10",
+    "genre": "Rock",
+    "spotify_artist_id": "",
+    "musicbrainz_mbid": "",
+    "tm_attraction_id": "K8vZ917GwI0",
+    "seatgeek_performer_slug": "jason-bonham-s-led-zeppelin-evening",
+    "wikipedia_title": "Jason_Bonham's_Led_Zeppelin_Evening",
+    "bandsintown_artist": "Jason Bonham's Led Zeppelin Evening"
   }
 ]
