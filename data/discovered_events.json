@@ -1453,5 +1453,20 @@
     "seatgeek_performer_slug": "jason-bonham-s-led-zeppelin-evening",
     "wikipedia_title": "Jason_Bonham's_Led_Zeppelin_Evening",
     "bandsintown_artist": "Jason Bonham's Led Zeppelin Evening"
+  },
+  {
+    "id": "thievery-corporation-2026",
+    "seed_score": 50,
+    "name": "Thievery Corporation",
+    "artist": "Thievery Corporation",
+    "venue": "The Tabernacle",
+    "date": "2026-12-12",
+    "genre": "Dance/Electronic",
+    "spotify_artist_id": "",
+    "musicbrainz_mbid": "",
+    "tm_attraction_id": "K8vZ9171l60",
+    "seatgeek_performer_slug": "thievery-corporation",
+    "wikipedia_title": "Thievery_Corporation",
+    "bandsintown_artist": "Thievery Corporation"
   }
 ]
