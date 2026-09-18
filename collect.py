@@ -2382,180 +2382,19 @@ def save_youtube_cache(cache):
 
 
 def fetch_youtube(event, cache):
-    """
-    YouTube Data API v3 — video view velocity signal.
-    Endpoint: youtube/v3/search + youtube/v3/videos
-
-    Strategy:
-      1. Search for the artist's official channel using their name
-      2. Get the most recent uploaded video from that channel
-      3. Compare today's view count against the cached count from
-         the previous run to compute a 24-hour view delta
-      4. Update the cache with today's count for tomorrow's delta
-
-    Signals returned:
-      yt_video_id           : YouTube video ID of the most recent official video
-      yt_view_count         : current total view count
-      yt_view_delta_24h     : views gained in the past ~24 hours
-                              (None on first run — no prior count to diff against)
-      yt_view_velocity_7d   : estimated 7-day velocity = delta * 7
-                              (proxy — only accurate after 7 days of daily runs)
-      yt_subscriber_count   : channel subscriber count
-      yt_channel_id         : YouTube channel ID (cached to avoid repeat searches)
-
-    Cache schema per event_id:
-      {
-        "event_id": {
-          "channel_id":  "UC...",
-          "video_id":    "dQw4w9WgXcQ",
-          "view_count":  12345678,
-          "date":        "2026-06-09"
+    """YouTube disabled — quota exhausted. Returns cached data only."""
+    eid = event["id"]
+    cached = cache.get(eid, {})
+    if cached.get("view_count") and cached.get("channel_id") != "NOT_FOUND":
+        return {
+            "yt_view_count":       cached.get("view_count", 0),
+            "yt_view_delta_24h":   None,
+            "yt_view_velocity_7d": None,
+            "yt_subscriber_count": cached.get("subscriber_count", 0),
+            "yt_channel_id":       cached.get("channel_id", ""),
+            "yt_video_id":         cached.get("video_id", ""),
         }
-      }
-
-    Rate budget: ~4 units per event (1 search + 1 videos.list).
-    At 42 events = 168 units/night. Free quota = 10,000 units/day.
-    """
-    global _YOUTUBE_QUOTA_EXHAUSTED
-    if not YOUTUBE_API_KEY or _YOUTUBE_QUOTA_EXHAUSTED:
-        return {}
-
-    eid         = event["id"]
-    artist_name = event.get("artist", "")
-    if not artist_name:
-        return {}
-
-    today_str   = datetime.date.today().isoformat()
-    cached      = cache.get(eid, {})
-    channel_id  = cached.get("channel_id", "")
-
-    # ── Step 1: Find the artist's channel (skip if cached) ───────────────
-    if not channel_id:
-        search_data = safe_get(
-            "https://www.googleapis.com/youtube/v3/search",
-            params={
-                "part":       "snippet",
-                "q":          f"{artist_name} official",
-                "type":       "channel",
-                "maxResults": 1,
-                "key":        YOUTUBE_API_KEY,
-            },
-            label=f"YouTube channel search: {artist_name}",
-        )
-        time.sleep(1.5)
-        if not search_data or not search_data.get("items"):
-            # Cache a sentinel so we don't retry every run
-            cache[eid] = {"channel_id": "NOT_FOUND", "date": today_str}
-            return {}
-        channel_id = search_data["items"][0].get("id", {}).get("channelId", "")
-        if not channel_id:
-            cache[eid] = {"channel_id": "NOT_FOUND", "date": today_str}
-            return {}
-    
-    # Skip if channel was previously marked not found
-    if channel_id == "NOT_FOUND":
-        return {}
-
-    # ── Step 2: Get most recent video from the channel ────────────────────
-    video_id   = cached.get("video_id", "")
-    # Refresh video ID weekly (Monday) or when not yet cached
-    should_refresh_video = (
-        not video_id
-        or datetime.date.today().day == 1  # first of month only
-    )
-
-    if should_refresh_video:
-        recent_data = safe_get(
-            "https://www.googleapis.com/youtube/v3/search",
-            params={
-                "part":       "snippet",
-                "channelId":  channel_id,
-                "order":      "date",
-                "type":       "video",
-                "maxResults": 1,
-                "key":        YOUTUBE_API_KEY,
-            },
-            label=f"YouTube recent video: {artist_name}",
-        )
-        time.sleep(1.5)
-        if recent_data and recent_data.get("items"):
-            video_id = (recent_data["items"][0]
-                        .get("id", {}).get("videoId", video_id))
-
-    if not video_id:
-        return {}
-
-    # ── Step 3: Get current stats for the video + channel ────────────────
-    stats_data = safe_get(
-        "https://www.googleapis.com/youtube/v3/videos",
-        params={
-            "part":  "statistics",
-            "id":    video_id,
-            "key":   YOUTUBE_API_KEY,
-        },
-        label=f"YouTube video stats: {artist_name}",
-    )
-    time.sleep(1.5)
-
-    if not stats_data or not stats_data.get("items"):
-        return {}
-
-    stats        = stats_data["items"][0].get("statistics", {})
-    view_count   = int(stats.get("viewCount", 0) or 0)
-
-    # Channel subscriber count (separate call, costs 1 unit)
-    chan_data = safe_get(
-        "https://www.googleapis.com/youtube/v3/channels",
-        params={
-            "part": "statistics",
-            "id":   channel_id,
-            "key":  YOUTUBE_API_KEY,
-        },
-        label=f"YouTube channel stats: {artist_name}",
-    )
-    time.sleep(1.5)
-    subscriber_count = 0
-    if chan_data and chan_data.get("items"):
-        chan_stats       = chan_data["items"][0].get("statistics", {})
-        subscriber_count = int(chan_stats.get("subscriberCount", 0) or 0)
-
-    # ── Step 4: Compute velocity from cache delta ─────────────────────────
-    prior_count  = cached.get("view_count")
-    prior_date   = cached.get("date", "")
-    view_delta   = None
-    velocity_7d  = None
-
-    if prior_count is not None and prior_date and prior_date != today_str:
-        try:
-            days_elapsed = (
-                datetime.date.fromisoformat(today_str)
-                - datetime.date.fromisoformat(prior_date)
-            ).days
-            if days_elapsed > 0:
-                daily_rate  = (view_count - prior_count) / days_elapsed
-                view_delta  = int(view_count - prior_count)
-                velocity_7d = int(daily_rate * 7)
-        except (ValueError, ZeroDivisionError):
-            pass
-
-    # ── Step 5: Update cache entry for tomorrow ───────────────────────────
-    cache[eid] = {
-        "channel_id":      channel_id,
-        "video_id":        video_id,
-        "view_count":      view_count,
-        "date":            today_str,
-        "subscriber_count": subscriber_count,
-    }
-
-    return {
-        "yt_video_id":         video_id,
-        "yt_view_count":       view_count,
-        "yt_view_delta_24h":   view_delta,
-        "yt_view_velocity_7d": velocity_7d,
-        "yt_subscriber_count": subscriber_count,
-        "yt_channel_id":       channel_id,
-    }
-
+    return {}
 
 def fetch_lastfm(event):
     """
