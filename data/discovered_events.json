@@ -1468,5 +1468,50 @@
     "seatgeek_performer_slug": "thievery-corporation",
     "wikipedia_title": "Thievery_Corporation",
     "bandsintown_artist": "Thievery Corporation"
+  },
+  {
+    "id": "nine-vicious-2026",
+    "seed_score": 50,
+    "name": "Nine Vicious",
+    "artist": "Nine Vicious",
+    "venue": "Coca-Cola Roxy",
+    "date": "2026-10-17",
+    "genre": "Hip-Hop",
+    "spotify_artist_id": "",
+    "musicbrainz_mbid": "",
+    "tm_attraction_id": "K8vZ917rC0V",
+    "seatgeek_performer_slug": "nine-vicious",
+    "wikipedia_title": "Nine_Vicious",
+    "bandsintown_artist": "Nine Vicious"
+  },
+  {
+    "id": "gnarls-barkley-2026",
+    "seed_score": 50,
+    "name": "Gnarls Barkley",
+    "artist": "Gnarls Barkley",
+    "venue": "Coca-Cola Roxy",
+    "date": "2026-11-10",
+    "genre": "Rock",
+    "spotify_artist_id": "",
+    "musicbrainz_mbid": "",
+    "tm_attraction_id": "K8vZ9175Hz7",
+    "seatgeek_performer_slug": "gnarls-barkley",
+    "wikipedia_title": "Gnarls_Barkley",
+    "bandsintown_artist": "Gnarls Barkley"
+  },
+  {
+    "id": "andrea-bocelli-2026",
+    "seed_score": 50,
+    "name": "Andrea Bocelli",
+    "artist": "Andrea Bocelli",
+    "venue": "Ameris Bank Amphitheatre",
+    "date": "2026-12-16",
+    "genre": "Classical",
+    "spotify_artist_id": "",
+    "musicbrainz_mbid": "",
+    "tm_attraction_id": "K8vZ9171bQ0",
+    "seatgeek_performer_slug": "andrea-bocelli",
+    "wikipedia_title": "Andrea_Bocelli",
+    "bandsintown_artist": "Andrea Bocelli"
   }
 ]
