@@ -1317,6 +1317,82 @@ EVENTS = [
         "bandsintown_artist": "Band of Horses",
     },
 
+    {
+        "id": "two-door-cinema-club-2026",
+        "seed_score": 62,
+        "name": "Two Door Cinema Club with STRFKR",
+        "artist": "Two Door Cinema Club",
+        "venue": "Coca-Cola Roxy",
+        "date": "2026-10-09",
+        "genre": "Indie / Alt",
+        "spotify_artist_id": "536BYVgOnRky0xjsPT96cA",
+        "musicbrainz_mbid": "0a35c16e-dc39-4f20-8f87-4471ab80a8ea",
+        "tm_attraction_id": "K8vZ9171Cfv",
+        "seatgeek_performer_slug": "two-door-cinema-club",
+        "wikipedia_title": "Two_Door_Cinema_Club",
+        "bandsintown_artist": "Two Door Cinema Club",
+    },
+    {
+        "id": "young-thug-2026",
+        "seed_score": 72,
+        "name": "Young Thug",
+        "artist": "Young Thug",
+        "venue": "Lakewood Amphitheatre",
+        "date": "2026-09-20",
+        "genre": "Hip-Hop",
+        "spotify_artist_id": "50co4Is1HCEo8bhOyUWKpn",
+        "musicbrainz_mbid": "7b47ab38-fcbe-4c15-9449-0aecb2b2f1aa",
+        "tm_attraction_id": "K8vZ9178Xbf",
+        "seatgeek_performer_slug": "young-thug",
+        "wikipedia_title": "Young_Thug",
+        "bandsintown_artist": "Young Thug",
+    },
+    {
+        "id": "schoolboy-q-2026",
+        "seed_score": 65,
+        "name": "ScHoolboy Q",
+        "artist": "ScHoolboy Q",
+        "venue": "Coca-Cola Roxy",
+        "date": "2026-10-01",
+        "genre": "Hip-Hop",
+        "spotify_artist_id": "0v6N6pDkheUSCnBYdMX7yY",
+        "musicbrainz_mbid": "c8d1d6a0-82a1-41f0-b3e2-a91e9f7d84b2",
+        "tm_attraction_id": "K8vZ917kRL0",
+        "seatgeek_performer_slug": "schoolboy-q",
+        "wikipedia_title": "ScHoolboy_Q",
+        "bandsintown_artist": "ScHoolboy Q",
+    },
+    {
+        "id": "yebba-2026",
+        "seed_score": 58,
+        "name": "Yebba",
+        "artist": "Yebba",
+        "venue": "Coca-Cola Roxy",
+        "date": "2026-11-12",
+        "genre": "R&B",
+        "spotify_artist_id": "3PK5MLUkiLxGXGKYABv0ac",
+        "musicbrainz_mbid": "b1c2d3e4-f5a6-7890-abcd-ef1234567891",
+        "tm_attraction_id": "K8vZ917mIm0",
+        "seatgeek_performer_slug": "yebba",
+        "wikipedia_title": "Yebba_(singer)",
+        "bandsintown_artist": "Yebba",
+    },
+    {
+        "id": "arcangel-2026",
+        "seed_score": 62,
+        "name": "Arcángel",
+        "artist": "Arcángel",
+        "venue": "Coca-Cola Roxy",
+        "date": "2026-10-15",
+        "genre": "Latin Pop",
+        "spotify_artist_id": "1vad9NiJgFXeaLABbgvBMt",
+        "musicbrainz_mbid": "c2d3e4f5-a6b7-8901-bcde-f12345678902",
+        "tm_attraction_id": "K8vZ917pzI0",
+        "seatgeek_performer_slug": "arcangel",
+        "wikipedia_title": "Arcángel_(singer)",
+        "bandsintown_artist": "Arcángel",
+    },
+
 ]
 
 
@@ -2237,13 +2313,22 @@ def match_amm_article(artist_name, catalog):
             if all(w in slug_words for w in artist_words):
                 raw_slug = re.sub(r'[^a-z0-9]+', '-', partner.lower()).strip('-')
                 # Primary: full raw artist slug must appear in article slug
-                if raw_slug in post["slug"].lower():
-                    pass  # good match
-                # Secondary: joined significant words (only if >1 significant word OR word is long/unique)
-                elif artist_words and len(artist_words) > 1 and '-'.join(artist_words) in post["slug"].lower():
+                # Require raw_slug to appear as a standalone word segment, not as part of a longer name
+                # e.g. "beck" should NOT match "jeff-beck-..." because it appears inside "jeff-beck"
+                slug_lower = post["slug"].lower()
+                raw_as_word = f"-{raw_slug}-" in f"-{slug_lower}-"
+                # Check it's not preceded by another name word (jeff-beck, jeff_beck etc.)
+                # Find position and check what precedes it
+                pos = slug_lower.find(raw_slug)
+                preceded_by_name = False
+                if pos > 0 and slug_lower[pos-1] == '-' and pos >= 2:
+                    # Check if the character before the hyphen is alphanumeric (another word)
+                    preceded_by_name = slug_lower[pos-2].isalpha()
+                
+                if raw_as_word and not preceded_by_name:
+                    pass  # good standalone match
+                elif artist_words and len(artist_words) > 1 and '-'.join(artist_words) in slug_lower:
                     pass  # good multi-word match
-                elif artist_words and len(artist_words) == 1 and len(artist_words[0]) >= 6 and artist_words[0] in post["slug"].lower():
-                    pass  # long single word — specific enough
                 else:
                     continue  # not specific enough match
                 if post not in matches:
@@ -2967,6 +3052,28 @@ def discover_new_events(blocklist=None):
                 with open(disc_path, "w") as _f:
                     json.dump(existing_disc, _f, indent=2)
                 print(f"[discover] {len(truly_new)} new events persisted to discovered_events.json")
+
+                # Also add new event IDs to BOTTOM_PANEL_IDS in build_html.py
+                # so they appear in the bottom panel rather than competing for top 20
+                try:
+                    build_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "build_html.py")
+                    with open(build_path) as _bf:
+                        build_src = _bf.read()
+                    for _ev in truly_new:
+                        _eid = _ev["id"]
+                        if f'"{_eid}"' not in build_src:
+                            build_src = build_src.replace(
+                                '"jinjer-2026", "hayley-williams-2026",',
+                                f'"jinjer-2026", "hayley-williams-2026",\n    "{_eid}",',
+                                1
+                            )
+                    import ast as _ast2
+                    _ast2.parse(build_src)
+                    with open(build_path, "w") as _bf:
+                        _bf.write(build_src)
+                    print(f"[discover] build_html.py updated with {len(truly_new)} new BOTTOM_PANEL_IDS")
+                except Exception as _be:
+                    print(f"[discover] WARNING: could not update build_html.py: {_be}")
         except Exception as _e:
             print(f"[discover] WARNING: could not write discovered_events.json: {_e}")
     else:
