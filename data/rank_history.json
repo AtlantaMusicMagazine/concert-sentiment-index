@@ -245,7 +245,7 @@
     "first_seen": "2026-06-27"
   },
   "guns-n-roses-2026": {
-    "rank": 2,
+    "rank": 1,
     "panel": "top",
     "first_seen": "2026-06-29"
   },
@@ -280,7 +280,7 @@
     "first_seen": "2026-07-03"
   },
   "kacey-musgraves-2026": {
-    "rank": 3,
+    "rank": 2,
     "panel": "top",
     "first_seen": "2026-07-04"
   },
@@ -305,7 +305,7 @@
     "first_seen": "2026-07-04"
   },
   "aespa-2026": {
-    "rank": 4,
+    "rank": 3,
     "panel": "top",
     "first_seen": "2026-07-04"
   },
@@ -445,12 +445,12 @@
     "first_seen": "2026-08-13"
   },
   "beck-2026": {
-    "rank": 6,
+    "rank": 5,
     "panel": "top",
     "first_seen": "2026-08-13"
   },
   "foster-the-people-2026": {
-    "rank": 5,
+    "rank": 4,
     "panel": "top",
     "first_seen": "2026-08-13"
   },
@@ -495,7 +495,7 @@
     "first_seen": "2026-09-13"
   },
   "jack-white-2026": {
-    "rank": 10,
+    "rank": 6,
     "panel": "top",
     "first_seen": "2026-09-14"
   },
@@ -540,7 +540,7 @@
     "first_seen": "2026-09-18"
   },
   "nine-vicious-2026": {
-    "rank": 18,
+    "rank": 19,
     "panel": "top",
     "first_seen": "2026-09-18"
   },
@@ -573,5 +573,15 @@
     "rank": 7,
     "panel": "bottom",
     "first_seen": "2026-09-18"
+  },
+  "karan-aujla-2026": {
+    "rank": 18,
+    "panel": "top",
+    "first_seen": "2026-09-19"
+  },
+  "gnarls-barkley-2026": {
+    "rank": 20,
+    "panel": "top",
+    "first_seen": "2026-09-19"
   }
 }
