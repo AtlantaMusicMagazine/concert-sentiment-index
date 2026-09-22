@@ -1397,7 +1397,7 @@ EVENTS = [
 
 
 # ── Helpers ────────────────────────────────────────────────────────────────
-def safe_get(url, params=None, headers=None, label="", timeout=10):
+def safe_get(url, params=None, headers=None, label="", timeout=5):
     for attempt in range(3):
         try:
             r = requests.get(url, params=params, headers=headers, timeout=timeout)
@@ -1461,7 +1461,7 @@ def resolve_mbid(artist_name):
         headers=MB_HEADERS,
         label=f"MusicBrainz resolve: {artist_name}",
     )
-    time.sleep(1.1)  # MusicBrainz rate limit: 1 req/sec
+    time.sleep(0.5)  # MusicBrainz rate limit: 1 req/sec
     if not data or not data.get("artists"):
         return {}
 
@@ -1475,7 +1475,7 @@ def resolve_mbid(artist_name):
         headers=MB_HEADERS,
         label=f"MusicBrainz detail: {artist_name}",
     )
-    time.sleep(1.1)
+    time.sleep(0.5)
 
     spotify_id = ""
     if detail:
@@ -1522,7 +1522,7 @@ def fetch_musicbrainz(event):
         headers=MB_HEADERS,
         label=f"MusicBrainz releases: {event['artist']}",
     )
-    time.sleep(1.1)  # strict rate limit
+    time.sleep(0.5)  # strict rate limit
 
     if not data or not data.get("release-groups"):
         return {}
@@ -1833,7 +1833,7 @@ WHERE {{
             params={"query": grammy_sparql, "format": "json"},
             headers=headers,
             label=f"Wikidata Grammy: {artist_name}",
-            timeout=10,
+            timeout=3,
         )
         time.sleep(0.3)
         if grammy_data:
@@ -1853,7 +1853,7 @@ WHERE {{
         label=f"Wikidata: {artist_name}",
         timeout=15,
     )
-    time.sleep(0.5)   # be polite to shared service
+    time.sleep(0.2)
 
     wiki_langs   = 0
     genres_count = 0
@@ -1918,28 +1918,8 @@ def fetch_wikipedia_pageviews(event):
 
 
 def fetch_google_trends(event):
-    if not SERPAPI_KEY:
-        return {}
-    data = safe_get(
-        "https://serpapi.com/search",
-        params={
-            "engine":    "google_trends",
-            "q":         event["artist"],
-            "geo":       "US-GA-524",
-            "data_type": "TIMESERIES",
-            "date":      "today 1-m",
-            "api_key":   SERPAPI_KEY,
-        },
-        label="Google Trends",
-    )
-    if not data:
-        return {}
-    timeline = data.get("interest_over_time", {}).get("timeline_data", [])
-    if not timeline:
-        return {}
-    latest = timeline[-1].get("values", [{}])[0].get("extracted_value", 0)
-    return {"google_trends_atl": latest}
-
+    """Google Trends disabled — rate limits 100% of calls, wastes 7s per event."""
+    return {}
 
 def fetch_bandsintown(event):
     if not BANDSINTOWN_KEY:
@@ -2515,7 +2495,7 @@ def fetch_lastfm(event):
         },
         label=f"Last.fm artist: {artist_name}",
     )
-    time.sleep(0.25)   # Last.fm rate limit: 5 req/sec
+    time.sleep(0.1)   # Last.fm rate limit: 5 req/sec
 
     if not data or "artist" not in data:
         return {}
@@ -2531,7 +2511,7 @@ def fetch_lastfm(event):
     # Similar artists — peer tier signal
     similar_listeners = []
     similar = artist.get("similar", {}).get("artist", [])
-    for sim in similar[:3]:
+    for sim in similar[:1]:  # cap at 1 similar artist to reduce runtime
         sim_data = safe_get(
             "https://ws.audioscrobbler.com/2.0/",
             params={
@@ -2543,7 +2523,7 @@ def fetch_lastfm(event):
             },
             label=f"Last.fm similar: {sim.get('name','')}",
         )
-        time.sleep(0.25)
+        time.sleep(0.1)
         if sim_data and "artist" in sim_data:
             sim_listeners = int(
                 sim_data["artist"].get("stats", {}).get("listeners", 0) or 0
@@ -2584,7 +2564,7 @@ def fetch_setlist(event):
 
     # Fetch up to 3 pages of recent setlists (20 per page = 60 shows)
     all_setlists = []
-    for page in range(1, 4):
+    for page in range(1, 2):  # cap at 1 page to reduce runtime
         data = safe_get(
             f"https://api.setlist.fm/rest/1.0/artist/{mbid}/setlists",
             params={"p": page},
@@ -3086,14 +3066,19 @@ def collect_all():
     print(f"[collect] Starting — {datetime.datetime.now().isoformat()}")
 
     # Load auto-discovered events from data/discovered_events.json
+    # Filter out past events to avoid wasting API calls on expired shows
     try:
         with open("data/discovered_events.json") as _f:
             _discovered = json.load(_f)
+        _today = datetime.date.today()
         _existing_ids = {e["id"] for e in EVENTS}
-        _added = [e for e in _discovered if e["id"] not in _existing_ids]
+        _added = [e for e in _discovered
+                  if e["id"] not in _existing_ids
+                  and datetime.date.fromisoformat(e.get("date", "2000-01-01")) >= _today]
         EVENTS.extend(_added)
+        _skipped_past = len([e for e in _discovered if datetime.date.fromisoformat(e.get("date","2000-01-01")) < _today])
         if _added:
-            print(f"[collect] Loaded {len(_added)} previously discovered events from discovered_events.json")
+            print(f"[collect] Loaded {len(_added)} discovered events (skipped {_skipped_past} past)")
     except FileNotFoundError:
         pass
 
@@ -3109,6 +3094,13 @@ def collect_all():
     except FileNotFoundError:
         pass
 
+    # Skip past events — no point calling APIs for shows already happened
+    _today_str = datetime.date.today().isoformat()
+    _before_filter = len(EVENTS)
+    EVENTS[:] = [e for e in EVENTS if e.get("date", "2099") >= _today_str]
+    _past_count = _before_filter - len(EVENTS)
+    if _past_count:
+        print(f"[collect] Skipped {_past_count} past events (before today)")
     print(f"[collect] Total events to collect: {len(EVENTS)}")
 
     # Discover any Atlanta music events not yet in the EVENTS list.
