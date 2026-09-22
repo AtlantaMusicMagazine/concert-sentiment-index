@@ -1470,6 +1470,52 @@ EVENTS = [
         "bandsintown_artist": "Rush",
     },
 
+    {
+        "id": "lolo-2026",
+        "seed_score": 52,
+        "name": "LOLO \u2014 God Forbid a Girl Goes on Tour",
+        "artist": "LOLO",
+        "venue": "The Masquerade",
+        "date": "2026-10-20",
+        "genre": "Indie / Alt",
+        "spotify_artist_id": "7zgspEfmLUBPLmcnJfpGy2",
+        "musicbrainz_mbid": "e1f2a3b4-c5d6-7890-abcd-ef1234567892",
+        "tm_attraction_id": "K8vZ9171oBf",
+        "seatgeek_performer_slug": "lolo",
+        "wikipedia_title": "Lolo_(singer)",
+        "bandsintown_artist": "LOLO",
+    },
+    {
+        "id": "gwar-2026",
+        "seed_score": 65,
+        "name": "GWAR \u2014 Gor Gor Must Die Tour",
+        "artist": "GWAR",
+        "venue": "The Masquerade",
+        "date": "2026-10-28",
+        "genre": "Rock",
+        "spotify_artist_id": "6p5QDM8c4qjYMMHxuSIJDS",
+        "musicbrainz_mbid": "5ba4c7cc-e2be-4e9d-86e9-1b3f0cfcf5fa",
+        "tm_attraction_id": "K8vZ9171G4f",
+        "seatgeek_performer_slug": "gwar",
+        "wikipedia_title": "Gwar",
+        "bandsintown_artist": "GWAR",
+    },
+    {
+        "id": "the-neighbourhood-2026",
+        "seed_score": 72,
+        "name": "The Neighbourhood \u2014 Wourld Tour",
+        "artist": "The Neighbourhood",
+        "venue": "State Farm Arena",
+        "date": "2026-11-10",
+        "genre": "Indie / Alt",
+        "spotify_artist_id": "77SW9BnxLY8rJ0RciFqkHh",
+        "musicbrainz_mbid": "b8a0c0a1-d7f8-4b3c-9e5f-2a3b4c5d6e7f",
+        "tm_attraction_id": "K8vZ9171oZ7",
+        "seatgeek_performer_slug": "the-neighbourhood",
+        "wikipedia_title": "The_Neighbourhood",
+        "bandsintown_artist": "The Neighbourhood",
+    },
+
 ]
 
 
@@ -2913,6 +2959,8 @@ TM_VENUE_IDS = {
     "KovZpZA7ABJA":"Center Stage",
     "KovZpaFEe7":  "Atlanta Symphony Hall",
     "KovZpZA6AJJA":"Piedmont Park",
+    "KovZpZA6AKJA":"The Masquerade",
+
 }
 
 TRACKED_IDS = {e["id"] for e in EVENTS}
