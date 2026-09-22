@@ -1513,5 +1513,50 @@
     "seatgeek_performer_slug": "andrea-bocelli",
     "wikipedia_title": "Andrea_Bocelli",
     "bandsintown_artist": "Andrea Bocelli"
+  },
+  {
+    "id": "yeat-2026",
+    "seed_score": 50,
+    "name": "Yeat",
+    "artist": "Yeat",
+    "venue": "Coca-Cola Roxy",
+    "date": "2026-09-22",
+    "genre": "Hip-Hop",
+    "spotify_artist_id": "",
+    "musicbrainz_mbid": "",
+    "tm_attraction_id": "K8vZ917Q3M0",
+    "seatgeek_performer_slug": "yeat",
+    "wikipedia_title": "Yeat",
+    "bandsintown_artist": "Yeat"
+  },
+  {
+    "id": "penelope-road-2026",
+    "seed_score": 50,
+    "name": "Penelope Road",
+    "artist": "Penelope Road",
+    "venue": "The Tabernacle",
+    "date": "2026-12-19",
+    "genre": "Rock",
+    "spotify_artist_id": "",
+    "musicbrainz_mbid": "",
+    "tm_attraction_id": "K8vZ917qS_V",
+    "seatgeek_performer_slug": "penelope-road",
+    "wikipedia_title": "Penelope_Road",
+    "bandsintown_artist": "Penelope Road"
+  },
+  {
+    "id": "yacht-rock-revue-2026",
+    "seed_score": 50,
+    "name": "Yacht Rock Revue",
+    "artist": "Yacht Rock Revue",
+    "venue": "Coca-Cola Roxy",
+    "date": "2026-12-19",
+    "genre": "Rock",
+    "spotify_artist_id": "",
+    "musicbrainz_mbid": "",
+    "tm_attraction_id": "K8vZ917uZ6V",
+    "seatgeek_performer_slug": "yacht-rock-revue",
+    "wikipedia_title": "Yacht_Rock_Revue",
+    "bandsintown_artist": "Yacht Rock Revue"
   }
 ]
