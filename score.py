@@ -60,6 +60,7 @@ VENUE_CAPS = {
     "Center Stage":                                   1000,
     "Variety Playhouse":                               1000,
     "Terminal West":                                   900,
+    "The Masquerade":                                 2500,
     "Buckhead Theatre":                               1800,
     "The Bowl at Sugar Hill":                         7000,
     "Atlanta Symphony Hall":                          1800,
