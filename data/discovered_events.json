@@ -1558,5 +1558,35 @@
     "seatgeek_performer_slug": "yacht-rock-revue",
     "wikipedia_title": "Yacht_Rock_Revue",
     "bandsintown_artist": "Yacht Rock Revue"
+  },
+  {
+    "id": "trippie-redd-2026",
+    "seed_score": 50,
+    "name": "Trippie Redd",
+    "artist": "Trippie Redd",
+    "venue": "Coca-Cola Roxy",
+    "date": "2026-11-24",
+    "genre": "Hip-Hop",
+    "spotify_artist_id": "",
+    "musicbrainz_mbid": "",
+    "tm_attraction_id": "K8vZ917ppmf",
+    "seatgeek_performer_slug": "trippie-redd",
+    "wikipedia_title": "Trippie_Redd",
+    "bandsintown_artist": "Trippie Redd"
+  },
+  {
+    "id": "hunxho-2026",
+    "seed_score": 50,
+    "name": "Hunxho",
+    "artist": "Hunxho",
+    "venue": "Coca-Cola Roxy",
+    "date": "2026-11-27",
+    "genre": "Hip-Hop",
+    "spotify_artist_id": "",
+    "musicbrainz_mbid": "",
+    "tm_attraction_id": "K8vZ917QQw0",
+    "seatgeek_performer_slug": "hunxho",
+    "wikipedia_title": "Hunxho",
+    "bandsintown_artist": "Hunxho"
   }
 ]
