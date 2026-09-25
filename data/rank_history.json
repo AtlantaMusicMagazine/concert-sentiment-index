@@ -380,12 +380,12 @@
     "first_seen": "2026-08-09"
   },
   "loathe-2026": {
-    "rank": 14,
+    "rank": 13,
     "panel": "top",
     "first_seen": "2026-08-09"
   },
   "wave-to-earth-2026": {
-    "rank": 9,
+    "rank": 15,
     "panel": "top",
     "first_seen": "2026-08-09"
   },
@@ -400,7 +400,7 @@
     "first_seen": "2026-08-09"
   },
   "esdeekid-2026": {
-    "rank": 18,
+    "rank": 19,
     "panel": "top",
     "first_seen": "2026-08-09"
   },
@@ -445,17 +445,17 @@
     "first_seen": "2026-08-13"
   },
   "beck-2026": {
-    "rank": 9,
+    "rank": 6,
     "panel": "top",
     "first_seen": "2026-08-13"
   },
   "foster-the-people-2026": {
-    "rank": 18,
+    "rank": 8,
     "panel": "top",
     "first_seen": "2026-08-13"
   },
   "vince-staples-2026": {
-    "rank": 20,
+    "rank": 18,
     "panel": "top",
     "first_seen": "2026-08-14"
   },
@@ -485,22 +485,22 @@
     "first_seen": "2026-09-13"
   },
   "suki-waterhouse-2026": {
-    "rank": 8,
+    "rank": 14,
     "panel": "top",
     "first_seen": "2026-09-13"
   },
   "gov-t-mule-2026": {
-    "rank": 15,
+    "rank": 16,
     "panel": "top",
     "first_seen": "2026-09-13"
   },
   "jack-white-2026": {
-    "rank": 10,
+    "rank": 9,
     "panel": "top",
     "first_seen": "2026-09-14"
   },
   "fetty-wap-2026": {
-    "rank": 19,
+    "rank": 20,
     "panel": "top",
     "first_seen": "2026-09-14"
   },
@@ -530,12 +530,12 @@
     "first_seen": "2026-09-18"
   },
   "freya-skye-2026": {
-    "rank": 10,
+    "rank": 7,
     "panel": "top",
     "first_seen": "2026-09-18"
   },
   "cavetown-2026": {
-    "rank": 19,
+    "rank": 17,
     "panel": "top",
     "first_seen": "2026-09-18"
   },
@@ -595,22 +595,22 @@
     "first_seen": "2026-09-22"
   },
   "rush-2026-n1": {
-    "rank": 3,
+    "rank": 2,
     "panel": "top",
     "first_seen": "2026-09-22"
   },
   "rush-2026-n2": {
-    "rank": 4,
+    "rank": 3,
     "panel": "top",
     "first_seen": "2026-09-22"
   },
   "journey-2026": {
-    "rank": 5,
+    "rank": 4,
     "panel": "top",
     "first_seen": "2026-09-22"
   },
   "the-neighbourhood-2026": {
-    "rank": 6,
+    "rank": 5,
     "panel": "top",
     "first_seen": "2026-09-22"
   },
@@ -635,7 +635,7 @@
     "first_seen": "2026-09-22"
   },
   "sombr-2026": {
-    "rank": 7,
+    "rank": 10,
     "panel": "top",
     "first_seen": "2026-09-24"
   },
@@ -648,5 +648,10 @@
     "rank": 17,
     "panel": "top",
     "first_seen": "2026-09-24"
+  },
+  "trippie-redd-2026": {
+    "rank": 12,
+    "panel": "top",
+    "first_seen": "2026-09-25"
   }
 }

@@ -1588,5 +1588,20 @@
     "seatgeek_performer_slug": "hunxho",
     "wikipedia_title": "Hunxho",
     "bandsintown_artist": "Hunxho"
+  },
+  {
+    "id": "z100-s-jingle-ball-2026",
+    "seed_score": 50,
+    "name": "Z100's Jingle Ball",
+    "artist": "Z100's Jingle Ball",
+    "venue": "Ameris Bank Amphitheatre",
+    "date": "2026-12-11",
+    "genre": "Rock",
+    "spotify_artist_id": "",
+    "musicbrainz_mbid": "",
+    "tm_attraction_id": "K8vZ917uj-0",
+    "seatgeek_performer_slug": "z100-s-jingle-ball",
+    "wikipedia_title": "Z100's_Jingle_Ball",
+    "bandsintown_artist": "Z100's Jingle Ball"
   }
 ]
