@@ -1618,5 +1618,20 @@
     "seatgeek_performer_slug": "ryan-castro",
     "wikipedia_title": "Ryan_Castro",
     "bandsintown_artist": "Ryan Castro"
+  },
+  {
+    "id": "the-nxt-awards-2026",
+    "seed_score": 50,
+    "name": "The NXT Awards",
+    "artist": "The NXT Awards",
+    "venue": "Coca-Cola Roxy",
+    "date": "2026-10-25",
+    "genre": "Rock",
+    "spotify_artist_id": "",
+    "musicbrainz_mbid": "",
+    "tm_attraction_id": "K8vZpZAaatvk",
+    "seatgeek_performer_slug": "the-nxt-awards",
+    "wikipedia_title": "The_NXT_Awards",
+    "bandsintown_artist": "The NXT Awards"
   }
 ]
