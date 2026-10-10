@@ -400,7 +400,7 @@
     "first_seen": "2026-08-09"
   },
   "esdeekid-2026": {
-    "rank": 15,
+    "rank": 16,
     "panel": "top",
     "first_seen": "2026-08-09"
   },
@@ -445,7 +445,7 @@
     "first_seen": "2026-08-13"
   },
   "beck-2026": {
-    "rank": 9,
+    "rank": 6,
     "panel": "top",
     "first_seen": "2026-08-13"
   },
@@ -490,17 +490,17 @@
     "first_seen": "2026-09-13"
   },
   "gov-t-mule-2026": {
-    "rank": 6,
+    "rank": 12,
     "panel": "top",
     "first_seen": "2026-09-13"
   },
   "jack-white-2026": {
-    "rank": 10,
+    "rank": 9,
     "panel": "top",
     "first_seen": "2026-09-14"
   },
   "fetty-wap-2026": {
-    "rank": 16,
+    "rank": 17,
     "panel": "top",
     "first_seen": "2026-09-14"
   },
@@ -525,7 +525,7 @@
     "first_seen": "2026-09-14"
   },
   "andrea-bocelli-2026": {
-    "rank": 11,
+    "rank": 10,
     "panel": "top",
     "first_seen": "2026-09-18"
   },
@@ -535,7 +535,7 @@
     "first_seen": "2026-09-18"
   },
   "cavetown-2026": {
-    "rank": 14,
+    "rank": 15,
     "panel": "top",
     "first_seen": "2026-09-18"
   },
@@ -560,7 +560,7 @@
     "first_seen": "2026-09-18"
   },
   "arcangel-2026": {
-    "rank": 6,
+    "rank": 5,
     "panel": "bottom",
     "first_seen": "2026-09-18"
   },
@@ -595,17 +595,17 @@
     "first_seen": "2026-09-22"
   },
   "rush-2026-n1": {
-    "rank": 1,
-    "panel": "top",
-    "first_seen": "2026-09-22"
-  },
-  "rush-2026-n2": {
     "rank": 2,
     "panel": "top",
     "first_seen": "2026-09-22"
   },
-  "journey-2026": {
+  "rush-2026-n2": {
     "rank": 3,
+    "panel": "top",
+    "first_seen": "2026-09-22"
+  },
+  "journey-2026": {
+    "rank": 1,
     "panel": "top",
     "first_seen": "2026-09-22"
   },
@@ -630,7 +630,7 @@
     "first_seen": "2026-09-22"
   },
   "five-finger-death-punch-2026": {
-    "rank": 7,
+    "rank": 6,
     "panel": "bottom",
     "first_seen": "2026-09-22"
   },
@@ -650,7 +650,7 @@
     "first_seen": "2026-09-24"
   },
   "trippie-redd-2026": {
-    "rank": 12,
+    "rank": 11,
     "panel": "top",
     "first_seen": "2026-09-25"
   },
@@ -673,5 +673,10 @@
     "rank": 15,
     "panel": "top",
     "first_seen": "2026-10-05"
+  },
+  "san-holo-2026": {
+    "rank": 14,
+    "panel": "top",
+    "first_seen": "2026-10-10"
   }
 }
