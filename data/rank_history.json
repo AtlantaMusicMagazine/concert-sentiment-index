@@ -500,7 +500,7 @@
     "first_seen": "2026-09-14"
   },
   "fetty-wap-2026": {
-    "rank": 11,
+    "rank": 12,
     "panel": "top",
     "first_seen": "2026-09-14"
   },
@@ -510,12 +510,12 @@
     "first_seen": "2026-09-14"
   },
   "sabaton-2026": {
-    "rank": 14,
+    "rank": 15,
     "panel": "top",
     "first_seen": "2026-09-14"
   },
   "underoath-2026": {
-    "rank": 15,
+    "rank": 16,
     "panel": "top",
     "first_seen": "2026-09-14"
   },
@@ -575,12 +575,12 @@
     "first_seen": "2026-09-18"
   },
   "karan-aujla-2026": {
-    "rank": 16,
+    "rank": 17,
     "panel": "top",
     "first_seen": "2026-09-19"
   },
   "gnarls-barkley-2026": {
-    "rank": 17,
+    "rank": 18,
     "panel": "top",
     "first_seen": "2026-09-19"
   },
@@ -635,7 +635,7 @@
     "first_seen": "2026-09-22"
   },
   "sombr-2026": {
-    "rank": 12,
+    "rank": 14,
     "panel": "top",
     "first_seen": "2026-09-24"
   },
@@ -650,7 +650,7 @@
     "first_seen": "2026-09-24"
   },
   "trippie-redd-2026": {
-    "rank": 18,
+    "rank": 19,
     "panel": "top",
     "first_seen": "2026-09-25"
   },
@@ -685,7 +685,7 @@
     "first_seen": "2026-10-14"
   },
   "ryan-castro-2026": {
-    "rank": 19,
+    "rank": 20,
     "panel": "top",
     "first_seen": "2026-10-17"
   },
@@ -693,5 +693,15 @@
     "rank": 20,
     "panel": "top",
     "first_seen": "2026-10-17"
+  },
+  "jpegmafia-2026": {
+    "rank": 11,
+    "panel": "top",
+    "first_seen": "2026-10-18"
+  },
+  "periphery-2026": {
+    "rank": 13,
+    "panel": "top",
+    "first_seen": "2026-10-18"
   }
 }
