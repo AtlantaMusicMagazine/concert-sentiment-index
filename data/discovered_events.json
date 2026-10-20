@@ -1633,5 +1633,20 @@
     "seatgeek_performer_slug": "the-nxt-awards",
     "wikipedia_title": "The_NXT_Awards",
     "bandsintown_artist": "The NXT Awards"
+  },
+  {
+    "id": "nick-cannon-presents-wild-n-out-live-2026",
+    "seed_score": 50,
+    "name": "Nick Cannon Presents: Wild 'N Out Live",
+    "artist": "Nick Cannon Presents: Wild 'N Out Live",
+    "venue": "Lakewood Amphitheatre",
+    "date": "2026-12-04",
+    "genre": "Comedy",
+    "spotify_artist_id": "",
+    "musicbrainz_mbid": "",
+    "tm_attraction_id": "K8vZ9179eYf",
+    "seatgeek_performer_slug": "nick-cannon-presents-wild-n-out-live",
+    "wikipedia_title": "Nick_Cannon_Presents:_Wild_'N_Out_Live",
+    "bandsintown_artist": "Nick Cannon Presents: Wild 'N Out Live"
   }
 ]
