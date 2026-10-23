@@ -1648,5 +1648,20 @@
     "seatgeek_performer_slug": "nick-cannon-presents-wild-n-out-live",
     "wikipedia_title": "Nick_Cannon_Presents:_Wild_'N_Out_Live",
     "bandsintown_artist": "Nick Cannon Presents: Wild 'N Out Live"
+  },
+  {
+    "id": "pigeons-playing-ping-pong-2026",
+    "seed_score": 50,
+    "name": "Pigeons Playing Ping Pong",
+    "artist": "Pigeons Playing Ping Pong",
+    "venue": "Lakewood Amphitheatre",
+    "date": "2026-12-13",
+    "genre": "Rock",
+    "spotify_artist_id": "",
+    "musicbrainz_mbid": "",
+    "tm_attraction_id": "K8vZ917Ce9f",
+    "seatgeek_performer_slug": "pigeons-playing-ping-pong",
+    "wikipedia_title": "Pigeons_Playing_Ping_Pong",
+    "bandsintown_artist": "Pigeons Playing Ping Pong"
   }
 ]
