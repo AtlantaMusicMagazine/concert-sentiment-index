@@ -445,7 +445,7 @@
     "first_seen": "2026-08-13"
   },
   "beck-2026": {
-    "rank": 5,
+    "rank": 4,
     "panel": "top",
     "first_seen": "2026-08-13"
   },
@@ -510,12 +510,12 @@
     "first_seen": "2026-09-14"
   },
   "sabaton-2026": {
-    "rank": 16,
+    "rank": 15,
     "panel": "top",
     "first_seen": "2026-09-14"
   },
   "underoath-2026": {
-    "rank": 17,
+    "rank": 16,
     "panel": "top",
     "first_seen": "2026-09-14"
   },
@@ -525,7 +525,7 @@
     "first_seen": "2026-09-14"
   },
   "andrea-bocelli-2026": {
-    "rank": 6,
+    "rank": 5,
     "panel": "top",
     "first_seen": "2026-09-18"
   },
@@ -580,7 +580,7 @@
     "first_seen": "2026-09-19"
   },
   "gnarls-barkley-2026": {
-    "rank": 18,
+    "rank": 17,
     "panel": "top",
     "first_seen": "2026-09-19"
   },
@@ -635,7 +635,7 @@
     "first_seen": "2026-09-22"
   },
   "sombr-2026": {
-    "rank": 14,
+    "rank": 13,
     "panel": "top",
     "first_seen": "2026-09-24"
   },
@@ -650,7 +650,7 @@
     "first_seen": "2026-09-24"
   },
   "trippie-redd-2026": {
-    "rank": 19,
+    "rank": 9,
     "panel": "top",
     "first_seen": "2026-09-25"
   },
@@ -660,7 +660,7 @@
     "first_seen": "2026-09-27"
   },
   "tyla-2026": {
-    "rank": 15,
+    "rank": 14,
     "panel": "top",
     "first_seen": "2026-09-30"
   },
@@ -685,7 +685,7 @@
     "first_seen": "2026-10-14"
   },
   "ryan-castro-2026": {
-    "rank": 20,
+    "rank": 18,
     "panel": "top",
     "first_seen": "2026-10-17"
   },
@@ -700,23 +700,28 @@
     "first_seen": "2026-10-18"
   },
   "periphery-2026": {
-    "rank": 13,
+    "rank": 20,
     "panel": "top",
     "first_seen": "2026-10-18"
   },
   "krs-one-2027": {
-    "rank": 4,
+    "rank": 6,
     "panel": "top",
     "first_seen": "2026-10-20"
   },
   "nick-cannon-presents-wild-n-out-live-2026": {
-    "rank": 20,
+    "rank": 19,
     "panel": "top",
     "first_seen": "2026-10-20"
   },
   "pigeons-playing-ping-pong-2026": {
-    "rank": 9,
+    "rank": 10,
     "panel": "top",
     "first_seen": "2026-10-23"
+  },
+  "the-wallflowers-2026": {
+    "rank": 11,
+    "panel": "top",
+    "first_seen": "2026-10-25"
   }
 }
