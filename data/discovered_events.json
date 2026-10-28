@@ -1678,5 +1678,50 @@
     "seatgeek_performer_slug": "the-wallflowers",
     "wikipedia_title": "The_Wallflowers",
     "bandsintown_artist": "The Wallflowers"
+  },
+  {
+    "id": "concert-for-the-planet-2026",
+    "seed_score": 50,
+    "name": "Concert for the Planet",
+    "artist": "Concert for the Planet",
+    "venue": "Coca-Cola Roxy",
+    "date": "2026-11-07",
+    "genre": "Rock",
+    "spotify_artist_id": "",
+    "musicbrainz_mbid": "",
+    "tm_attraction_id": "K8vZ917-zn7",
+    "seatgeek_performer_slug": "concert-for-the-planet",
+    "wikipedia_title": "Concert_for_the_Planet",
+    "bandsintown_artist": "Concert for the Planet"
+  },
+  {
+    "id": "key-glock-2026",
+    "seed_score": 50,
+    "name": "Key Glock",
+    "artist": "Key Glock",
+    "venue": "The Tabernacle",
+    "date": "2026-12-18",
+    "genre": "Hip-Hop",
+    "spotify_artist_id": "",
+    "musicbrainz_mbid": "",
+    "tm_attraction_id": "K8vZ9179vjf",
+    "seatgeek_performer_slug": "key-glock",
+    "wikipedia_title": "Key_Glock",
+    "bandsintown_artist": "Key Glock"
+  },
+  {
+    "id": "meek-mill-2026",
+    "seed_score": 50,
+    "name": "Meek Mill",
+    "artist": "Meek Mill",
+    "venue": "Coca-Cola Roxy",
+    "date": "2026-12-20",
+    "genre": "Hip-Hop",
+    "spotify_artist_id": "",
+    "musicbrainz_mbid": "",
+    "tm_attraction_id": "K8vZ917CDv0",
+    "seatgeek_performer_slug": "meek-mill",
+    "wikipedia_title": "Meek_Mill",
+    "bandsintown_artist": "Meek Mill"
   }
 ]
