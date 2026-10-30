@@ -1723,5 +1723,20 @@
     "seatgeek_performer_slug": "meek-mill",
     "wikipedia_title": "Meek_Mill",
     "bandsintown_artist": "Meek Mill"
+  },
+  {
+    "id": "belly-gang-kushington-2026",
+    "seed_score": 50,
+    "name": "Belly Gang Kushington",
+    "artist": "Belly Gang Kushington",
+    "venue": "The Tabernacle",
+    "date": "2026-11-25",
+    "genre": "Hip-Hop",
+    "spotify_artist_id": "",
+    "musicbrainz_mbid": "",
+    "tm_attraction_id": "K8vZ917r5T7",
+    "seatgeek_performer_slug": "belly-gang-kushington",
+    "wikipedia_title": "Belly_Gang_Kushington",
+    "bandsintown_artist": "Belly Gang Kushington"
   }
 ]
