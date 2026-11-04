@@ -459,6 +459,27 @@ BOTTOM_PANEL_IDS = {
     "ne-yo-akon-2026", "styx-chicago-2026", "5sos-2026",
     "madison-beer-2026", "motionless-2026",
     "jinjer-2026", "hayley-williams-2026",
+    "kamijo-2027",
+    "chelsea-cutler-2027",
+    "wolves-in-throne-room-2027",
+    "meshell-ndegeocello-2027",
+    "flo-2027",
+    "kameron-marlowe-2027",
+    "joy-oladokun-2026",
+    "bella-poarch-2027",
+    "tesseract-2027",
+    "stephen-wilson-jr-2026",
+    "montell-fish-2026",
+    "underoath-2026",
+    "jason-bonham-2026",
+    "tamar-braxton-2026",
+    "state-champs-2026",
+    "switchfoot-2026",
+    "samantha-fish-2026",
+    "sabaton-2026",
+    "dragonforce-2026",
+    "jack-white-2026",
+    "fetty-wap-2026",
     "gwar-2026",
     "lolo-2026",
     "stryper-2026",
@@ -1049,17 +1070,28 @@ def build():
     if past_count:
         print(f"[build] Filtered {past_count} past/out-of-window events from main panels")
 
-    # ── Top panel: highest-scoring future in-window events ───────────────
-    # Top 20 by score descending, excluding events reserved for bottom panel
-    top_candidates  = [ev for ev in future_events if ev.get("id") not in BOTTOM_PANEL_IDS]
-    top_events      = top_candidates[:TOP_N]
+    # ── Automatic score-based panel assignment ────────────────────────────
+    # Top panel: 20 highest-scoring events. Bottom panel: 20 lowest-scoring.
+    # BOTTOM_PANEL_IDS acts as an editorial override — events in that set
+    # are pinned to the bottom panel regardless of score. All other events
+    # are placed automatically by score. This ensures the bottom panel is
+    # always full as the roster rolls forward, with no manual maintenance.
 
-    # ── Bottom panel: curated soft-demand events, sorted score ascending ──
-    # Fixed set of events editorially designated as the "softest demand"
-    # tier — not simply the lowest scorers from all events, which would
-    # bleed top-panel events into the bottom ranking.
-    bot_candidates  = [ev for ev in future_events if ev.get("id") in BOTTOM_PANEL_IDS]
-    bottom_events   = sorted(bot_candidates, key=lambda e: int(e["score"]))[:BOTTOM_N]
+    pinned_bottom = [ev for ev in future_events if ev.get("id") in BOTTOM_PANEL_IDS]
+    pinned_ids    = {ev["id"] for ev in pinned_bottom}
+    unpinned_desc = sorted([ev for ev in future_events if ev["id"] not in pinned_ids],
+                           key=lambda e: int(e["score"]), reverse=True)
+    unpinned_asc  = sorted([ev for ev in future_events if ev["id"] not in pinned_ids],
+                           key=lambda e: int(e["score"]))
+
+    top_events    = unpinned_desc[:TOP_N]
+    top_ids       = {ev["id"] for ev in top_events}
+
+    # Fill bottom panel: pinned events + lowest-scoring unpinned not in top
+    bottom_fill   = [ev for ev in unpinned_asc if ev["id"] not in top_ids]
+    bottom_pool   = sorted(pinned_bottom + bottom_fill[:max(0, BOTTOM_N - len(pinned_bottom))],
+                           key=lambda e: int(e["score"]))
+    bottom_events = bottom_pool[:BOTTOM_N]
 
     print(f"[build] Top panel: {len(top_events)} events  "
           f"(score range {top_events[-1]['score']}–{top_events[0]['score']})")
