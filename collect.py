@@ -3425,6 +3425,22 @@ def discover_new_events(blocklist=None):
                 if is_false_positive(artist_name, tm_attr_id):
                     continue
 
+                # Outdoor summer-only venues: skip events outside their season
+                SEASONAL_VENUES = {
+                    "Lakewood Amphitheatre": (4, 10),   # April–October only
+                    "Ameris Bank Amphitheatre": (4, 11), # April–November only
+                    "Truist Park": (3, 10),
+                    "Piedmont Park": (3, 11),
+                }
+                try:
+                    _ev_month = int(date_str[5:7])
+                    _ev_venue = venue_name
+                    _season = SEASONAL_VENUES.get(_ev_venue)
+                    if _season and not (_season[0] <= _ev_month <= _season[1]):
+                        continue  # outside season for this venue
+                except Exception:
+                    pass
+
                 # Already tracked? Block if same artist exists on ANY date —
                 # prevents false Ticketmaster duplicates (e.g. Shakira appearing
                 # at a different venue on a different date). Multi-night shows
