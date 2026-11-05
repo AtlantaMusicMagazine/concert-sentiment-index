@@ -1894,6 +1894,23 @@ EVENTS = [
         "bandsintown_artist": "Kamijo",
     },
 
+    {
+        "id": "andrea-bocelli-2027",
+        "seed_score": 85,
+        "grammy_wins_override": 7,
+        "name": "Andrea Bocelli \u2014 Romanza 30th Anniversary World Tour",
+        "artist": "Andrea Bocelli",
+        "venue": "State Farm Arena",
+        "date": "2027-02-02",
+        "genre": "Classical",
+        "spotify_artist_id": "4N4VFfXDsN3HGeorME8V0F",
+        "musicbrainz_mbid": "61fe4a2f-d9c5-4958-8a44-0e8cbcb8b9a2",
+        "tm_attraction_id": "K8vZ9171oXV",
+        "seatgeek_performer_slug": "andrea-bocelli",
+        "wikipedia_title": "Andrea_Bocelli",
+        "bandsintown_artist": "Andrea Bocelli",
+    },
+
 ]
 
 
@@ -3427,8 +3444,8 @@ def discover_new_events(blocklist=None):
 
                 # Outdoor summer-only venues: skip events outside their season
                 SEASONAL_VENUES = {
-                    "Lakewood Amphitheatre": (4, 10),   # April–October only
-                    "Ameris Bank Amphitheatre": (4, 11), # April–November only
+                    "Lakewood Amphitheatre": (4, 10),    # April–October only
+                    "Ameris Bank Amphitheatre": (4, 10), # April–October only
                     "Truist Park": (3, 10),
                     "Piedmont Park": (3, 11),
                 }
