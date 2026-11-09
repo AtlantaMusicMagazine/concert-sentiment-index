@@ -550,7 +550,7 @@
     "first_seen": "2026-09-18"
   },
   "yebba-2026": {
-    "rank": 14,
+    "rank": 13,
     "panel": "bottom",
     "first_seen": "2026-09-18"
   },
@@ -670,7 +670,7 @@
     "first_seen": "2026-09-30"
   },
   "manchester-orchestra-2026": {
-    "rank": 10,
+    "rank": 11,
     "panel": "top",
     "first_seen": "2026-10-05"
   },
@@ -680,7 +680,7 @@
     "first_seen": "2026-10-10"
   },
   "orville-peck-2026": {
-    "rank": 12,
+    "rank": 14,
     "panel": "top",
     "first_seen": "2026-10-14"
   },
@@ -700,7 +700,7 @@
     "first_seen": "2026-10-18"
   },
   "periphery-2026": {
-    "rank": 14,
+    "rank": 10,
     "panel": "top",
     "first_seen": "2026-10-18"
   },
@@ -730,7 +730,7 @@
     "first_seen": "2026-10-27"
   },
   "story-of-the-year-2026": {
-    "rank": 11,
+    "rank": 12,
     "panel": "top",
     "first_seen": "2026-10-29"
   },
@@ -760,12 +760,12 @@
     "first_seen": "2026-11-04"
   },
   "wolves-in-throne-room-2027": {
-    "rank": 2,
+    "rank": 3,
     "panel": "bottom",
     "first_seen": "2026-11-04"
   },
   "kamijo-2027": {
-    "rank": 3,
+    "rank": 2,
     "panel": "bottom",
     "first_seen": "2026-11-04"
   },
@@ -790,7 +790,7 @@
     "first_seen": "2026-11-04"
   },
   "state-champs-2026": {
-    "rank": 13,
+    "rank": 12,
     "panel": "bottom",
     "first_seen": "2026-11-04"
   },
@@ -810,7 +810,7 @@
     "first_seen": "2026-11-04"
   },
   "samantha-fish-2026": {
-    "rank": 12,
+    "rank": 14,
     "panel": "bottom",
     "first_seen": "2026-11-04"
   },
@@ -868,5 +868,10 @@
     "rank": 1,
     "panel": "bottom",
     "first_seen": "2026-11-07"
+  },
+  "judah-the-lion-2026": {
+    "rank": 20,
+    "panel": "top",
+    "first_seen": "2026-11-09"
   }
 }
