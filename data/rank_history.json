@@ -760,42 +760,42 @@
     "first_seen": "2026-11-04"
   },
   "wolves-in-throne-room-2027": {
-    "rank": 3,
-    "panel": "bottom",
-    "first_seen": "2026-11-04"
-  },
-  "kamijo-2027": {
     "rank": 2,
     "panel": "bottom",
     "first_seen": "2026-11-04"
   },
+  "kamijo-2027": {
+    "rank": 1,
+    "panel": "bottom",
+    "first_seen": "2026-11-04"
+  },
   "jason-bonham-2026": {
-    "rank": 4,
+    "rank": 3,
     "panel": "bottom",
     "first_seen": "2026-11-04"
   },
   "stephen-wilson-jr-2026": {
-    "rank": 5,
+    "rank": 4,
     "panel": "bottom",
     "first_seen": "2026-11-04"
   },
   "joy-oladokun-2026": {
-    "rank": 6,
+    "rank": 5,
     "panel": "bottom",
     "first_seen": "2026-11-04"
   },
   "meshell-ndegeocello-2027": {
-    "rank": 7,
+    "rank": 6,
     "panel": "bottom",
     "first_seen": "2026-11-04"
   },
   "state-champs-2026": {
-    "rank": 13,
+    "rank": 12,
     "panel": "bottom",
     "first_seen": "2026-11-04"
   },
   "montell-fish-2026": {
-    "rank": 8,
+    "rank": 7,
     "panel": "bottom",
     "first_seen": "2026-11-04"
   },
@@ -805,12 +805,12 @@
     "first_seen": "2026-11-04"
   },
   "tesseract-2027": {
-    "rank": 9,
+    "rank": 8,
     "panel": "bottom",
     "first_seen": "2026-11-04"
   },
   "samantha-fish-2026": {
-    "rank": 12,
+    "rank": 14,
     "panel": "bottom",
     "first_seen": "2026-11-04"
   },
@@ -820,7 +820,7 @@
     "first_seen": "2026-11-04"
   },
   "bella-poarch-2027": {
-    "rank": 14,
+    "rank": 13,
     "panel": "bottom",
     "first_seen": "2026-11-04"
   },
@@ -835,7 +835,7 @@
     "first_seen": "2026-11-04"
   },
   "blackberry-smoke-2026": {
-    "rank": 16,
+    "rank": 14,
     "panel": "top",
     "first_seen": "2026-11-04"
   },
@@ -850,12 +850,12 @@
     "first_seen": "2026-11-05"
   },
   "key-glock-2026": {
-    "rank": 17,
+    "rank": 15,
     "panel": "top",
     "first_seen": "2026-11-05"
   },
   "meek-mill-2026": {
-    "rank": 18,
+    "rank": 16,
     "panel": "top",
     "first_seen": "2026-11-06"
   },
@@ -890,13 +890,28 @@
     "first_seen": "2026-11-12"
   },
   "imminence-2026": {
-    "rank": 15,
+    "rank": 18,
     "panel": "top",
     "first_seen": "2026-11-14"
   },
   "6lack-2026": {
-    "rank": 20,
+    "rank": 17,
     "panel": "top",
     "first_seen": "2026-11-14"
+  },
+  "beartooth-2026": {
+    "rank": 19,
+    "panel": "top",
+    "first_seen": "2026-11-15"
+  },
+  "syd-2026": {
+    "rank": 20,
+    "panel": "top",
+    "first_seen": "2026-11-15"
+  },
+  "kameron-marlowe-2027": {
+    "rank": 9,
+    "panel": "bottom",
+    "first_seen": "2026-11-15"
   }
 }
