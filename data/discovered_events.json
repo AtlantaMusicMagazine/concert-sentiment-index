@@ -1738,5 +1738,20 @@
     "seatgeek_performer_slug": "belly-gang-kushington",
     "wikipedia_title": "Belly_Gang_Kushington",
     "bandsintown_artist": "Belly Gang Kushington"
+  },
+  {
+    "id": "under-ath-2026",
+    "seed_score": 50,
+    "name": "UNDER\u00d8ATH",
+    "artist": "UNDER\u00d8ATH",
+    "venue": "Coca-Cola Roxy",
+    "date": "2026-12-13",
+    "genre": "Rock",
+    "spotify_artist_id": "",
+    "musicbrainz_mbid": "",
+    "tm_attraction_id": "K8vZ9175Y30",
+    "seatgeek_performer_slug": "under-ath",
+    "wikipedia_title": "UNDER\u00d8ATH",
+    "bandsintown_artist": "UNDER\u00d8ATH"
   }
 ]
