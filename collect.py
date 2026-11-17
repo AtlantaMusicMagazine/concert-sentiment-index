@@ -1522,7 +1522,7 @@ EVENTS = [
         "name": "Fetty Wap",
         "artist": "Fetty Wap",
         "venue": "Coca-Cola Roxy",
-        "date": "2026-11-06",
+        "date": "2026-11-28",
         "genre": "Hip-Hop",
         "spotify_artist_id": "6RHTUrRF63xao58xh9FMUC",
         "musicbrainz_mbid": "a1b2c3d4-e5f6-7890-abcd-ef1234567893",
@@ -1909,6 +1909,22 @@ EVENTS = [
         "seatgeek_performer_slug": "andrea-bocelli",
         "wikipedia_title": "Andrea_Bocelli",
         "bandsintown_artist": "Andrea Bocelli",
+    },
+
+    {
+        "id": "hunxho-2026",
+        "seed_score": 62,
+        "name": "Hunxho 2Night Only Tour",
+        "artist": "Hunxho",
+        "venue": "Coca-Cola Roxy",
+        "date": "2026-11-24",
+        "genre": "Hip-Hop",
+        "spotify_artist_id": "5dKdCVbBh2vrdHNEZwKBMu",
+        "musicbrainz_mbid": "b5c6d7e8-f9a0-1234-5678-901234567890",
+        "tm_attraction_id": "K8vZ917pZW0",
+        "seatgeek_performer_slug": "hunxho",
+        "wikipedia_title": "Hunxho",
+        "bandsintown_artist": "Hunxho",
     },
 
 ]
