@@ -595,12 +595,12 @@
     "first_seen": "2026-09-22"
   },
   "rush-2026-n1": {
-    "rank": 3,
+    "rank": 2,
     "panel": "top",
     "first_seen": "2026-09-22"
   },
   "rush-2026-n2": {
-    "rank": 4,
+    "rank": 3,
     "panel": "top",
     "first_seen": "2026-09-22"
   },
@@ -745,7 +745,7 @@
     "first_seen": "2026-11-03"
   },
   "lil-baby-dec-2026": {
-    "rank": 2,
+    "rank": 4,
     "panel": "top",
     "first_seen": "2026-11-04"
   },
@@ -765,7 +765,7 @@
     "first_seen": "2026-11-04"
   },
   "kamijo-2027": {
-    "rank": 8,
+    "rank": 6,
     "panel": "bottom",
     "first_seen": "2026-11-04"
   },
@@ -880,7 +880,7 @@
     "first_seen": "2026-11-11"
   },
   "alan-walker-2027": {
-    "rank": 19,
+    "rank": 18,
     "panel": "bottom",
     "first_seen": "2026-11-12"
   },
@@ -890,7 +890,7 @@
     "first_seen": "2026-11-12"
   },
   "imminence-2026": {
-    "rank": 9,
+    "rank": 7,
     "panel": "bottom",
     "first_seen": "2026-11-14"
   },
@@ -945,22 +945,22 @@
     "first_seen": "2026-11-18"
   },
   "the-string-cheese-incident-2027": {
-    "rank": 6,
+    "rank": 9,
     "panel": "bottom",
     "first_seen": "2026-11-18"
   },
   "the-string-cheese-incident-2027-0122": {
-    "rank": 7,
-    "panel": "bottom",
-    "first_seen": "2026-11-18"
-  },
-  "los-gemelos-de-sinaloa-2026": {
     "rank": 10,
     "panel": "bottom",
     "first_seen": "2026-11-18"
   },
+  "los-gemelos-de-sinaloa-2026": {
+    "rank": 8,
+    "panel": "bottom",
+    "first_seen": "2026-11-18"
+  },
   "belly-gang-kushington-2026": {
-    "rank": 17,
+    "rank": 16,
     "panel": "bottom",
     "first_seen": "2026-11-18"
   },
@@ -970,12 +970,12 @@
     "first_seen": "2026-11-18"
   },
   "z100-s-jingle-ball-2026": {
-    "rank": 16,
+    "rank": 15,
     "panel": "bottom",
     "first_seen": "2026-11-18"
   },
   "stella-lefty-2027": {
-    "rank": 18,
+    "rank": 17,
     "panel": "bottom",
     "first_seen": "2026-11-18"
   },
@@ -985,8 +985,13 @@
     "first_seen": "2026-11-18"
   },
   "gregory-alan-isakov-2027": {
-    "rank": 20,
+    "rank": 19,
     "panel": "bottom",
     "first_seen": "2026-11-19"
+  },
+  "gregory-alan-isakov-2027-0217": {
+    "rank": 20,
+    "panel": "bottom",
+    "first_seen": "2026-11-20"
   }
 }
