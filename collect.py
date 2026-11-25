@@ -3492,20 +3492,31 @@ def discover_new_events(blocklist=None):
 
     for venue_id, venue_name in TM_VENUE_IDS.items():
         try:
-            params = {
-                "apikey":              TICKETMASTER_KEY,
-                "venueId":            venue_id,
-                "classificationName": "Music",
-                "startDateTime":      f"{today}T00:00:00Z",
-                "endDateTime":        f"{win_end}T23:59:59Z",
-                "size":               50,
-                "sort":               "date,asc",
-            }
-            r = requests.get(base_url, params=params, timeout=10)
-            if r.status_code != 200:
-                continue
-            data = r.json()
-            events_found = data.get("_embedded", {}).get("events", [])
+            events_found = []
+            page = 0
+            while True:
+                params = {
+                    "apikey":              TICKETMASTER_KEY,
+                    "venueId":            venue_id,
+                    "classificationName": "Music",
+                    "startDateTime":      f"{today}T00:00:00Z",
+                    "endDateTime":        f"{win_end}T23:59:59Z",
+                    "size":               50,
+                    "page":               page,
+                    "sort":               "date,asc",
+                }
+                r = requests.get(base_url, params=params, timeout=10)
+                if r.status_code != 200:
+                    break
+                data = r.json()
+                page_events = data.get("_embedded", {}).get("events", [])
+                events_found.extend(page_events)
+                # Check if there are more pages
+                total_pages = data.get("page", {}).get("totalPages", 1)
+                if page + 1 >= total_pages or not page_events:
+                    break
+                page += 1
+                time.sleep(0.2)  # be polite between pages
 
             for ev in events_found:
                 tm_event_id = ev.get("id", "")
