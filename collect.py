@@ -1927,6 +1927,54 @@ EVENTS = [
         "bandsintown_artist": "Hunxho",
     },
 
+    {
+        "id": "men-without-hats-2026",
+        "seed_score": 58,
+        "name": "Men Without Hats with Pylon Reenactment Society",
+        "artist": "Men Without Hats",
+        "venue": "Buckhead Theatre",
+        "date": "2026-11-29",
+        "genre": "Indie / Alt",
+        "spotify_artist_id": "71Z5YAFsevGpkTFCqAHKhc",
+        "musicbrainz_mbid": "0fb6a450-91e7-4c89-8b4c-5b8c82c4f0a1",
+        "tm_attraction_id": "K8vZ9171oqf",
+        "seatgeek_performer_slug": "men-without-hats",
+        "wikipedia_title": "Men_Without_Hats",
+        "bandsintown_artist": "Men Without Hats",
+    },
+
+    {
+        "id": "the-string-cheese-incident-2027-n1",
+        "seed_score": 65,
+        "name": "The String Cheese Incident \u2014 Say Cheese Tour (Night 1)",
+        "artist": "The String Cheese Incident",
+        "venue": "The Tabernacle",
+        "date": "2027-01-22",
+        "genre": "Rock",
+        "spotify_artist_id": "5J3fFPFT5ChFkI0FvJWpfH",
+        "musicbrainz_mbid": "b98b9d16-9b88-4e36-9bed-2b0a6a35e54c",
+        "tm_attraction_id": "K8vZ9171Fqf",
+        "seatgeek_performer_slug": "string-cheese-incident",
+        "wikipedia_title": "The_String_Cheese_Incident",
+        "bandsintown_artist": "The String Cheese Incident",
+    },
+
+    {
+        "id": "the-string-cheese-incident-2027-n2",
+        "seed_score": 65,
+        "name": "The String Cheese Incident \u2014 Say Cheese Tour (Night 2)",
+        "artist": "The String Cheese Incident",
+        "venue": "The Tabernacle",
+        "date": "2027-01-23",
+        "genre": "Rock",
+        "spotify_artist_id": "5J3fFPFT5ChFkI0FvJWpfH",
+        "musicbrainz_mbid": "b98b9d16-9b88-4e36-9bed-2b0a6a35e54c",
+        "tm_attraction_id": "K8vZ9171Fqf",
+        "seatgeek_performer_slug": "string-cheese-incident",
+        "wikipedia_title": "The_String_Cheese_Incident",
+        "bandsintown_artist": "The String Cheese Incident",
+    },
+
 ]
 
 
@@ -3405,6 +3453,13 @@ def discover_new_events(blocklist=None):
         "pit", "floor", "club", "premium", "package", "upgrade", "early",
         "entry", "meet", "greet", "soundcheck", "backstage", "presale",
     }
+    # Radio station jingle ball events and ticket-category-as-artist names
+    FALSE_POSITIVE_PHRASES = {
+        "jingle ball", "jingleball", "r&b only", "rb only",
+        "hip hop only", "hip-hop only", "pop only",
+    }
+    # Radio station naming patterns (Z100, B96, Hot97, etc.)
+    RADIO_STATION_PATTERN = re.compile(r'^[A-Z]\d{2,3}', re.IGNORECASE)
 
     def is_false_positive(name, attr_id):
         if not name:
@@ -3418,6 +3473,13 @@ def discover_new_events(blocklist=None):
         # Name contains ticket-type keywords
         words = set(name.lower().split())
         if words & TICKET_KEYWORDS:
+            return True
+        # Ticket-category-as-artist phrases (R&B ONLY, Jingle Ball, etc.)
+        name_lower = name.lower()
+        if any(phrase in name_lower for phrase in FALSE_POSITIVE_PHRASES):
+            return True
+        # Radio station jingle ball events (Z100, B96, Hot97 Jingle Ball etc.)
+        if RADIO_STATION_PATTERN.match(name) and "jingle" in name_lower:
             return True
         # Pure numbers or very short
         if len(name.strip()) < 3:
