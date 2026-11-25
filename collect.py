@@ -3457,7 +3457,10 @@ def discover_new_events(blocklist=None):
     FALSE_POSITIVE_PHRASES = {
         "jingle ball", "jingleball", "r&b only", "rb only",
         "hip hop only", "hip-hop only", "pop only",
+        "only", # catches genre-only ticket types
     }
+    # Also catch radio station + jingle patterns (Z100, B96, Hot97, etc.)
+    JINGLE_PATTERN = re.compile(r"(z\d{2,3}|b\d{2,3}|hot\s*\d{2,3}|iheartradio).*jingle", re.IGNORECASE)
     # Radio station naming patterns (Z100, B96, Hot97, etc.)
     RADIO_STATION_PATTERN = re.compile(r'^[A-Z]\d{2,3}', re.IGNORECASE)
 
@@ -3480,6 +3483,8 @@ def discover_new_events(blocklist=None):
             return True
         # Radio station jingle ball events (Z100, B96, Hot97 Jingle Ball etc.)
         if RADIO_STATION_PATTERN.match(name) and "jingle" in name_lower:
+            return True
+        if JINGLE_PATTERN.search(name):
             return True
         # Pure numbers or very short
         if len(name.strip()) < 3:
