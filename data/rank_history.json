@@ -500,7 +500,7 @@
     "first_seen": "2026-09-14"
   },
   "fetty-wap-2026": {
-    "rank": 15,
+    "rank": 14,
     "panel": "top",
     "first_seen": "2026-09-14"
   },
@@ -775,7 +775,7 @@
     "first_seen": "2026-11-04"
   },
   "stephen-wilson-jr-2026": {
-    "rank": 19,
+    "rank": 18,
     "panel": "top",
     "first_seen": "2026-11-04"
   },
@@ -790,22 +790,22 @@
     "first_seen": "2026-11-04"
   },
   "state-champs-2026": {
-    "rank": 16,
+    "rank": 15,
     "panel": "top",
     "first_seen": "2026-11-04"
   },
   "montell-fish-2026": {
-    "rank": 18,
+    "rank": 17,
     "panel": "top",
     "first_seen": "2026-11-04"
   },
   "chelsea-cutler-2027": {
-    "rank": 10,
-    "panel": "bottom",
+    "rank": 20,
+    "panel": "top",
     "first_seen": "2026-11-04"
   },
   "tesseract-2027": {
-    "rank": 17,
+    "rank": 16,
     "panel": "top",
     "first_seen": "2026-11-04"
   },
@@ -820,7 +820,7 @@
     "first_seen": "2026-11-04"
   },
   "bella-poarch-2027": {
-    "rank": 14,
+    "rank": 13,
     "panel": "top",
     "first_seen": "2026-11-04"
   },
@@ -851,12 +851,12 @@
   },
   "key-glock-2026": {
     "rank": 18,
-    "panel": "top",
+    "panel": "bottom",
     "first_seen": "2026-11-05"
   },
   "meek-mill-2026": {
     "rank": 19,
-    "panel": "top",
+    "panel": "bottom",
     "first_seen": "2026-11-06"
   },
   "whitechapel-2026": {
@@ -900,7 +900,7 @@
     "first_seen": "2026-11-14"
   },
   "beartooth-2026": {
-    "rank": 18,
+    "rank": 17,
     "panel": "bottom",
     "first_seen": "2026-11-15"
   },
@@ -910,7 +910,7 @@
     "first_seen": "2026-11-15"
   },
   "kameron-marlowe-2027": {
-    "rank": 20,
+    "rank": 19,
     "panel": "top",
     "first_seen": "2026-11-15"
   },
@@ -920,8 +920,8 @@
     "first_seen": "2026-11-16"
   },
   "hunxho-2026": {
-    "rank": 13,
-    "panel": "top",
+    "rank": 14,
+    "panel": "bottom",
     "first_seen": "2026-11-17"
   },
   "r-b-only-2027": {
@@ -945,12 +945,12 @@
     "first_seen": "2026-11-18"
   },
   "the-string-cheese-incident-2027": {
-    "rank": 7,
+    "rank": 8,
     "panel": "bottom",
     "first_seen": "2026-11-18"
   },
   "the-string-cheese-incident-2027-0122": {
-    "rank": 8,
+    "rank": 9,
     "panel": "bottom",
     "first_seen": "2026-11-18"
   },
@@ -960,22 +960,22 @@
     "first_seen": "2026-11-18"
   },
   "belly-gang-kushington-2026": {
-    "rank": 15,
+    "rank": 7,
     "panel": "bottom",
     "first_seen": "2026-11-18"
   },
   "the-string-cheese-incident-2027-0123": {
-    "rank": 9,
+    "rank": 15,
     "panel": "bottom",
     "first_seen": "2026-11-18"
   },
   "z100-s-jingle-ball-2026": {
-    "rank": 14,
+    "rank": 13,
     "panel": "bottom",
     "first_seen": "2026-11-18"
   },
   "stella-lefty-2027": {
-    "rank": 19,
+    "rank": 20,
     "panel": "bottom",
     "first_seen": "2026-11-18"
   },
@@ -990,7 +990,7 @@
     "first_seen": "2026-11-19"
   },
   "gregory-alan-isakov-2027-0217": {
-    "rank": 17,
+    "rank": 16,
     "panel": "bottom",
     "first_seen": "2026-11-20"
   }
