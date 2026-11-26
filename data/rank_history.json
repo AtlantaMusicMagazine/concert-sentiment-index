@@ -500,7 +500,7 @@
     "first_seen": "2026-09-14"
   },
   "fetty-wap-2026": {
-    "rank": 16,
+    "rank": 15,
     "panel": "top",
     "first_seen": "2026-09-14"
   },
@@ -510,7 +510,7 @@
     "first_seen": "2026-09-14"
   },
   "sabaton-2026": {
-    "rank": 11,
+    "rank": 10,
     "panel": "top",
     "first_seen": "2026-09-14"
   },
@@ -600,7 +600,7 @@
     "first_seen": "2026-09-22"
   },
   "rush-2026-n2": {
-    "rank": 3,
+    "rank": 2,
     "panel": "top",
     "first_seen": "2026-09-22"
   },
@@ -660,7 +660,7 @@
     "first_seen": "2026-09-27"
   },
   "tyla-2026": {
-    "rank": 6,
+    "rank": 5,
     "panel": "top",
     "first_seen": "2026-09-30"
   },
@@ -745,22 +745,22 @@
     "first_seen": "2026-11-03"
   },
   "lil-baby-dec-2026": {
-    "rank": 4,
+    "rank": 3,
     "panel": "top",
     "first_seen": "2026-11-04"
   },
   "pentatonix-2026": {
-    "rank": 5,
+    "rank": 4,
     "panel": "top",
     "first_seen": "2026-11-04"
   },
   "leanne-morgan-2027": {
-    "rank": 7,
+    "rank": 6,
     "panel": "top",
     "first_seen": "2026-11-04"
   },
   "wolves-in-throne-room-2027": {
-    "rank": 8,
+    "rank": 6,
     "panel": "bottom",
     "first_seen": "2026-11-04"
   },
@@ -770,7 +770,7 @@
     "first_seen": "2026-11-04"
   },
   "jason-bonham-2026": {
-    "rank": 16,
+    "rank": 17,
     "panel": "bottom",
     "first_seen": "2026-11-04"
   },
@@ -790,7 +790,7 @@
     "first_seen": "2026-11-04"
   },
   "state-champs-2026": {
-    "rank": 17,
+    "rank": 16,
     "panel": "top",
     "first_seen": "2026-11-04"
   },
@@ -805,12 +805,12 @@
     "first_seen": "2026-11-04"
   },
   "tesseract-2027": {
-    "rank": 18,
+    "rank": 17,
     "panel": "top",
     "first_seen": "2026-11-04"
   },
   "samantha-fish-2026": {
-    "rank": 14,
+    "rank": 11,
     "panel": "top",
     "first_seen": "2026-11-04"
   },
@@ -820,7 +820,7 @@
     "first_seen": "2026-11-04"
   },
   "bella-poarch-2027": {
-    "rank": 15,
+    "rank": 12,
     "panel": "top",
     "first_seen": "2026-11-04"
   },
@@ -835,7 +835,7 @@
     "first_seen": "2026-11-04"
   },
   "blackberry-smoke-2026": {
-    "rank": 17,
+    "rank": 13,
     "panel": "bottom",
     "first_seen": "2026-11-04"
   },
@@ -850,12 +850,12 @@
     "first_seen": "2026-11-05"
   },
   "key-glock-2026": {
-    "rank": 12,
+    "rank": 15,
     "panel": "bottom",
     "first_seen": "2026-11-05"
   },
   "meek-mill-2026": {
-    "rank": 13,
+    "rank": 5,
     "panel": "bottom",
     "first_seen": "2026-11-06"
   },
@@ -880,12 +880,12 @@
     "first_seen": "2026-11-11"
   },
   "alan-walker-2027": {
-    "rank": 15,
+    "rank": 16,
     "panel": "bottom",
     "first_seen": "2026-11-12"
   },
   "flo-2027": {
-    "rank": 10,
+    "rank": 7,
     "panel": "top",
     "first_seen": "2026-11-12"
   },
@@ -900,7 +900,7 @@
     "first_seen": "2026-11-14"
   },
   "beartooth-2026": {
-    "rank": 11,
+    "rank": 14,
     "panel": "bottom",
     "first_seen": "2026-11-15"
   },
@@ -920,7 +920,7 @@
     "first_seen": "2026-11-16"
   },
   "hunxho-2026": {
-    "rank": 9,
+    "rank": 7,
     "panel": "bottom",
     "first_seen": "2026-11-17"
   },
@@ -975,33 +975,43 @@
     "first_seen": "2026-11-18"
   },
   "stella-lefty-2027": {
-    "rank": 14,
+    "rank": 8,
     "panel": "bottom",
     "first_seen": "2026-11-18"
   },
   "pablo-alboran-2027": {
-    "rank": 6,
+    "rank": 9,
     "panel": "bottom",
     "first_seen": "2026-11-18"
   },
   "gregory-alan-isakov-2027": {
-    "rank": 7,
+    "rank": 10,
     "panel": "bottom",
     "first_seen": "2026-11-19"
   },
   "gregory-alan-isakov-2027-0217": {
-    "rank": 10,
+    "rank": 11,
     "panel": "bottom",
     "first_seen": "2026-11-20"
   },
   "the-string-cheese-incident-2027-n1": {
-    "rank": 12,
+    "rank": 13,
     "panel": "top",
     "first_seen": "2026-11-25"
   },
   "the-string-cheese-incident-2027-n2": {
-    "rank": 13,
+    "rank": 14,
     "panel": "top",
     "first_seen": "2026-11-25"
+  },
+  "men-without-hats-2026": {
+    "rank": 18,
+    "panel": "top",
+    "first_seen": "2026-11-26"
+  },
+  "2hollis-2027": {
+    "rank": 12,
+    "panel": "bottom",
+    "first_seen": "2026-11-26"
   }
 }
